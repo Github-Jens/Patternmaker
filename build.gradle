@@ -10,10 +10,10 @@ javafx {
 }
 
 application {
-    mainClass = 'org.example.Main'
+    mainClass = 'org.Hieke.Main'
 }
 
-group = 'org.example'
+group = 'org.Hieke'
 version = '1.0-SNAPSHOT'
 
 repositories {
