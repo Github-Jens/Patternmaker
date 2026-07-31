@@ -29,4 +29,12 @@ public class Stitch {
     public String getSymbol() {
         return type.getSymbol();
     }
+
+    public int getRow() {
+        return row;
+    }
+
+    public int getColumn() {
+        return column;
+    }
 }
