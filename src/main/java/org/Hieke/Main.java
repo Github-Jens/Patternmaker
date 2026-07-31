@@ -36,6 +36,28 @@ public class Main extends Application {
         MenuBar menuBar = new MenuBar();
 
         Menu fileMenu = new Menu("File");
+        Menu viewMenu = new Menu("View");
+        Menu exportMenu = new Menu("Export");
+        MenuItem resetView = new MenuItem("Reset View");
+        MenuItem exportSVG =
+                new MenuItem("Export SVG");
+
+        resetView.setOnAction(event -> {
+
+            canvas.resetView();
+
+        });
+
+        exportSVG.setOnAction(event ->
+                exportSVG(stage)
+        );
+        exportMenu.getItems().add(
+                exportSVG
+        );
+        viewMenu.getItems().add(
+                resetView
+        );
+
                 //Create new chart here
         MenuItem savePattern = new MenuItem("Save Pattern");
         MenuItem newChart = new MenuItem("New Chart");
@@ -260,7 +282,9 @@ public class Main extends Application {
 
         menuBar.getMenus().addAll(
                 fileMenu,
-                editMenu
+                editMenu,
+                viewMenu,
+                exportMenu
         );
 
 
@@ -418,6 +442,47 @@ public class Main extends Application {
         selectedButton.setStyle(
                 "-fx-background-color: lightblue;"
         );
+    }
+    private void exportSVG(Stage stage) {
+
+        FileChooser chooser =
+                new FileChooser();
+
+
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter(
+                        "SVG Image (*.svg)",
+                        "*.svg"
+                )
+        );
+
+
+        File file =
+                chooser.showSaveDialog(stage);
+
+
+        if(file != null) {
+
+            try {
+
+                new SVGExporter(
+                        canvas.getChart()
+                ).export(
+                        file.getAbsolutePath()
+                );
+
+            }
+            catch(IOException e) {
+
+                e.printStackTrace();
+
+                new Alert(
+                        Alert.AlertType.ERROR,
+                        "SVG export failed"
+                ).showAndWait();
+
+            }
+        }
     }
 
 

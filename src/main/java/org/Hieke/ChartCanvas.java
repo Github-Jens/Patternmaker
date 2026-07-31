@@ -11,8 +11,22 @@ import java.util.Stack;
 public class ChartCanvas extends Canvas {
 
     private static final int CELL_SIZE = 30;
+    private static final int RULER_SIZE = 30;
     private final KnittingChart chart;
     private final ObjectProperty<StitchType> selectedType;
+    private final Ruler ruler;
+    private final ChartRenderer renderer;
+    private CanvasRenderContext renderContext;
+    private double zoom = 1.0;
+
+    private double offsetX = 0;
+    private double offsetY = 0;
+
+    private double lastMouseX;
+    private double lastMouseY;
+
+    private boolean panning = false;
+
     private final Stack<Stroke> undoStack = new Stack<>();
     private final Stack<Stroke> redoStack = new Stack<>();
     private Stroke currentStroke;
@@ -21,19 +35,54 @@ public class ChartCanvas extends Canvas {
                        ObjectProperty<StitchType> selectedType) {
         this.chart = chart;
         this.selectedType = selectedType;
-        setWidth(chart.getColumns() * CELL_SIZE);
-        setHeight(chart.getRows() * CELL_SIZE);
+        this.ruler = new Ruler(RULER_SIZE);
+        this.renderer = new ChartRenderer(chart);
+        setWidth(600);
+        setHeight(600);
+        this.renderContext =
+                new CanvasRenderContext(getGraphicsContext2D());
         drawChart();
         setupMouseControls();
+        setupZoomControls();
 
     }
 
     private void drawChart() {
 
-        GraphicsContext gc = getGraphicsContext2D();
-        gc.setTextAlign(TextAlignment.CENTER);
-        gc.setTextBaseline(VPos.CENTER);
+        double scaledCellSize = CELL_SIZE * zoom;
 
+        int firstColumn = Math.max(
+                0,
+                (int)Math.floor(
+                        (-offsetX - RULER_SIZE) / scaledCellSize
+                )
+        );
+
+        int lastColumn = Math.min(
+                chart.getColumns() - 1,
+                (int)Math.ceil(
+                        (getWidth() - offsetX - RULER_SIZE)
+                                / scaledCellSize
+                )
+        );
+
+        int firstRow = Math.max(
+                0,
+                (int)Math.floor(
+                        (-offsetY - RULER_SIZE) / scaledCellSize
+                )
+        );
+
+        int lastRow = Math.min(
+                chart.getRows() - 1,
+                (int)Math.ceil(
+                        (getHeight() - offsetY - RULER_SIZE)
+                                / scaledCellSize
+                )
+        );
+
+        GraphicsContext gc = getGraphicsContext2D();
+        gc.save();
         gc.clearRect(
                 0,
                 0,
@@ -41,47 +90,39 @@ public class ChartCanvas extends Canvas {
                 getHeight()
         );
 
-        for (int row = 0; row <= chart.getRows(); row++) {
+        renderer.render(
+                renderContext,
+                getRenderSettings(
+                        firstRow,
+                        lastRow,
+                        firstColumn,
+                        lastColumn
+                ),
+                getWidth(),
+                getHeight()
+        );
 
-            double y = row * CELL_SIZE;
-
-            gc.strokeLine(
-                    0,
-                    y,
-                    getWidth(),
-                    y
-            );
-        }
 
 
-        for (int column = 0; column <= chart.getColumns(); column++) {
 
-            double x = column * CELL_SIZE;
-
-            gc.strokeLine(
-                    x,
-                    0,
-                    x,
-                    getHeight()
-            );
-        }
-
-        for (int row = 0; row < chart.getRows(); row++) {
-
-            for (int column = 0; column < chart.getColumns(); column++) {
-
-                Stitch stitch = chart.getStitch(row, column);
-
-                drawStitch(gc, stitch);
-
-            }
-        }
+        gc.restore();
 
     }
 
     private void setupMouseControls() {
 
         setOnMousePressed(event -> {
+
+            if (event.isMiddleButtonDown()) {
+
+                panning = true;
+
+                lastMouseX = event.getX();
+                lastMouseY = event.getY();
+
+                return;
+            }
+
 
             currentStroke = new Stroke();
 
@@ -95,6 +136,30 @@ public class ChartCanvas extends Canvas {
 
         setOnMouseDragged(event -> {
 
+
+            if (panning) {
+
+                double deltaX =
+                        event.getX() - lastMouseX;
+
+                double deltaY =
+                        event.getY() - lastMouseY;
+
+
+                offsetX += deltaX;
+                offsetY += deltaY;
+
+
+                lastMouseX = event.getX();
+                lastMouseY = event.getY();
+
+
+                drawChart();
+
+                return;
+            }
+
+
             paintAt(
                     event.getX(),
                     event.getY()
@@ -104,6 +169,15 @@ public class ChartCanvas extends Canvas {
 
 
         setOnMouseReleased(event -> {
+
+
+            if (panning) {
+
+                panning = false;
+
+                return;
+            }
+
 
             if (currentStroke != null) {
 
@@ -119,24 +193,18 @@ public class ChartCanvas extends Canvas {
 
     }
 
-    private void drawStitch(GraphicsContext gc, Stitch stitch) {
-        String symbol = stitch.getSymbol();
-
-        double x = stitch.getColumn() * CELL_SIZE + CELL_SIZE / 2;
-        double y = stitch.getRow() * CELL_SIZE + CELL_SIZE / 2;
-
-
-        gc.fillText(
-                symbol,
-                x ,
-                y
-        );
-    }
-
     private void paintAt(double mouseX, double mouseY) {
 
-        int column = (int)(mouseX / CELL_SIZE);
-        int row = (int)(mouseY / CELL_SIZE);
+        double scaledCellSize = CELL_SIZE * zoom;
+
+
+        int column =
+                (int)((mouseX - offsetX - RULER_SIZE)
+                        / scaledCellSize);
+
+        int row =
+                (int)((mouseY - offsetY - RULER_SIZE)
+                        / scaledCellSize);
 
 
         if (row < 0 || column < 0 ||
@@ -208,7 +276,87 @@ public class ChartCanvas extends Canvas {
         }
 
     }
+
     public KnittingChart getChart() {
         return chart;
     }
+
+    public void resetView() {
+
+        zoom = 1.0;
+
+        offsetX = 0;
+        offsetY = 0;
+
+        drawChart();
+
+    }
+
+    private void setupZoomControls() {
+
+        setOnScroll(event -> {
+
+            double mouseX = event.getX();
+            double mouseY = event.getY();
+
+
+            double oldZoom = zoom;
+
+
+            if (event.getDeltaY() > 0) {
+
+                zoom *= 1.1;
+
+            } else {
+
+                zoom /= 1.1;
+
+            }
+
+
+            if (zoom < 0.2) {
+                zoom = 0.2;
+            }
+
+            if (zoom > 5) {
+                zoom = 5;
+            }
+
+
+            double zoomFactor = zoom / oldZoom;
+
+
+            offsetX =
+                    mouseX - (mouseX - offsetX) * zoomFactor;
+
+
+            offsetY =
+                    mouseY - (mouseY - offsetY) * zoomFactor;
+
+
+            drawChart();
+
+        });
+
+    }
+    private RenderSettings getRenderSettings(
+            int firstRow,
+            int lastRow,
+            int firstColumn,
+            int lastColumn
+    ) {
+
+        return new RenderSettings(
+                CELL_SIZE,
+                zoom,
+                offsetX,
+                offsetY,
+                RULER_SIZE,
+                firstRow,
+                lastRow,
+                firstColumn,
+                lastColumn
+        );
+    }
+
 }
