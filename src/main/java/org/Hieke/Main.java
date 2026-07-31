@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -18,11 +19,14 @@ public class Main extends Application {
 
     private BorderPane root;
     private ObjectProperty<StitchType> selectedType;
+    private ObjectProperty<Color> selectedColor;
 
     private ChartCanvas canvas;
+    private Palette palette;
 
     private static final int MIN_CHART_SIZE = 1;
     private static final int MAX_CHART_SIZE = 50;
+
 
     @Override
     public void start(Stage stage) {
@@ -30,7 +34,10 @@ public class Main extends Application {
         KnittingChart chart = new KnittingChart(20,20);
 
         selectedType =
-                new SimpleObjectProperty<>(StitchType.KNIT);
+                new SimpleObjectProperty<>(StitchType.EMPTY);
+        palette = new Palette();
+        selectedColor =
+                new SimpleObjectProperty<>(null);
 
         //TOP Menu Bar
         MenuBar menuBar = new MenuBar();
@@ -61,7 +68,12 @@ public class Main extends Application {
                 //Create new chart here
         MenuItem savePattern = new MenuItem("Save Pattern");
         MenuItem newChart = new MenuItem("New Chart");
+
         newChart.setOnAction(event -> {
+            //failsave for unsaved changes
+            if (!confirmDiscardChanges(stage)) {
+                return;
+            }
             //Dialog asking for size
             Dialog<ButtonType> dialog = new Dialog<>();
 
@@ -121,7 +133,7 @@ public class Main extends Application {
                                 new KnittingChart(rows, columns);
 
 
-                        canvas = new ChartCanvas(newChartData, selectedType);
+                        canvas = new ChartCanvas(newChartData, selectedType, selectedColor);
 
                         root.setCenter(canvas);
 
@@ -146,54 +158,16 @@ public class Main extends Application {
         });
 
         savePattern.setOnAction(event -> {
-
-            FileChooser fileChooser = new FileChooser();
-
-            fileChooser.setTitle("Save Knitting Pattern");
-
-            fileChooser.getExtensionFilters().add(
-                    new FileChooser.ExtensionFilter(
-                            "Knitting Pattern (*.knit)",
-                            "*.knit"
-                    )
-            );
-
-
-            File file = fileChooser.showSaveDialog(stage);
-
-
-            if (file != null) {
-
-                try {
-
-                    FileManager manager =
-                            new FileManager();
-
-
-                    manager.save(
-                            canvas.getChart(),
-                            file
-                    );
-
-
-                } catch (IOException e) {
-
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-
-                    alert.setTitle("Save Error");
-                    alert.setHeaderText("Could not save pattern");
-                    alert.setContentText(e.getMessage());
-
-                    alert.showAndWait();
-
-                }
-
-            }
-
+            saveChart(stage);
         });
 
         MenuItem loadPattern = new MenuItem("Load Pattern");
         loadPattern.setOnAction(event -> {
+
+            if (!confirmDiscardChanges(stage)) {
+                return;
+            }
+
 
             FileChooser fileChooser = new FileChooser();
 
@@ -225,7 +199,8 @@ public class Main extends Application {
                     canvas =
                             new ChartCanvas(
                                     loadedChart,
-                                    selectedType
+                                    selectedType,
+                                    selectedColor
                             );
 
 
@@ -292,15 +267,24 @@ public class Main extends Application {
 
         //Left VBOX
 
+        // Left Panel
+
         VBox symbolPanel = new VBox();
+        symbolPanel.setSpacing(5);
 
         Label symbolTitle = new Label("Symbols");
-        //Create Buttons for Symbols here
-        Button eraserButton = new Button("Eraser");
+
         Button knitButton = new Button("K - Knit");
         Button purlButton = new Button("P - Purl");
         Button yarnButton = new Button("O - Yarn Over");
         Button k2togButton = new Button("/ - K2tog");
+        Button eraserButton = new Button("Eraser");
+        knitButton.setFocusTraversable(false);
+        purlButton.setFocusTraversable(false);
+        yarnButton.setFocusTraversable(false);
+        k2togButton.setFocusTraversable(false);
+        eraserButton.setFocusTraversable(false);
+
 
         symbolPanel.getChildren().addAll(
                 symbolTitle,
@@ -311,10 +295,33 @@ public class Main extends Application {
                 eraserButton
         );
 
-        root.setLeft(symbolPanel);
+
+// Palette
+
+        PaletteView paletteView =
+                new PaletteView(
+                        palette,
+                        selectedColor
+                );
+
+
+// Combine left side
+
+        VBox leftPanel = new VBox();
+        leftPanel.setSpacing(15);
+
+        leftPanel.getChildren().addAll(
+                symbolPanel,
+                paletteView
+        );
+
+        root.setLeft(leftPanel);
+
+
+// Default tool
 
         selectTool(
-                knitButton,
+                null,
                 knitButton,
                 purlButton,
                 yarnButton,
@@ -322,86 +329,85 @@ public class Main extends Application {
                 eraserButton
         );
 
-        //create the chart with this method
-        canvas = new ChartCanvas(chart, selectedType);
+
+// Tool actions
+
+        knitButton.setOnAction(event ->
+                selectStitchTool(
+                        StitchType.KNIT,
+                        knitButton,
+                        knitButton,
+                        purlButton,
+                        yarnButton,
+                        k2togButton,
+                        eraserButton
+                )
+        );
+
+
+        purlButton.setOnAction(event ->
+                selectStitchTool(
+                        StitchType.PURL,
+                        purlButton,
+                        knitButton,
+                        purlButton,
+                        yarnButton,
+                        k2togButton,
+                        eraserButton
+                )
+        );
+
+
+        yarnButton.setOnAction(event ->
+                selectStitchTool(
+                        StitchType.YARN_OVER,
+                        yarnButton,
+                        knitButton,
+                        purlButton,
+                        yarnButton,
+                        k2togButton,
+                        eraserButton
+                )
+        );
+
+
+        k2togButton.setOnAction(event ->
+                selectStitchTool(
+                        StitchType.K2TOG,
+                        k2togButton,
+                        knitButton,
+                        purlButton,
+                        yarnButton,
+                        k2togButton,
+                        eraserButton
+                )
+        );
+
+
+        eraserButton.setOnAction(event ->
+                selectStitchTool(
+                        StitchType.EMPTY,
+                        eraserButton,
+                        knitButton,
+                        purlButton,
+                        yarnButton,
+                        k2togButton,
+                        eraserButton
+                )
+        );
+
+
+// Create canvas
+
+        canvas = new ChartCanvas(
+                chart,
+                selectedType,
+                selectedColor
+        );
 
         root.setCenter(canvas);
 
         root.setBottom(new Label("Status: Ready"));
-        //Make the buttons do things
-        knitButton.setOnAction(event -> {
-
-            selectedType.set(StitchType.KNIT);
-
-            selectTool(
-                    knitButton,
-                    knitButton,
-                    purlButton,
-                    yarnButton,
-                    k2togButton,
-                    eraserButton
-            );
-
-        });
-
-        purlButton.setOnAction(event -> {
-
-            selectedType.set(StitchType.PURL);
-
-            selectTool(
-                    purlButton,
-                    knitButton,
-                    purlButton,
-                    yarnButton,
-                    k2togButton,
-                    eraserButton
-            );
-
-        });
-
-        yarnButton.setOnAction(event -> {
-
-            selectedType.set(StitchType.YARN_OVER);
-
-            selectTool(
-                    yarnButton,
-                    knitButton,
-                    purlButton,
-                    yarnButton,
-                    k2togButton,
-                    eraserButton
-            );
-
-        });
-
-        k2togButton.setOnAction(event -> {
-
-            selectedType.set(StitchType.K2TOG);
-
-            selectTool(
-                    k2togButton,
-                    knitButton,
-                    purlButton,
-                    yarnButton,
-                    k2togButton,
-                    eraserButton
-            );
-
-        });
-        eraserButton.setOnAction(event -> {
-
-            selectedType.set(StitchType.EMPTY);
-
-            selectTool(
-                    eraserButton,
-                    knitButton,
-                    purlButton,
-                    yarnButton,
-                    k2togButton,
-                    eraserButton
-            );
-
-        });
 
 
  //Create the scene
@@ -428,6 +434,77 @@ public class Main extends Application {
 
         stage.setTitle("Knitting Chart Maker");
         stage.setScene(scene);
+
+        stage.setOnCloseRequest(event -> {
+
+            if (!canvas.isModified()) {
+                return;
+            }
+
+
+            Alert alert = new Alert(
+                    Alert.AlertType.CONFIRMATION
+            );
+
+            alert.setTitle("Unsaved Changes");
+            alert.setHeaderText(
+                    "Your knitting chart has unsaved changes."
+            );
+            alert.setContentText(
+                    "Do you want to save before closing?"
+            );
+
+
+            ButtonType save =
+                    new ButtonType("Save");
+
+            ButtonType discard =
+                    new ButtonType("Discard");
+
+            ButtonType cancel =
+                    new ButtonType(
+                            "Cancel",
+                            ButtonBar.ButtonData.CANCEL_CLOSE
+                    );
+
+
+            alert.getButtonTypes().setAll(
+                    save,
+                    discard,
+                    cancel
+            );
+
+
+            alert.showAndWait().ifPresent(result -> {
+
+                if (result == save) {
+
+                    savePattern.fire();
+
+                    // prevent closing if save failed
+                    event.consume();
+
+                }
+                else if (result == cancel) {
+
+                    event.consume();
+
+                }
+
+            });
+
+        });
+
+        stage.setOnCloseRequest(event -> {
+
+            if (!confirmDiscardChanges(stage)) {
+
+                event.consume();
+
+            }
+
+        });
+
         stage.show();
     }
 
@@ -438,10 +515,14 @@ public class Main extends Application {
             button.setStyle("");
 
         }
-        //change button style here
-        selectedButton.setStyle(
-                "-fx-background-color: lightblue;"
-        );
+
+        if (selectedButton != null) {
+
+            selectedButton.setStyle(
+                    "-fx-background-color: lightblue;"
+            );
+
+        }
     }
     private void exportSVG(Stage stage) {
 
@@ -484,6 +565,146 @@ public class Main extends Application {
             }
         }
     }
+    private boolean saveChart(Stage stage) {
+
+        FileChooser fileChooser = new FileChooser();
+
+        fileChooser.setTitle("Save Knitting Pattern");
+
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter(
+                        "Knitting Pattern (*.knit)",
+                        "*.knit"
+                )
+        );
+
+
+        File file = fileChooser.showSaveDialog(stage);
+
+
+        if (file == null) {
+            return false;
+        }
+
+
+        try {
+
+            FileManager manager = new FileManager();
+
+            manager.save(
+                    canvas.getChart(),
+                    file
+            );
+
+            canvas.markSaved();
+
+            return true;
+
+        }
+        catch (IOException e) {
+
+            Alert alert = new Alert(
+                    Alert.AlertType.ERROR
+            );
+
+            alert.setTitle("Save Error");
+            alert.setHeaderText("Could not save pattern");
+            alert.setContentText(e.getMessage());
+
+            alert.showAndWait();
+
+            return false;
+        }
+    }
+    private boolean confirmDiscardChanges(Stage stage) {
+
+        if (!canvas.isModified()) {
+            return true;
+        }
+
+
+        Alert alert = new Alert(
+                Alert.AlertType.CONFIRMATION
+        );
+
+        alert.setTitle("Unsaved Changes");
+        alert.setHeaderText(
+                "Your knitting chart has unsaved changes."
+        );
+        alert.setContentText(
+                "Do you want to save before continuing?"
+        );
+
+
+        ButtonType save =
+                new ButtonType("Save");
+
+        ButtonType discard =
+                new ButtonType("Discard");
+
+        ButtonType cancel =
+                new ButtonType(
+                        "Cancel",
+                        ButtonBar.ButtonData.CANCEL_CLOSE
+                );
+
+
+        alert.getButtonTypes().setAll(
+                save,
+                discard,
+                cancel
+        );
+
+
+        return alert.showAndWait()
+                .map(result -> {
+
+                    if (result == save) {
+
+                        return saveChart(stage);
+
+                    }
+
+                    if (result == discard) {
+
+                        return true;
+
+                    }
+
+                    return false;
+
+                })
+                .orElse(false);
+    }
+    private void selectStitchTool(
+            StitchType type,
+            Button selectedButton,
+            Button... buttons
+    ) {
+
+        if (selectedType.get() == type) {
+
+            // Deselect current stitch tool
+            selectedType.set(null);
+
+            selectTool(
+                    null,
+                    buttons
+            );
+
+        } else {
+
+            // Select new stitch tool
+            selectedType.set(type);
+
+            selectTool(
+                    selectedButton,
+                    buttons
+            );
+
+        }
+    }
+
 
 
     public static void main(String[] args) {

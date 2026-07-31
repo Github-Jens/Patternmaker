@@ -4,6 +4,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 
 import java.util.Stack;
@@ -14,6 +15,7 @@ public class ChartCanvas extends Canvas {
     private static final int RULER_SIZE = 30;
     private final KnittingChart chart;
     private final ObjectProperty<StitchType> selectedType;
+    private final ObjectProperty<Color> selectedColor;
     private final Ruler ruler;
     private final ChartRenderer renderer;
     private CanvasRenderContext renderContext;
@@ -26,15 +28,18 @@ public class ChartCanvas extends Canvas {
     private double lastMouseY;
 
     private boolean panning = false;
+    private boolean modified = false;
 
     private final Stack<Stroke> undoStack = new Stack<>();
     private final Stack<Stroke> redoStack = new Stack<>();
     private Stroke currentStroke;
 
     public ChartCanvas(KnittingChart chart,
-                       ObjectProperty<StitchType> selectedType) {
+                       ObjectProperty<StitchType> selectedType,
+                       ObjectProperty<Color> selectedColor) {
         this.chart = chart;
         this.selectedType = selectedType;
+        this.selectedColor = selectedColor;
         this.ruler = new Ruler(RULER_SIZE);
         this.renderer = new ChartRenderer(chart);
         setWidth(600);
@@ -212,18 +217,59 @@ public class ChartCanvas extends Canvas {
                 column >= chart.getColumns()) {
             return;
         }
-        if (selectedType.get() == null) {
+        if (selectedType.get() == null &&
+                selectedColor.get() == null) {
+
             return;
+
         }
 
         Stitch stitch = chart.getStitch(row, column);
 
+
         StitchType oldType = stitch.getType();
-        StitchType newType = selectedType.get();
+        Color oldBackground =
+                stitch.getBackgroundColor();
 
 
-        if (oldType == newType) {
+        StitchType newType = oldType;
+        Color newBackground = oldBackground;
+
+
+// Symbol handling
+        if (selectedType.get() != null) {
+
+            if (selectedType.get() == StitchType.EMPTY) {
+
+                // Eraser
+                newType = StitchType.EMPTY;
+                newBackground = null;
+
+            } else {
+
+                newType = selectedType.get();
+
+            }
+
+        }
+
+
+// Colour handling
+        if (selectedType.get() != StitchType.EMPTY) {
+
+            newBackground = selectedColor.get();
+
+        }
+
+
+        if (oldType == newType &&
+                java.util.Objects.equals(
+                        oldBackground,
+                        newBackground
+                )) {
+
             return;
+
         }
 
 
@@ -231,11 +277,15 @@ public class ChartCanvas extends Canvas {
                 new StitchChange(
                         stitch,
                         oldType,
-                        newType
+                        newType,
+                        oldBackground,
+                        newBackground
                 );
 
 
         change.redo();
+        modified = true;
+
 
 
         if (currentStroke != null) {
@@ -255,6 +305,7 @@ public class ChartCanvas extends Canvas {
             Stroke stroke = undoStack.pop();
 
             stroke.undo();
+            modified = true;
 
             redoStack.push(stroke);
 
@@ -269,6 +320,7 @@ public class ChartCanvas extends Canvas {
             Stroke stroke = redoStack.pop();
 
             stroke.redo();
+            modified = true;
 
             undoStack.push(stroke);
 
@@ -357,6 +409,13 @@ public class ChartCanvas extends Canvas {
                 firstColumn,
                 lastColumn
         );
+    }
+    public boolean isModified() {
+        return modified;
+    }
+
+    public void markSaved() {
+        modified = false;
     }
 
 }

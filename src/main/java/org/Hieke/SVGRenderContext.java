@@ -1,5 +1,7 @@
 package org.Hieke;
 
+import javafx.scene.paint.Color;
+
 public class SVGRenderContext implements RenderContext {
 
     private final StringBuilder svg;
@@ -124,6 +126,7 @@ public class SVGRenderContext implements RenderContext {
 
     @Override
     public void fillRect(
+            Color color,
             double x,
             double y,
             double width,
@@ -151,7 +154,7 @@ public class SVGRenderContext implements RenderContext {
         );
 
         svg.append(
-                "fill=\"white\"/>"
+                "fill=\"" + colorToHex(color) + "\"/>"
         );
 
     }
@@ -163,5 +166,14 @@ public class SVGRenderContext implements RenderContext {
 
         return svg.toString();
 
+    }
+    private String colorToHex(Color color) {
+
+        return String.format(
+                "#%02X%02X%02X",
+                (int)(color.getRed() * 255),
+                (int)(color.getGreen() * 255),
+                (int)(color.getBlue() * 255)
+        );
     }
 }

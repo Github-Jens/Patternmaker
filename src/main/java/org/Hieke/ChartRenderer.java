@@ -120,12 +120,6 @@ public class ChartRenderer {
                         chart.getStitch(row, column);
 
 
-                if (stitch.getType() == StitchType.EMPTY) {
-                    continue;
-                }
-
-
-
                 drawStitch(
                         context,
                         settings,
@@ -144,24 +138,49 @@ public class ChartRenderer {
                 settings.cellSize * settings.zoom;
 
 
-        double x =
+        double cellX =
                 stitch.getColumn() * scaledCellSize
-                        + scaledCellSize / 2
                         + settings.offsetX
                         + settings.rulerSize;
 
 
-        double y =
+        double cellY =
                 stitch.getRow() * scaledCellSize
-                        + scaledCellSize / 2
                         + settings.offsetY
                         + settings.rulerSize;
 
 
-        context.drawText(
-                stitch.getSymbol(),
-                x,
-                y
-        );
+        // Draw cell background
+        if (stitch.getBackgroundColor() != null) {
+
+            context.fillRect(
+                    stitch.getBackgroundColor(),
+                    cellX,
+                    cellY,
+                    scaledCellSize,
+                    scaledCellSize
+            );
+
+        }
+
+
+        // Draw stitch symbol in the center of the cell
+        double x =
+                cellX + scaledCellSize / 2;
+
+
+        double y =
+                cellY + scaledCellSize / 2;
+
+
+        if (stitch.getType() != StitchType.EMPTY) {
+
+            context.drawText(
+                    stitch.getSymbol(),
+                    x,
+                    y
+            );
+
+        }
     }
 }

@@ -1,5 +1,7 @@
 package org.Hieke;
 
+import javafx.scene.paint.Color;
+
 public interface RenderContext {
 
     void setStroke(String color);
@@ -19,9 +21,11 @@ public interface RenderContext {
             double y
     );
     void fillRect(
+            Color color,
             double x,
             double y,
             double width,
             double height
     );
+
 }

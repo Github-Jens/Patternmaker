@@ -1,5 +1,7 @@
 package org.Hieke;
 
+import javafx.scene.paint.Color;
+
 public class Ruler {
 
     private final int size;
@@ -74,6 +76,7 @@ public class Ruler {
 
         // Top ruler area
         context.fillRect(
+                Color.WHITE,
                 0,
                 0,
                 width,
@@ -82,6 +85,7 @@ public class Ruler {
 
         // Left ruler area
         context.fillRect(
+                Color.WHITE,
                 0,
                 0,
                 size,

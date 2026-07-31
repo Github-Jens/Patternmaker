@@ -69,13 +69,17 @@ public class CanvasRenderContext implements RenderContext {
                 y
         );
     }
+
     @Override
     public void fillRect(
+            Color color,
             double x,
             double y,
             double width,
             double height
     ) {
+
+        gc.setFill(color);
 
         gc.fillRect(
                 x,
