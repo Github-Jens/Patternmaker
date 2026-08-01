@@ -1,6 +1,8 @@
 package org.Hieke;
 
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
@@ -16,19 +18,19 @@ public class PaletteView extends VBox {
     private final ObjectProperty<Color> selectedColor;
 
     private final GridPane colorContainer;
-    private int selectedIndex = 0;
+    private final IntegerProperty selectedIndex =
+            new SimpleIntegerProperty(-1);
 
 
     public PaletteView(
             Palette palette,
-            ObjectProperty<Color> selectedColor
+            ObjectProperty<Color> selectedColor,
+             IntegerProperty selectedIndex
     ) {
 
         this.palette = palette;
         this.selectedColor = selectedColor;
-        selectedColor.set(
-                palette.getColor(0)
-        );
+        this.selectedIndex.bindBidirectional(selectedIndex);
 
         colorContainer = new GridPane();
 
@@ -133,7 +135,7 @@ public class PaletteView extends VBox {
         // Left click = select colour
         button.setOnAction(event -> {
 
-            selectedIndex = index;
+            selectedIndex.set(index);
 
             selectedColor.set(
                     palette.getColor(index)
@@ -188,15 +190,17 @@ public class PaletteView extends VBox {
 
                 remove.setOnAction(e -> {
 
-                    if (selectedIndex == index) {
+                    if (selectedIndex.get() == index) {
 
-                        selectedIndex = -1;
+                        selectedIndex.set(-1);
                         selectedColor.set(null);
 
                     }
-                    else if (selectedIndex > index) {
+                    else if (selectedIndex.get() > index) {
 
-                        selectedIndex--;
+                        selectedIndex.set(
+                                selectedIndex.get() - 1
+                        );
 
                     }
 
@@ -265,7 +269,7 @@ public class PaletteView extends VBox {
         }
 
 
-        if (index == selectedIndex) {
+        if (index == selectedIndex.get()) {
 
             style.append(
                     "-fx-border-color: blue;"
@@ -297,8 +301,11 @@ public class PaletteView extends VBox {
 
     public boolean isColorSelected() {
 
-        return selectedIndex >= 0;
+        return selectedIndex.get() >= 0;
 
+    }
+    public IntegerProperty selectedIndexProperty() {
+        return selectedIndex;
     }
 
 

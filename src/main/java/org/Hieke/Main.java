@@ -1,12 +1,15 @@
 package org.Hieke;
 
 import javafx.application.Application;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -20,6 +23,8 @@ public class Main extends Application {
     private BorderPane root;
     private ObjectProperty<StitchType> selectedType;
     private ObjectProperty<Color> selectedColor;
+    private IntegerProperty selectedColorIndex;
+
 
     private ChartCanvas canvas;
     private Palette palette;
@@ -34,10 +39,15 @@ public class Main extends Application {
         KnittingChart chart = new KnittingChart(20,20);
 
         selectedType =
-                new SimpleObjectProperty<>(StitchType.EMPTY);
+                new SimpleObjectProperty<>(null);
+
         palette = new Palette();
+
         selectedColor =
                 new SimpleObjectProperty<>(null);
+
+        selectedColorIndex =
+                new SimpleIntegerProperty(-1);
 
         //TOP Menu Bar
         MenuBar menuBar = new MenuBar();
@@ -48,6 +58,10 @@ public class Main extends Application {
         MenuItem resetView = new MenuItem("Reset View");
         MenuItem exportSVG =
                 new MenuItem("Export SVG");
+        MenuItem exportPDF =
+                new MenuItem("Export PDF");
+
+
 
         resetView.setOnAction(event -> {
 
@@ -64,6 +78,13 @@ public class Main extends Application {
         viewMenu.getItems().add(
                 resetView
         );
+        exportPDF.setOnAction(event ->
+                exportPDF(stage)
+        );
+
+
+        exportMenu.getItems()
+                .add(exportPDF);
 
                 //Create new chart here
         MenuItem savePattern = new MenuItem("Save Pattern");
@@ -133,7 +154,7 @@ public class Main extends Application {
                                 new KnittingChart(rows, columns);
 
 
-                        canvas = new ChartCanvas(newChartData, selectedType, selectedColor);
+                        canvas = new ChartCanvas(newChartData, selectedType, selectedColor, selectedColorIndex);
 
                         root.setCenter(canvas);
 
@@ -200,11 +221,19 @@ public class Main extends Application {
                             new ChartCanvas(
                                     loadedChart,
                                     selectedType,
-                                    selectedColor
+                                    selectedColor,
+                                    selectedColorIndex
                             );
 
 
-                    root.setCenter(canvas);
+                    StackPane canvasContainer = new StackPane(canvas);
+                    canvas.widthProperty()
+                            .bind(canvasContainer.widthProperty());
+
+                    canvas.heightProperty()
+                            .bind(canvasContainer.heightProperty());
+
+                    root.setCenter(canvasContainer);
 
 
                 } catch (IOException e) {
@@ -301,7 +330,8 @@ public class Main extends Application {
         PaletteView paletteView =
                 new PaletteView(
                         palette,
-                        selectedColor
+                        selectedColor,
+                        selectedColorIndex
                 );
 
 
@@ -402,7 +432,8 @@ public class Main extends Application {
         canvas = new ChartCanvas(
                 chart,
                 selectedType,
-                selectedColor
+                selectedColor,
+                selectedColorIndex
         );
 
         root.setCenter(canvas);
@@ -522,6 +553,48 @@ public class Main extends Application {
                     "-fx-background-color: lightblue;"
             );
 
+        }
+    }
+
+    private void exportPDF(Stage stage) {
+
+        FileChooser chooser =
+                new FileChooser();
+
+
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter(
+                        "PDF (*.pdf)",
+                        "*.pdf"
+                )
+        );
+
+
+        File file =
+                chooser.showSaveDialog(stage);
+
+
+        if(file != null) {
+
+            try {
+
+                new PDFExporter(
+                        canvas.getChart()
+                ).export(
+                        file.getAbsolutePath()
+                );
+
+            }
+            catch(IOException e) {
+
+                e.printStackTrace();
+
+                new Alert(
+                        Alert.AlertType.ERROR,
+                        "PDF export failed"
+                ).showAndWait();
+
+            }
         }
     }
     private void exportSVG(Stage stage) {
@@ -704,6 +777,8 @@ public class Main extends Application {
 
         }
     }
+
+
 
 
 

@@ -23,6 +23,12 @@ public class ChartRenderer {
         );
 
 
+        renderBackgrounds(
+                context,
+                settings
+        );
+
+
         renderGrid(
                 context,
                 settings
@@ -150,19 +156,6 @@ public class ChartRenderer {
                         + settings.rulerSize;
 
 
-        // Draw cell background
-        if (stitch.getBackgroundColor() != null) {
-
-            context.fillRect(
-                    stitch.getBackgroundColor(),
-                    cellX,
-                    cellY,
-                    scaledCellSize,
-                    scaledCellSize
-            );
-
-        }
-
 
         // Draw stitch symbol in the center of the cell
         double x =
@@ -181,6 +174,57 @@ public class ChartRenderer {
                     y
             );
 
+        }
+    }
+    private void renderBackgrounds(
+            RenderContext context,
+            RenderSettings settings
+    ) {
+
+        double scaledCellSize =
+                settings.cellSize * settings.zoom;
+
+
+        for (int row = settings.firstRow;
+             row <= settings.lastRow;
+             row++) {
+
+
+            for (int column = settings.firstColumn;
+                 column <= settings.lastColumn;
+                 column++) {
+
+
+                Stitch stitch =
+                        chart.getStitch(row, column);
+
+
+                if (stitch.getBackgroundColor() == null) {
+                    continue;
+                }
+
+
+                double x =
+                        column * scaledCellSize
+                                + settings.offsetX
+                                + settings.rulerSize;
+
+
+                double y =
+                        row * scaledCellSize
+                                + settings.offsetY
+                                + settings.rulerSize;
+
+
+                context.fillRect(
+                        stitch.getBackgroundColor(),
+                        x,
+                        y,
+                        scaledCellSize,
+                        scaledCellSize
+                );
+
+            }
         }
     }
 }

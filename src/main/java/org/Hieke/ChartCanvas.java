@@ -1,11 +1,10 @@
 package org.Hieke;
 
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.text.TextAlignment;
 
 import java.util.Stack;
 
@@ -16,7 +15,8 @@ public class ChartCanvas extends Canvas {
     private final KnittingChart chart;
     private final ObjectProperty<StitchType> selectedType;
     private final ObjectProperty<Color> selectedColor;
-    private final Ruler ruler;
+    private final IntegerProperty selectedColorIndex;
+
     private final ChartRenderer renderer;
     private CanvasRenderContext renderContext;
     private double zoom = 1.0;
@@ -36,14 +36,15 @@ public class ChartCanvas extends Canvas {
 
     public ChartCanvas(KnittingChart chart,
                        ObjectProperty<StitchType> selectedType,
-                       ObjectProperty<Color> selectedColor) {
+                       ObjectProperty<Color> selectedColor,
+                       IntegerProperty selectedColorIndex) {
         this.chart = chart;
         this.selectedType = selectedType;
         this.selectedColor = selectedColor;
-        this.ruler = new Ruler(RULER_SIZE);
+        this.selectedColorIndex = selectedColorIndex;
         this.renderer = new ChartRenderer(chart);
-        setWidth(600);
-        setHeight(600);
+        setWidth(800);
+        setHeight(800);
         this.renderContext =
                 new CanvasRenderContext(getGraphicsContext2D());
         drawChart();
@@ -218,10 +219,8 @@ public class ChartCanvas extends Canvas {
             return;
         }
         if (selectedType.get() == null &&
-                selectedColor.get() == null) {
-
+                selectedColorIndex.get() == -1) {
             return;
-
         }
 
         Stitch stitch = chart.getStitch(row, column);
@@ -255,9 +254,22 @@ public class ChartCanvas extends Canvas {
 
 
 // Colour handling
-        if (selectedType.get() != StitchType.EMPTY) {
+        if (selectedType.get() == StitchType.EMPTY) {
 
+            // Eraser removes everything
+            newBackground = null;
+
+        }
+        else if (selectedColorIndex.get() >= 0) {
+
+            // Apply selected colour
             newBackground = selectedColor.get();
+
+        }
+        else {
+
+            // No colour selected = remove background
+            newBackground = null;
 
         }
 
