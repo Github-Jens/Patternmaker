@@ -3,11 +3,12 @@ package org.Hieke;
 public class ChartRenderer {
 
     private final KnittingChart chart;
-    private final Ruler ruler;
+    private static final String GRID_COLOR = "#CCCCCC";
+
 
     public ChartRenderer(KnittingChart chart) {
         this.chart = chart;
-        this.ruler = new Ruler(30);
+
     }
     public void render(
             RenderContext context,
@@ -15,13 +16,6 @@ public class ChartRenderer {
             double width,
             double height
     ) {
-
-        ruler.renderBackground(
-                context,
-                width,
-                height
-        );
-
 
         renderBackgrounds(
                 context,
@@ -31,7 +25,7 @@ public class ChartRenderer {
 
         renderGrid(
                 context,
-                settings
+              settings
         );
 
 
@@ -40,68 +34,107 @@ public class ChartRenderer {
                 settings
         );
 
-
-        ruler.render(
+        renderRulerCells(
                 context,
                 settings
         );
+
     }
 
     public void renderGrid(
             RenderContext context,
             RenderSettings settings
-
     ) {
+
+        context.setStroke(GRID_COLOR);
 
         double scaledCellSize =
                 settings.cellSize * settings.zoom;
 
 
         // Horizontal lines
-        for (int row = settings.firstRow;
-             row <= settings.lastRow + 1;
+        for (int row = 1;
+             row < settings.renderRows - 1;
              row++) {
-
 
             double y =
                     row * scaledCellSize
-                            + settings.offsetY
-                            + settings.rulerSize;
+                            + settings.offsetY;
 
 
             context.drawLine(
-                    settings.offsetX + settings.rulerSize,
+                    settings.offsetX + scaledCellSize,
                     y,
-                    chart.getColumns() * scaledCellSize
-                            + settings.offsetX
-                            + settings.rulerSize,
+                    settings.offsetX
+                            + (settings.renderColumns - 1)
+                            * scaledCellSize,
                     y
             );
         }
 
 
-
         // Vertical lines
-        for (int column = settings.firstColumn;
-             column <= settings.lastColumn + 1;
+        for (int column = 1;
+             column < settings.renderColumns - 1;
              column++) {
-
 
             double x =
                     column * scaledCellSize
-                            + settings.offsetX
-                            + settings.rulerSize;
+                            + settings.offsetX;
 
 
             context.drawLine(
                     x,
-                    settings.offsetY + settings.rulerSize,
+                    settings.offsetY + scaledCellSize,
                     x,
-                    chart.getRows() * scaledCellSize
-                            + settings.offsetY
-                            + settings.rulerSize
+                    settings.offsetY
+                            + (settings.renderRows - 1)
+                            * scaledCellSize
             );
         }
+
+
+        // Ruler/chart separator lines
+
+        // top separator
+        context.drawLine(
+                settings.offsetX + scaledCellSize,
+                settings.offsetY + scaledCellSize,
+                settings.offsetX
+                        + (settings.renderColumns - 1) * scaledCellSize,
+                settings.offsetY + scaledCellSize
+        );
+
+        // bottom separator
+        context.drawLine(
+                settings.offsetX + scaledCellSize,
+                settings.offsetY
+                        + (settings.renderRows - 1) * scaledCellSize,
+                settings.offsetX
+                        + (settings.renderColumns - 1) * scaledCellSize,
+                settings.offsetY
+                        + (settings.renderRows - 1) * scaledCellSize
+        );
+
+        // left separator
+        context.drawLine(
+                settings.offsetX + scaledCellSize,
+                settings.offsetY + scaledCellSize,
+                settings.offsetX + scaledCellSize,
+                settings.offsetY
+                        + (settings.renderRows - 1) * scaledCellSize
+        );
+
+        // right separator
+        context.drawLine(
+                settings.offsetX
+                        + (settings.renderColumns - 1) * scaledCellSize,
+                settings.offsetY + scaledCellSize,
+                settings.offsetX
+                        + (settings.renderColumns - 1) * scaledCellSize,
+                settings.offsetY
+                        + (settings.renderRows - 1) * scaledCellSize
+        );
     }
     public void renderStitches(
             RenderContext context,
@@ -122,8 +155,15 @@ public class ChartRenderer {
                  column++) {
 
 
+                if (!isStitchCell(row, column, settings)) {
+                    continue;
+                }
+
                 Stitch stitch =
-                        chart.getStitch(row, column);
+                        chart.getStitch(
+                                chartRow(row),
+                                chartColumn(column)
+                        );
 
 
                 drawStitch(
@@ -145,15 +185,13 @@ public class ChartRenderer {
 
 
         double cellX =
-                stitch.getColumn() * scaledCellSize
-                        + settings.offsetX
-                        + settings.rulerSize;
+                (stitch.getColumn() + 1) * scaledCellSize
+                        + settings.offsetX;
 
 
         double cellY =
-                stitch.getRow() * scaledCellSize
-                        + settings.offsetY
-                        + settings.rulerSize;
+                (stitch.getRow() + 1) * scaledCellSize
+                        + settings.offsetY;
 
 
 
@@ -195,8 +233,15 @@ public class ChartRenderer {
                  column++) {
 
 
+                if (!isStitchCell(row, column, settings)) {
+                    continue;
+                }
+
                 Stitch stitch =
-                        chart.getStitch(row, column);
+                        chart.getStitch(
+                                chartRow(row),
+                                chartColumn(column)
+                        );
 
 
                 if (stitch.getBackgroundColor() == null) {
@@ -206,14 +251,12 @@ public class ChartRenderer {
 
                 double x =
                         column * scaledCellSize
-                                + settings.offsetX
-                                + settings.rulerSize;
+                                + settings.offsetX;
 
 
                 double y =
                         row * scaledCellSize
-                                + settings.offsetY
-                                + settings.rulerSize;
+                                + settings.offsetY;
 
 
                 context.fillRect(
@@ -226,5 +269,170 @@ public class ChartRenderer {
 
             }
         }
+    }
+    private void renderRulerCells(
+            RenderContext context,
+            RenderSettings settings
+    ) {
+
+        renderTopRuler(
+                context,
+                settings
+        );
+
+        renderBottomRuler(
+                context,
+                settings
+        );
+
+        renderLeftRuler(
+                context,
+                settings
+        );
+
+        renderRightRuler(
+                context,
+                settings
+        );
+    }
+    private void renderTopRuler(
+            RenderContext context,
+            RenderSettings settings
+    ) {
+
+        double scaledCellSize =
+                settings.cellSize * settings.zoom;
+
+        context.setFill("#000000");
+
+
+        for (int column = 0;
+             column < chart.getColumns();
+             column++) {
+
+
+            double x =
+                    (column + 1.5) * scaledCellSize
+                            + settings.offsetX;
+
+
+            context.drawText(
+                    String.valueOf(chart.getColumns() - column),
+                    x,
+                    settings.offsetY
+                            + scaledCellSize / 2
+            );
+        }
+    }
+
+
+    private void renderBottomRuler(
+            RenderContext context,
+            RenderSettings settings
+    ) {
+
+        double scaledCellSize =
+                settings.cellSize * settings.zoom;
+
+
+        for (int column = 0;
+             column < chart.getColumns();
+             column++) {
+
+
+            double x =
+                    (column + 1.5) * scaledCellSize
+                            + settings.offsetX;
+
+
+            context.drawText(
+                    String.valueOf(chart.getColumns() - column),
+                    x,
+                    settings.offsetY
+                            + (settings.renderRows - 0.5)
+                            * scaledCellSize
+            );
+        }
+    }
+
+
+    private void renderLeftRuler(
+            RenderContext context,
+            RenderSettings settings
+    ) {
+
+        double scaledCellSize =
+                settings.cellSize * settings.zoom;
+
+
+        for (int row = 0;
+             row < chart.getRows();
+             row++) {
+
+
+            double y =
+                    (row + 1.5) * scaledCellSize
+                            + settings.offsetY;
+
+
+            context.drawText(
+                    String.valueOf(chart.getRows() - row),
+                    settings.offsetX
+                            + scaledCellSize / 2,
+                    y
+            );
+        }
+    }
+
+
+    private void renderRightRuler(
+            RenderContext context,
+            RenderSettings settings
+    ) {
+
+        double scaledCellSize =
+                settings.cellSize * settings.zoom;
+
+
+        for (int row = 0;
+             row < chart.getRows();
+             row++) {
+
+
+            double y =
+                    (row + 1.5) * scaledCellSize
+                            + settings.offsetY;
+
+
+            context.drawText(
+                    String.valueOf(chart.getRows() - row),
+                    settings.offsetX
+                            + (settings.renderColumns - 0.5)
+                            * scaledCellSize,
+                    y
+            );
+        }
+    }
+
+
+    private boolean isStitchCell(
+            int renderRow,
+            int renderColumn,
+            RenderSettings settings
+    ) {
+        return renderRow > 0
+                && renderRow < chart.getRows() + 1
+                && renderColumn > 0
+                && renderColumn < chart.getColumns() + 1;
+    }
+
+
+    private int chartRow(int renderRow) {
+        return renderRow - 1;
+    }
+
+
+    private int chartColumn(int renderColumn) {
+        return renderColumn - 1;
     }
 }

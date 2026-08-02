@@ -31,13 +31,13 @@ public class SVGExporter {
 
 
         double width =
-                chart.getColumns() * settings.cellSize
-                        + settings.rulerSize;
+                settings.renderColumns
+                        * settings.cellSize;
 
 
         double height =
-                chart.getRows() * settings.cellSize
-                        + settings.rulerSize;
+                settings.renderRows
+                        * settings.cellSize;
 
 
 

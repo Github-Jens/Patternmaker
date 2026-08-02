@@ -39,15 +39,17 @@ public class PDFExporter {
 
 
         float width =
-                (float) (chart.getColumns()
-                                        * settings.cellSize
-                                        + settings.rulerSize * 2);
+                (float) (
+                        settings.renderColumns
+                                * settings.cellSize
+                );
 
 
         float height =
-                (float) (chart.getRows()
-                                        * settings.cellSize
-                                        + settings.rulerSize * 2);
+                (float) (
+                        settings.renderRows
+                                * settings.cellSize
+                );
 
 
         PDDocument document =

@@ -9,7 +9,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -226,14 +225,7 @@ public class Main extends Application {
                             );
 
 
-                    StackPane canvasContainer = new StackPane(canvas);
-                    canvas.widthProperty()
-                            .bind(canvasContainer.widthProperty());
-
-                    canvas.heightProperty()
-                            .bind(canvasContainer.heightProperty());
-
-                    root.setCenter(canvasContainer);
+                    root.setCenter(canvas);
 
 
                 } catch (IOException e) {

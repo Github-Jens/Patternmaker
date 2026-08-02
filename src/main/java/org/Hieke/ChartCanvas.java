@@ -43,8 +43,8 @@ public class ChartCanvas extends Canvas {
         this.selectedColor = selectedColor;
         this.selectedColorIndex = selectedColorIndex;
         this.renderer = new ChartRenderer(chart);
-        setWidth(800);
-        setHeight(800);
+        setWidth(600);
+        setHeight(600);
         this.renderContext =
                 new CanvasRenderContext(getGraphicsContext2D());
         drawChart();
@@ -56,18 +56,20 @@ public class ChartCanvas extends Canvas {
     private void drawChart() {
 
         double scaledCellSize = CELL_SIZE * zoom;
+        int renderColumns = chart.getColumns() + 2;
+        int renderRows    = chart.getRows() + 2;
 
         int firstColumn = Math.max(
                 0,
                 (int)Math.floor(
-                        (-offsetX - RULER_SIZE) / scaledCellSize
+                        -offsetX / scaledCellSize
                 )
         );
 
         int lastColumn = Math.min(
-                chart.getColumns() - 1,
+                renderColumns - 1,
                 (int)Math.ceil(
-                        (getWidth() - offsetX - RULER_SIZE)
+                        (getWidth() - offsetX)
                                 / scaledCellSize
                 )
         );
@@ -75,14 +77,14 @@ public class ChartCanvas extends Canvas {
         int firstRow = Math.max(
                 0,
                 (int)Math.floor(
-                        (-offsetY - RULER_SIZE) / scaledCellSize
+                        -offsetY / scaledCellSize
                 )
         );
 
         int lastRow = Math.min(
-                chart.getRows() - 1,
+                renderRows - 1,
                 (int)Math.ceil(
-                        (getHeight() - offsetY - RULER_SIZE)
+                        (getHeight() - offsetY)
                                 / scaledCellSize
                 )
         );
@@ -415,11 +417,12 @@ public class ChartCanvas extends Canvas {
                 zoom,
                 offsetX,
                 offsetY,
-                RULER_SIZE,
                 firstRow,
                 lastRow,
                 firstColumn,
-                lastColumn
+                lastColumn,
+                chart.getRows() + 2,
+                chart.getColumns() + 2
         );
     }
     public boolean isModified() {

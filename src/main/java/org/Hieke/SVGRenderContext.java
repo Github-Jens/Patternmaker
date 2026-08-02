@@ -5,6 +5,7 @@ import javafx.scene.paint.Color;
 public class SVGRenderContext implements RenderContext {
 
     private final StringBuilder svg;
+    private String strokeColor = "#000000";
 
 
     public SVGRenderContext(
@@ -32,11 +33,7 @@ public class SVGRenderContext implements RenderContext {
     @Override
     public void setStroke(String color) {
 
-        svg.append(
-                "<!-- stroke "
-                        + color
-                        + " -->"
-        );
+        this.strokeColor = color;
 
     }
 
@@ -82,7 +79,7 @@ public class SVGRenderContext implements RenderContext {
         );
 
         svg.append(
-                "stroke=\"black\"/>"
+                "stroke=\"" + strokeColor + "\"/>"
         );
 
     }
