@@ -9,7 +9,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -20,14 +19,13 @@ import java.io.IOException;
 public class Main extends Application {
 
     private BorderPane root;
-    private ObjectProperty<StitchType> selectedType;
-    private ObjectProperty<Color> selectedColor;
-    private IntegerProperty selectedColorIndex;
+
     private Stage stage;
 
     private ChartCanvas canvas;
     private Palette palette;
     private ScrollPane scrollPane;
+    private EditorState editorState;
 
     private static final int MIN_CHART_SIZE = 1;
     private static final int MAX_CHART_SIZE = 300;
@@ -39,16 +37,9 @@ public class Main extends Application {
         root = new BorderPane();
         KnittingChart chart = new KnittingChart(20, 20);
 
-        selectedType =
-                new SimpleObjectProperty<>(null);
+        editorState = new EditorState();
 
         palette = new Palette();
-
-        selectedColor =
-                new SimpleObjectProperty<>(null);
-
-        selectedColorIndex =
-                new SimpleIntegerProperty(-1);
 
         //TOP Menu Bar
         MenuBar menuBar =
@@ -69,9 +60,7 @@ public class Main extends Application {
         ToolPanel toolPanel =
                 new ToolPanel(
                         palette,
-                        selectedType,
-                        selectedColor,
-                        selectedColorIndex
+                        editorState
                 );
 
         root.setLeft(toolPanel);
@@ -488,9 +477,7 @@ public class Main extends Application {
 
         canvas = new ChartCanvas(
                 chart,
-                selectedType,
-                selectedColor,
-                selectedColorIndex,
+                editorState,
                 scrollPane
         );
 

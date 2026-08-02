@@ -10,20 +10,61 @@ import javafx.scene.paint.Color;
 
 public class ToolPanel extends VBox {
 
-    private final ObjectProperty<StitchType> selectedType;
+    private final EditorState editorState;
 
 
     public ToolPanel(
             Palette palette,
-            ObjectProperty<StitchType> selectedType,
-            ObjectProperty<Color> selectedColor,
-            IntegerProperty selectedColorIndex
+            EditorState editorState
     ) {
-        this.selectedType = selectedType;
+        this.editorState = editorState;
 
-        //Left VBOX
+
 
         // Left Panel
+
+        // Tools Panel
+
+        VBox toolPanel = new VBox();
+        toolPanel.setSpacing(5);
+
+        Label toolTitle = new Label("Tools");
+
+        Button selectButton = new Button("Select");
+
+        selectButton.setFocusTraversable(false);
+
+        selectButton.setOnAction(event -> {
+
+            if (editorState.activeToolProperty().get() == Tool.SELECT) {
+
+                // Deselect select tool
+                editorState.activeToolProperty()
+                        .set(Tool.DRAW);
+
+                selectButton.setStyle("");
+
+            }
+            else {
+
+                // Activate select tool
+                editorState.activeToolProperty()
+                        .set(Tool.SELECT);
+
+                selectButton.setStyle(
+                        "-fx-background-color: lightblue;"
+                );
+
+            }
+
+        });
+
+        toolPanel.getChildren().addAll(
+                toolTitle,
+                selectButton
+        );
+
+        //Symbols
 
         VBox symbolPanel = new VBox();
         symbolPanel.setSpacing(5);
@@ -117,8 +158,8 @@ public class ToolPanel extends VBox {
         PaletteView paletteView =
                 new PaletteView(
                         palette,
-                        selectedColor,
-                        selectedColorIndex
+                        editorState.selectedColorProperty(),
+                        editorState.selectedColorIndexProperty()
                 );
 
 
@@ -127,6 +168,7 @@ public class ToolPanel extends VBox {
         setSpacing(15);
 
         getChildren().addAll(
+                toolPanel,
                 symbolPanel,
                 paletteView
         );
@@ -155,10 +197,10 @@ public class ToolPanel extends VBox {
             Button... buttons
     ) {
 
-        if (selectedType.get() == type) {
+        if (editorState.selectedTypeProperty().get() == type) {
 
             // Deselect current stitch tool
-            selectedType.set(null);
+            editorState.selectedTypeProperty().set(null);
 
             selectTool(
                     null,
@@ -168,7 +210,7 @@ public class ToolPanel extends VBox {
         } else {
 
             // Select new stitch tool
-            selectedType.set(type);
+            editorState.selectedTypeProperty().set(type);
 
             selectTool(
                     selectedButton,

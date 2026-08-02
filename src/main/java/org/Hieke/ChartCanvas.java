@@ -16,9 +16,7 @@ public class ChartCanvas extends Canvas {
 
     private final ChartEditor editor;
 
-    private final ObjectProperty<StitchType> selectedType;
-    private final ObjectProperty<Color> selectedColor;
-    private final IntegerProperty selectedColorIndex;
+    private final EditorState editorState;
 
     private final ChartRenderer renderer;
     private CanvasRenderContext renderContext;
@@ -32,16 +30,15 @@ public class ChartCanvas extends Canvas {
     private double lastMouseY;
 
     private boolean panning = false;
+    private boolean selecting = false;
 
-    public ChartCanvas(KnittingChart chart,
-                       ObjectProperty<StitchType> selectedType,
-                       ObjectProperty<Color> selectedColor,
-                       IntegerProperty selectedColorIndex,
-                       ScrollPane scrollPane) {
+    public ChartCanvas(
+            KnittingChart chart,
+            EditorState editorState,
+            ScrollPane scrollPane) {
+
         this.editor = new ChartEditor(chart);
-        this.selectedType = selectedType;
-        this.selectedColor = selectedColor;
-        this.selectedColorIndex = selectedColorIndex;
+        this.editorState = editorState;
         this.scrollPane = scrollPane;
         this.renderer = new ChartRenderer(chart);
         setWidth(
@@ -116,10 +113,91 @@ public class ChartCanvas extends Canvas {
                 getHeight()
         );
 
-
-
+        drawSelection();
 
         gc.restore();
+
+    }
+
+    private void drawSelection() {
+
+        ChartSelection selection =
+                editorState.getSelection();
+
+
+
+        if (!selection.hasSelection()) {
+
+            return;
+
+        }
+
+
+        double scaledCellSize = CELL_SIZE * zoom;
+
+
+        int startColumn =
+                Math.min(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+        int endColumn =
+                Math.max(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+
+        int startRow =
+                Math.min(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+        int endRow =
+                Math.max(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+
+        double x =
+                offsetX
+                        + RULER_SIZE
+                        + startColumn * scaledCellSize;
+
+
+        double y =
+                offsetY
+                        + RULER_SIZE
+                        + startRow * scaledCellSize;
+
+
+        double width =
+                (endColumn - startColumn + 1)
+                        * scaledCellSize;
+
+
+        double height =
+                (endRow - startRow + 1)
+                        * scaledCellSize;
+
+
+        GraphicsContext gc =
+                getGraphicsContext2D();
+
+
+        gc.setStroke(Color.BLUE);
+        gc.setLineWidth(2);
+
+
+        gc.strokeRect(
+                x,
+                y,
+                width,
+                height
+        );
 
     }
 
@@ -137,18 +215,35 @@ public class ChartCanvas extends Canvas {
                 return;
             }
 
-            editor.beginStroke();
 
-            paintAt(
-                    event.getX(),
-                    event.getY()
-            );
+            if (editorState.activeToolProperty().get() == Tool.SELECT) {
+
+                selecting = true;
+
+                startSelection(
+                        event.getX(),
+                        event.getY()
+                );
+
+                return;
+            }
+
+
+            if (editorState.activeToolProperty().get() == Tool.DRAW) {
+
+                editor.beginStroke();
+
+                paintAt(
+                        event.getX(),
+                        event.getY()
+                );
+
+            }
 
         });
 
 
         setOnMouseDragged(event -> {
-
 
             if (panning) {
 
@@ -173,16 +268,31 @@ public class ChartCanvas extends Canvas {
             }
 
 
-            paintAt(
-                    event.getX(),
-                    event.getY()
-            );
+            if (editorState.activeToolProperty().get() == Tool.SELECT
+                    && selecting) {
+
+                updateSelection(
+                        event.getX(),
+                        event.getY()
+                );
+
+                return;
+            }
+
+
+            if (editorState.activeToolProperty().get() == Tool.DRAW) {
+
+                paintAt(
+                        event.getX(),
+                        event.getY()
+                );
+
+            }
 
         });
 
 
         setOnMouseReleased(event -> {
-
 
             if (panning) {
 
@@ -190,7 +300,18 @@ public class ChartCanvas extends Canvas {
 
                 return;
             }
+
+
+            if (selecting) {
+
+                selecting = false;
+
+                return;
+            }
+
+
             editor.endStroke();
+
         });
 
     }
@@ -214,17 +335,17 @@ public class ChartCanvas extends Canvas {
                 column >= editor.getChart().getColumns()) {
             return;
         }
-        if (selectedType.get() == null &&
-                selectedColorIndex.get() == -1) {
+        if (editorState.selectedTypeProperty().get() == null &&
+                editorState.selectedColorIndexProperty().get() == -1) {
             return;
         }
 
         editor.paintCell(
                 row,
                 column,
-                selectedType.get(),
-                selectedColor.get(),
-                selectedColorIndex.get()
+                editorState.selectedTypeProperty().get(),
+                editorState.selectedColorProperty().get(),
+                editorState.selectedColorIndexProperty().get()
         );
 
         drawChart();
@@ -333,6 +454,77 @@ public class ChartCanvas extends Canvas {
                 editor.getChart().getRows() + 2,
                 editor.getChart().getColumns() + 2
         );
+    }
+
+    private void startSelection(
+            double mouseX,
+            double mouseY
+    ) {
+
+        double scaledCellSize = CELL_SIZE * zoom;
+
+
+        int column =
+                (int)((mouseX - offsetX - RULER_SIZE)
+                        / scaledCellSize);
+
+
+        int row =
+                (int)((mouseY - offsetY - RULER_SIZE)
+                        / scaledCellSize);
+
+
+        if (row < 0 || column < 0 ||
+                row >= editor.getChart().getRows() ||
+                column >= editor.getChart().getColumns()) {
+
+            return;
+
+        }
+
+
+        editorState.getSelection()
+                .setStart(
+                        row,
+                        column
+                );
+
+    }
+
+    private void updateSelection(
+            double mouseX,
+            double mouseY
+    ) {
+
+        double scaledCellSize = CELL_SIZE * zoom;
+
+
+        int column =
+                (int)((mouseX - offsetX - RULER_SIZE)
+                        / scaledCellSize);
+
+
+        int row =
+                (int)((mouseY - offsetY - RULER_SIZE)
+                        / scaledCellSize);
+
+
+        if (row < 0 || column < 0 ||
+                row >= editor.getChart().getRows() ||
+                column >= editor.getChart().getColumns()) {
+
+            return;
+
+        }
+
+
+        editorState.getSelection()
+                .setEnd(
+                        row,
+                        column
+                );
+        drawChart();
+
     }
     public boolean isModified() {
 
