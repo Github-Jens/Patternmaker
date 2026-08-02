@@ -54,6 +54,9 @@ public class PaletteView extends VBox {
         selectedColor.addListener((observable, oldValue, newValue) -> {
             refresh();
         });
+        selectedIndex.addListener((observable, oldValue, newValue) -> {
+            refresh();
+        });
 
 
         refresh();
@@ -84,7 +87,6 @@ public class PaletteView extends VBox {
             );
 
         }
-
 
         Button addButton =
                 new Button("+ Add Colour");
@@ -139,17 +141,58 @@ public class PaletteView extends VBox {
                 index
         );
 
-
-        // Left click = select colour
+        // Left click = select / deselect colour
         button.setOnAction(event -> {
 
-            selectedIndex.set(index);
 
-            selectedColor.set(
-                    palette.getColor(index)
-            );
+            // Null colour button
+            if (index == 0) {
+
+                if (selectedIndex.get() == 0) {
+
+                    // Clicking X again deselects colour operation
+                    selectedIndex.set(-1);
+
+                    selectedColor.set(null);
+
+                }
+                else {
+
+                    // Select remove colour
+                    selectedIndex.set(0);
+
+                    selectedColor.set(null);
+
+                }
+
+                return;
+
+            }
+
+
+            // Normal colours
+            if (selectedIndex.get() == index) {
+
+                // Clicking active colour deselects it
+                selectedIndex.set(-1);
+
+                selectedColor.set(null);
+
+            }
+            else {
+
+                // Select colour
+                selectedIndex.set(index);
+
+                selectedColor.set(
+                        palette.getColor(index)
+                );
+
+            }
 
         });
+
+
 
 
         // Right click = colour menu
