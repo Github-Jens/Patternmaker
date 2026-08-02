@@ -4,10 +4,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -157,20 +154,46 @@ public class PaletteView extends VBox {
                     );
 
 
-            ColorPicker picker =
-                    new ColorPicker(
-                            palette.getColor(index)
-                    );
-
-
             change.setOnAction(e -> {
 
-                palette.setColor(
-                        index,
-                        picker.getValue()
-                );
+                ColorPicker picker =
+                        new ColorPicker(
+                                palette.getColor(index)
+                        );
 
-                refresh();
+
+                Dialog<ButtonType> dialog =
+                        new Dialog<>();
+
+                dialog.setTitle("Change Colour");
+
+                dialog.getDialogPane()
+                        .setContent(picker);
+
+
+                dialog.getDialogPane()
+                        .getButtonTypes()
+                        .addAll(
+                                ButtonType.OK,
+                                ButtonType.CANCEL
+                        );
+
+
+                dialog.showAndWait()
+                        .ifPresent(result -> {
+
+                            if (result == ButtonType.OK) {
+
+                                palette.setColor(
+                                        index,
+                                        picker.getValue()
+                                );
+
+                                refresh();
+
+                            }
+
+                        });
 
             });
 

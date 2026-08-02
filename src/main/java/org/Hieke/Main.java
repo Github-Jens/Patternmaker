@@ -36,7 +36,7 @@ public class Main extends Application {
     public void start(Stage stage) {
         this.stage = stage;
         root = new BorderPane();
-        KnittingChart chart = new KnittingChart(20,20);
+        KnittingChart chart = new KnittingChart(20, 20);
 
         selectedType =
                 new SimpleObjectProperty<>(null);
@@ -64,138 +64,16 @@ public class Main extends Application {
 
         root.setTop(menuBar);
 
-        //Left VBOX
-
-        // Left Panel
-
-        VBox symbolPanel = new VBox();
-        symbolPanel.setSpacing(5);
-
-        Label symbolTitle = new Label("Symbols");
-
-        Button knitButton = new Button("K - Knit");
-        Button purlButton = new Button("P - Purl");
-        Button yarnButton = new Button("O - Yarn Over");
-        Button k2togButton = new Button("/ - K2tog");
-        Button eraserButton = new Button("Eraser");
-        knitButton.setFocusTraversable(false);
-        purlButton.setFocusTraversable(false);
-        yarnButton.setFocusTraversable(false);
-        k2togButton.setFocusTraversable(false);
-        eraserButton.setFocusTraversable(false);
-
-
-        symbolPanel.getChildren().addAll(
-                symbolTitle,
-                knitButton,
-                purlButton,
-                yarnButton,
-                k2togButton,
-                eraserButton
-        );
-
-
-// Palette
-
-        PaletteView paletteView =
-                new PaletteView(
+        //left VBox
+        ToolPanel toolPanel =
+                new ToolPanel(
                         palette,
+                        selectedType,
                         selectedColor,
                         selectedColorIndex
                 );
 
-
-// Combine left side
-
-        VBox leftPanel = new VBox();
-        leftPanel.setSpacing(15);
-
-        leftPanel.getChildren().addAll(
-                symbolPanel,
-                paletteView
-        );
-
-        root.setLeft(leftPanel);
-
-
-// Default tool
-
-        selectTool(
-                null,
-                knitButton,
-                purlButton,
-                yarnButton,
-                k2togButton,
-                eraserButton
-        );
-
-
-// Tool actions
-
-        knitButton.setOnAction(event ->
-                selectStitchTool(
-                        StitchType.KNIT,
-                        knitButton,
-                        knitButton,
-                        purlButton,
-                        yarnButton,
-                        k2togButton,
-                        eraserButton
-                )
-        );
-
-
-        purlButton.setOnAction(event ->
-                selectStitchTool(
-                        StitchType.PURL,
-                        purlButton,
-                        knitButton,
-                        purlButton,
-                        yarnButton,
-                        k2togButton,
-                        eraserButton
-                )
-        );
-
-
-        yarnButton.setOnAction(event ->
-                selectStitchTool(
-                        StitchType.YARN_OVER,
-                        yarnButton,
-                        knitButton,
-                        purlButton,
-                        yarnButton,
-                        k2togButton,
-                        eraserButton
-                )
-        );
-
-
-        k2togButton.setOnAction(event ->
-                selectStitchTool(
-                        StitchType.K2TOG,
-                        k2togButton,
-                        knitButton,
-                        purlButton,
-                        yarnButton,
-                        k2togButton,
-                        eraserButton
-                )
-        );
-
-
-        eraserButton.setOnAction(event ->
-                selectStitchTool(
-                        StitchType.EMPTY,
-                        eraserButton,
-                        knitButton,
-                        purlButton,
-                        yarnButton,
-                        k2togButton,
-                        eraserButton
-                )
-        );
-
+        root.setLeft(toolPanel);
 
 // Create canvas
 
@@ -204,7 +82,7 @@ public class Main extends Application {
         root.setBottom(new Label("Status: Ready"));
 
 
- //Create the scene
+        //Create the scene
         Scene scene = new Scene(root, 800, 600);
 
         scene.setOnKeyPressed(event -> {
@@ -240,23 +118,6 @@ public class Main extends Application {
         });
 
         stage.show();
-    }
-
-    private void selectTool(Button selectedButton, Button... buttons) {
-
-        for (Button button : buttons) {
-
-            button.setStyle("");
-
-        }
-
-        if (selectedButton != null) {
-
-            selectedButton.setStyle(
-                    "-fx-background-color: lightblue;"
-            );
-
-        }
     }
 
     private void exportPDF() {
@@ -609,35 +470,6 @@ public class Main extends Application {
                 })
                 .orElse(false);
     }
-    private void selectStitchTool(
-            StitchType type,
-            Button selectedButton,
-            Button... buttons
-    ) {
-
-        if (selectedType.get() == type) {
-
-            // Deselect current stitch tool
-            selectedType.set(null);
-
-            selectTool(
-                    null,
-                    buttons
-            );
-
-        } else {
-
-            // Select new stitch tool
-            selectedType.set(type);
-
-            selectTool(
-                    selectedButton,
-                    buttons
-            );
-
-        }
-    }
-
 
     private void setChart(KnittingChart chart) {
 
