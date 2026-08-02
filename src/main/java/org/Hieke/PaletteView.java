@@ -19,6 +19,8 @@ public class PaletteView extends VBox {
     private final IntegerProperty selectedIndex =
             new SimpleIntegerProperty(-1);
 
+    private ContextMenu activeMenu;
+
 
     public PaletteView(
             Palette palette,
@@ -153,6 +155,16 @@ public class PaletteView extends VBox {
         // Right click = colour menu
         button.setOnContextMenuRequested(event -> {
 
+            if (index == 0) {
+                return;
+            }
+
+            if (activeMenu != null) {
+
+                activeMenu.hide();
+
+            }
+
             ContextMenu menu =
                     new ContextMenu();
 
@@ -257,6 +269,8 @@ public class PaletteView extends VBox {
                     event.getScreenX(),
                     event.getScreenY()
             );
+
+            activeMenu = menu;
 
         });
 

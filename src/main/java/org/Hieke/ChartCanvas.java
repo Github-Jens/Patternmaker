@@ -13,7 +13,9 @@ public class ChartCanvas extends Canvas {
 
     private static final int CELL_SIZE = 30;
     private static final int RULER_SIZE = 30;
-    private final KnittingChart chart;
+
+    private final ChartEditor editor;
+
     private final ObjectProperty<StitchType> selectedType;
     private final ObjectProperty<Color> selectedColor;
     private final IntegerProperty selectedColorIndex;
@@ -30,18 +32,13 @@ public class ChartCanvas extends Canvas {
     private double lastMouseY;
 
     private boolean panning = false;
-    private boolean modified = false;
-
-    private final Stack<Stroke> undoStack = new Stack<>();
-    private final Stack<Stroke> redoStack = new Stack<>();
-    private Stroke currentStroke;
 
     public ChartCanvas(KnittingChart chart,
                        ObjectProperty<StitchType> selectedType,
                        ObjectProperty<Color> selectedColor,
                        IntegerProperty selectedColorIndex,
                        ScrollPane scrollPane) {
-        this.chart = chart;
+        this.editor = new ChartEditor(chart);
         this.selectedType = selectedType;
         this.selectedColor = selectedColor;
         this.selectedColorIndex = selectedColorIndex;
@@ -65,8 +62,8 @@ public class ChartCanvas extends Canvas {
     private void drawChart() {
 
         double scaledCellSize = CELL_SIZE * zoom;
-        int renderColumns = chart.getColumns() + 2;
-        int renderRows    = chart.getRows() + 2;
+        int renderColumns = editor.getChart().getColumns() + 2;
+        int renderRows    = editor.getChart().getRows() + 2;
 
         int firstColumn = Math.max(
                 0,
@@ -140,8 +137,7 @@ public class ChartCanvas extends Canvas {
                 return;
             }
 
-
-            currentStroke = new Stroke();
+            editor.beginStroke();
 
             paintAt(
                     event.getX(),
@@ -194,18 +190,7 @@ public class ChartCanvas extends Canvas {
 
                 return;
             }
-
-
-            if (currentStroke != null) {
-
-                undoStack.push(currentStroke);
-
-                redoStack.clear();
-
-                currentStroke = null;
-
-            }
-
+            editor.endStroke();
         });
 
     }
@@ -225,8 +210,8 @@ public class ChartCanvas extends Canvas {
 
 
         if (row < 0 || column < 0 ||
-                row >= chart.getRows() ||
-                column >= chart.getColumns()) {
+                row >= editor.getChart().getRows() ||
+                column >= editor.getChart().getColumns()) {
             return;
         }
         if (selectedType.get() == null &&
@@ -234,123 +219,32 @@ public class ChartCanvas extends Canvas {
             return;
         }
 
-        Stitch stitch = chart.getStitch(row, column);
-
-
-        StitchType oldType = stitch.getType();
-        Color oldBackground =
-                stitch.getBackgroundColor();
-
-
-        StitchType newType = oldType;
-        Color newBackground = oldBackground;
-
-
-// Symbol handling
-        if (selectedType.get() != null) {
-
-            if (selectedType.get() == StitchType.EMPTY) {
-
-                // Eraser
-                newType = StitchType.EMPTY;
-                newBackground = null;
-
-            } else {
-
-                newType = selectedType.get();
-
-            }
-
-        }
-
-
-// Colour handling
-        if (selectedType.get() == StitchType.EMPTY) {
-
-            // Eraser removes everything
-            newBackground = null;
-
-        }
-        else if (selectedColorIndex.get() >= 0) {
-
-            // Apply selected colour
-            newBackground = selectedColor.get();
-
-        }
-        else {
-
-            // No colour selected = remove background
-            newBackground = null;
-
-        }
-
-
-        if (oldType == newType &&
-                java.util.Objects.equals(
-                        oldBackground,
-                        newBackground
-                )) {
-
-            return;
-
-        }
-
-
-        StitchChange change =
-                new StitchChange(
-                        stitch,
-                        oldType,
-                        newType,
-                        oldBackground,
-                        newBackground
-                );
-
-
-        change.redo();
-        modified = true;
-
-
-
-        if (currentStroke != null) {
-
-            currentStroke.addChange(change);
-
-        }
-
+        editor.paintCell(
+                row,
+                column,
+                selectedType.get(),
+                selectedColor.get(),
+                selectedColorIndex.get()
+        );
 
         drawChart();
     }
 
     public void undo() {
 
-        if (!undoStack.isEmpty()) {
+        editor.undo();
 
-            Stroke stroke = undoStack.pop();
-
-            stroke.undo();
-            modified = true;
-
-            redoStack.push(stroke);
-
-            drawChart();
-        }
+        drawChart();
 
     }
     public void redo() {
 
-        if (!redoStack.isEmpty()) {
+        editor.redo();
 
-            Stroke stroke = redoStack.pop();
-
-            stroke.redo();
-            modified = true;
-
-            undoStack.push(stroke);
-
-            drawChart();
-        }
+        drawChart();
 
     }
+
     private void setupZoomControls() {
 
         setOnScroll(event -> {
@@ -400,10 +294,6 @@ public class ChartCanvas extends Canvas {
 
     }
 
-    public KnittingChart getChart() {
-        return chart;
-    }
-
     public void resetView() {
 
         zoom = 1.0;
@@ -440,21 +330,30 @@ public class ChartCanvas extends Canvas {
                 lastRow,
                 firstColumn,
                 lastColumn,
-                chart.getRows() + 2,
-                chart.getColumns() + 2
+                editor.getChart().getRows() + 2,
+                editor.getChart().getColumns() + 2
         );
     }
     public boolean isModified() {
-        return modified;
+
+        return editor.isModified();
+
     }
 
     public void markSaved() {
-        modified = false;
+
+        editor.markSaved();
+
     }
 
     public void setScrollPane(ScrollPane scrollPane) {
 
         this.scrollPane = scrollPane;
+
+    }
+    public KnittingChart getChart() {
+
+        return editor.getChart();
 
     }
 
