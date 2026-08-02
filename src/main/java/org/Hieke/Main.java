@@ -27,9 +27,10 @@ public class Main extends Application {
 
     private ChartCanvas canvas;
     private Palette palette;
+    private ScrollPane scrollPane;
 
     private static final int MIN_CHART_SIZE = 1;
-    private static final int MAX_CHART_SIZE = 500;
+    private static final int MAX_CHART_SIZE = 300;
 
 
     @Override
@@ -105,6 +106,7 @@ public class Main extends Application {
         });
 
         stage.setTitle("Knitting Chart Maker");
+        stage.setMaximized(true);
         stage.setScene(scene);
 
         stage.setOnCloseRequest(event -> {
@@ -296,7 +298,7 @@ public class Main extends Application {
                     );
 
                     alert.setContentText(
-                            "Rows and columns must be positive numbers smaller than 500."
+                            "Rows and columns must be positive numbers smaller than 300."
                     );
 
                     alert.showAndWait();
@@ -338,11 +340,17 @@ public class Main extends Application {
                         new FileManager();
 
 
-                KnittingChart loadedChart =
+                PatternData data =
                         manager.load(file);
 
 
-                setChart(loadedChart);
+                palette.replaceColors(
+                        data.getPalette().getColors()
+                );
+
+                setChart(
+                        data.getChart()
+                );
 
 
             } catch (IOException e) {
@@ -387,6 +395,7 @@ public class Main extends Application {
 
             manager.save(
                     canvas.getChart(),
+                    palette,
                     file
             );
 
@@ -473,14 +482,31 @@ public class Main extends Application {
 
     private void setChart(KnittingChart chart) {
 
+
+        scrollPane = new ScrollPane();
+
+
         canvas = new ChartCanvas(
                 chart,
                 selectedType,
                 selectedColor,
-                selectedColorIndex
+                selectedColorIndex,
+                scrollPane
         );
 
-        root.setCenter(canvas);
+
+        scrollPane.setContent(canvas);
+
+
+        canvas.setScrollPane(scrollPane);
+
+
+        scrollPane.setFitToWidth(false);
+        scrollPane.setFitToHeight(false);
+        scrollPane.setPannable(false);
+
+
+        root.setCenter(scrollPane);
 
     }
 

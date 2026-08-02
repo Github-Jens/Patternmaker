@@ -4,6 +4,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.paint.Color;
 
 import java.util.Stack;
@@ -19,6 +20,7 @@ public class ChartCanvas extends Canvas {
 
     private final ChartRenderer renderer;
     private CanvasRenderContext renderContext;
+    private ScrollPane scrollPane;
     private double zoom = 1.0;
 
     private double offsetX = 0;
@@ -37,14 +39,21 @@ public class ChartCanvas extends Canvas {
     public ChartCanvas(KnittingChart chart,
                        ObjectProperty<StitchType> selectedType,
                        ObjectProperty<Color> selectedColor,
-                       IntegerProperty selectedColorIndex) {
+                       IntegerProperty selectedColorIndex,
+                       ScrollPane scrollPane) {
         this.chart = chart;
         this.selectedType = selectedType;
         this.selectedColor = selectedColor;
         this.selectedColorIndex = selectedColorIndex;
+        this.scrollPane = scrollPane;
         this.renderer = new ChartRenderer(chart);
-        setWidth(600);
-        setHeight(600);
+        setWidth(
+                (chart.getColumns() + 2) * CELL_SIZE
+        );
+
+        setHeight(
+                (chart.getRows() + 2) * CELL_SIZE
+        );
         this.renderContext =
                 new CanvasRenderContext(getGraphicsContext2D());
         drawChart();
@@ -342,22 +351,6 @@ public class ChartCanvas extends Canvas {
         }
 
     }
-
-    public KnittingChart getChart() {
-        return chart;
-    }
-
-    public void resetView() {
-
-        zoom = 1.0;
-
-        offsetX = 0;
-        offsetY = 0;
-
-        drawChart();
-
-    }
-
     private void setupZoomControls() {
 
         setOnScroll(event -> {
@@ -380,12 +373,12 @@ public class ChartCanvas extends Canvas {
             }
 
 
-            if (zoom < 0.2) {
-                zoom = 0.2;
+            if (zoom < 0.25) {
+                zoom = 0.25;
             }
 
-            if (zoom > 5) {
-                zoom = 5;
+            if (zoom > 1.0) {
+                zoom = 1.0;
             }
 
 
@@ -400,11 +393,37 @@ public class ChartCanvas extends Canvas {
                     mouseY - (mouseY - offsetY) * zoomFactor;
 
 
+
             drawChart();
 
         });
 
     }
+
+    public KnittingChart getChart() {
+        return chart;
+    }
+
+    public void resetView() {
+
+        zoom = 1.0;
+
+        offsetX = 0;
+        offsetY = 0;
+
+
+        if (scrollPane != null) {
+
+            scrollPane.setHvalue(0);
+            scrollPane.setVvalue(0);
+
+        }
+
+
+        drawChart();
+
+    }
+
     private RenderSettings getRenderSettings(
             int firstRow,
             int lastRow,
@@ -431,6 +450,12 @@ public class ChartCanvas extends Canvas {
 
     public void markSaved() {
         modified = false;
+    }
+
+    public void setScrollPane(ScrollPane scrollPane) {
+
+        this.scrollPane = scrollPane;
+
     }
 
 }

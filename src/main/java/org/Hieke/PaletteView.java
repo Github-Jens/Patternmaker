@@ -3,6 +3,7 @@ package org.Hieke;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.ListChangeListener;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -28,6 +29,14 @@ public class PaletteView extends VBox {
         this.palette = palette;
         this.selectedColor = selectedColor;
         this.selectedIndex.bindBidirectional(selectedIndex);
+        palette.getColors()
+                .addListener(
+                        (ListChangeListener<Color>) change -> {
+
+                            refresh();
+
+                        }
+                );
 
         colorContainer = new GridPane();
 
@@ -329,6 +338,12 @@ public class PaletteView extends VBox {
     }
     public IntegerProperty selectedIndexProperty() {
         return selectedIndex;
+    }
+
+    public void refreshPalette() {
+
+        refresh();
+
     }
 
 

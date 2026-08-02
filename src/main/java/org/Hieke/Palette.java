@@ -1,18 +1,21 @@
 package org.Hieke;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class Palette {
 
-    private final List<Color> colors;
+    private final ObservableList<Color> colors;
 
 
     public Palette() {
 
-        colors = new ArrayList<>();
+        colors = FXCollections.observableArrayList();
 
         colors.add(null);
         colors.add(Color.WHITE);
@@ -22,7 +25,7 @@ public class Palette {
     }
 
 
-    public List<Color> getColors() {
+    public ObservableList<Color> getColors() {
 
         return colors;
 
@@ -59,6 +62,13 @@ public class Palette {
     public int size() {
 
         return colors.size();
+
+    }
+    public void replaceColors(
+            Collection<Color> newColors
+    ) {
+
+        colors.setAll(newColors);
 
     }
 }

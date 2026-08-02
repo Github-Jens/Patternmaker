@@ -8,6 +8,7 @@ public class FileManager {
 
     public void save(
             KnittingChart chart,
+            Palette palette,
             File file
     ) throws IOException {
 
@@ -18,6 +19,31 @@ public class FileManager {
             // Save size
             writer.println(chart.getRows());
             writer.println(chart.getColumns());
+
+            // Save palette
+
+            writer.println("PALETTE");
+
+
+            for (Color color : palette.getColors()) {
+
+                if (color == null) {
+
+                    writer.println("null");
+
+                }
+                else {
+
+                    writer.println(
+                            toHex(color)
+                    );
+
+                }
+
+            }
+
+
+            writer.println("END_PALETTE");
 
 
             // Save stitches
@@ -64,7 +90,7 @@ public class FileManager {
     }
 
 
-    public KnittingChart load(
+    public PatternData load(
             File file
     ) throws IOException {
 
@@ -93,6 +119,48 @@ public class FileManager {
                             columns
                     );
 
+            Palette palette = new Palette();
+
+
+// Load palette
+
+            String paletteHeader =
+                    reader.readLine();
+
+
+            if ("PALETTE".equals(paletteHeader)) {
+
+                palette.getColors().clear();
+
+
+                String line;
+
+
+                while (!(line = reader.readLine())
+                        .equals("END_PALETTE")) {
+
+
+                    if (line.equals("null")) {
+
+                        palette.getColors()
+                                .add(null);
+
+                    }
+                    else {
+
+                        palette.getColors()
+                                .add(
+                                        Color.web(line)
+                                );
+
+                    }
+
+                }
+
+            }
+
+
+// Load stitches
 
             for (int row = 0; row < rows; row++) {
 
@@ -150,7 +218,10 @@ public class FileManager {
             }
 
 
-            return chart;
+            return new PatternData(
+                    chart,
+                    palette
+            );
 
         }
 
