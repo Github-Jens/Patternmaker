@@ -23,17 +23,18 @@ public class Main extends Application {
     private ObjectProperty<StitchType> selectedType;
     private ObjectProperty<Color> selectedColor;
     private IntegerProperty selectedColorIndex;
-
+    private Stage stage;
 
     private ChartCanvas canvas;
     private Palette palette;
 
     private static final int MIN_CHART_SIZE = 1;
-    private static final int MAX_CHART_SIZE = 50;
+    private static final int MAX_CHART_SIZE = 500;
 
 
     @Override
     public void start(Stage stage) {
+        this.stage = stage;
         root = new BorderPane();
         KnittingChart chart = new KnittingChart(20,20);
 
@@ -49,240 +50,17 @@ public class Main extends Application {
                 new SimpleIntegerProperty(-1);
 
         //TOP Menu Bar
-        MenuBar menuBar = new MenuBar();
-
-        Menu fileMenu = new Menu("File");
-        Menu viewMenu = new Menu("View");
-        Menu exportMenu = new Menu("Export");
-        MenuItem resetView = new MenuItem("Reset View");
-        MenuItem exportSVG =
-                new MenuItem("Export SVG");
-        MenuItem exportPDF =
-                new MenuItem("Export PDF");
-
-
-
-        resetView.setOnAction(event -> {
-
-            canvas.resetView();
-
-        });
-
-        exportSVG.setOnAction(event ->
-                exportSVG(stage)
-        );
-        exportMenu.getItems().add(
-                exportSVG
-        );
-        viewMenu.getItems().add(
-                resetView
-        );
-        exportPDF.setOnAction(event ->
-                exportPDF(stage)
-        );
-
-
-        exportMenu.getItems()
-                .add(exportPDF);
-
-                //Create new chart here
-        MenuItem savePattern = new MenuItem("Save Pattern");
-        MenuItem newChart = new MenuItem("New Chart");
-
-        newChart.setOnAction(event -> {
-            //failsave for unsaved changes
-            if (!confirmDiscardChanges(stage)) {
-                return;
-            }
-            //Dialog asking for size
-            Dialog<ButtonType> dialog = new Dialog<>();
-
-            dialog.setTitle("New Chart");
-            dialog.setHeaderText("Create a new knitting chart");
-
-
-            Label rowsLabel = new Label("Rows:");
-            TextField rowsField = new TextField("20");
-
-
-            Label columnsLabel = new Label("Columns:");
-            TextField columnsField = new TextField("20");
-
-
-            GridPane layout = new GridPane();
-
-            layout.setHgap(10);
-            layout.setVgap(10);
-
-            layout.add(rowsLabel, 0, 0);
-            layout.add(rowsField, 1, 0);
-
-            layout.add(columnsLabel, 0, 1);
-            layout.add(columnsField, 1, 1);
-
-
-            dialog.getDialogPane().setContent(layout);
-
-
-            dialog.getDialogPane()
-                    .getButtonTypes()
-                    .addAll(ButtonType.OK, ButtonType.CANCEL);
-
-
-            dialog.showAndWait().ifPresent(result -> {
-                //check for invalid options
-                if (result == ButtonType.OK) {
-
-                    try {
-
-                        int rows = Integer.parseInt(rowsField.getText());
-                        int columns = Integer.parseInt(columnsField.getText());
-
-
-                        if (rows < MIN_CHART_SIZE ||
-                                columns < MIN_CHART_SIZE ||
-                                rows > MAX_CHART_SIZE ||
-                                columns > MAX_CHART_SIZE) {
-
-                            throw new NumberFormatException();
-
-                        }
-
-
-                        KnittingChart newChartData =
-                                new KnittingChart(rows, columns);
-
-
-                        canvas = new ChartCanvas(newChartData, selectedType, selectedColor, selectedColorIndex);
-
-                        root.setCenter(canvas);
-
-
-                    } catch (NumberFormatException e) {
-
-                        Alert alert = new Alert(Alert.AlertType.ERROR);
-
-                        alert.setTitle("Invalid Chart Size");
-                        alert.setHeaderText("Please enter valid numbers");
-                        alert.setContentText(
-                                "Rows and columns must be positive numbers smaller than 50."
-                        );
-
-                        alert.showAndWait();
-
-                    }
-                }
-
-            });
-
-        });
-
-        savePattern.setOnAction(event -> {
-            saveChart(stage);
-        });
-
-        MenuItem loadPattern = new MenuItem("Load Pattern");
-        loadPattern.setOnAction(event -> {
-
-            if (!confirmDiscardChanges(stage)) {
-                return;
-            }
-
-
-            FileChooser fileChooser = new FileChooser();
-
-            fileChooser.setTitle("Open Knitting Pattern");
-
-            fileChooser.getExtensionFilters().add(
-                    new FileChooser.ExtensionFilter(
-                            "Knitting Pattern (*.knit)",
-                            "*.knit"
-                    )
-            );
-
-
-            File file = fileChooser.showOpenDialog(stage);
-
-
-            if (file != null) {
-
-                try {
-
-                    FileManager manager =
-                            new FileManager();
-
-
-                    KnittingChart loadedChart =
-                            manager.load(file);
-
-
-                    canvas =
-                            new ChartCanvas(
-                                    loadedChart,
-                                    selectedType,
-                                    selectedColor,
-                                    selectedColorIndex
-                            );
-
-
-                    root.setCenter(canvas);
-
-
-                } catch (IOException e) {
-
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-
-                    alert.setTitle("Load Error");
-                    alert.setHeaderText("Could not load pattern");
-                    alert.setContentText(e.getMessage());
-
-                    alert.showAndWait();
-
-                }
-
-            }
-
-        });
-
-
-
-        fileMenu.getItems().addAll(
-                newChart,
-                savePattern,
-                loadPattern
-        );
-
-
-// Edit Menu
-        Menu editMenu = new Menu("Edit");
-
-        MenuItem undoItem = new MenuItem("Undo");
-        MenuItem redoItem = new MenuItem("Redo");
-
-
-        undoItem.setOnAction(event -> {
-            canvas.undo();
-        });
-
-
-        redoItem.setOnAction(event -> {
-            canvas.redo();
-        });
-
-
-        editMenu.getItems().addAll(
-                undoItem,
-                redoItem
-        );
-
-
-        menuBar.getMenus().addAll(
-                fileMenu,
-                editMenu,
-                viewMenu,
-                exportMenu
-        );
-
+        MenuBar menuBar =
+                new MenuBarBuilder(
+                        this::createNewChart,
+                        () -> saveChart(),
+                        this::loadChart,
+                        () -> canvas.undo(),
+                        () -> canvas.redo(),
+                        () -> canvas.resetView(),
+                        this::exportPDF,
+                        this::exportSVG
+                ).createMenuBar();
 
         root.setTop(menuBar);
 
@@ -421,14 +199,7 @@ public class Main extends Application {
 
 // Create canvas
 
-        canvas = new ChartCanvas(
-                chart,
-                selectedType,
-                selectedColor,
-                selectedColorIndex
-        );
-
-        root.setCenter(canvas);
+        setChart(chart);
 
         root.setBottom(new Label("Status: Ready"));
 
@@ -460,67 +231,7 @@ public class Main extends Application {
 
         stage.setOnCloseRequest(event -> {
 
-            if (!canvas.isModified()) {
-                return;
-            }
-
-
-            Alert alert = new Alert(
-                    Alert.AlertType.CONFIRMATION
-            );
-
-            alert.setTitle("Unsaved Changes");
-            alert.setHeaderText(
-                    "Your knitting chart has unsaved changes."
-            );
-            alert.setContentText(
-                    "Do you want to save before closing?"
-            );
-
-
-            ButtonType save =
-                    new ButtonType("Save");
-
-            ButtonType discard =
-                    new ButtonType("Discard");
-
-            ButtonType cancel =
-                    new ButtonType(
-                            "Cancel",
-                            ButtonBar.ButtonData.CANCEL_CLOSE
-                    );
-
-
-            alert.getButtonTypes().setAll(
-                    save,
-                    discard,
-                    cancel
-            );
-
-
-            alert.showAndWait().ifPresent(result -> {
-
-                if (result == save) {
-
-                    savePattern.fire();
-
-                    // prevent closing if save failed
-                    event.consume();
-
-                }
-                else if (result == cancel) {
-
-                    event.consume();
-
-                }
-
-            });
-
-        });
-
-        stage.setOnCloseRequest(event -> {
-
-            if (!confirmDiscardChanges(stage)) {
+            if (!confirmDiscardChanges()) {
 
                 event.consume();
 
@@ -548,7 +259,7 @@ public class Main extends Application {
         }
     }
 
-    private void exportPDF(Stage stage) {
+    private void exportPDF() {
 
         FileChooser chooser =
                 new FileChooser();
@@ -563,7 +274,7 @@ public class Main extends Application {
 
 
         File file =
-                chooser.showSaveDialog(stage);
+                chooser.showSaveDialog(this.stage);
 
 
         if(file != null) {
@@ -589,7 +300,7 @@ public class Main extends Application {
             }
         }
     }
-    private void exportSVG(Stage stage) {
+    private void exportSVG() {
 
         FileChooser chooser =
                 new FileChooser();
@@ -604,7 +315,7 @@ public class Main extends Application {
 
 
         File file =
-                chooser.showSaveDialog(stage);
+                chooser.showSaveDialog(this.stage);
 
 
         if(file != null) {
@@ -630,7 +341,164 @@ public class Main extends Application {
             }
         }
     }
-    private boolean saveChart(Stage stage) {
+    private void createNewChart() {
+
+        if (!confirmDiscardChanges()) {
+            return;
+        }
+
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+
+        dialog.setTitle("New Chart");
+        dialog.setHeaderText("Create a new knitting chart");
+
+
+        Label rowsLabel = new Label("Rows:");
+        TextField rowsField = new TextField("20");
+
+
+        Label columnsLabel = new Label("Columns:");
+        TextField columnsField = new TextField("20");
+
+
+        GridPane layout = new GridPane();
+
+        layout.setHgap(10);
+        layout.setVgap(10);
+
+        layout.add(rowsLabel, 0, 0);
+        layout.add(rowsField, 1, 0);
+
+        layout.add(columnsLabel, 0, 1);
+        layout.add(columnsField, 1, 1);
+
+
+        dialog.getDialogPane().setContent(layout);
+
+
+        dialog.getDialogPane()
+                .getButtonTypes()
+                .addAll(
+                        ButtonType.OK,
+                        ButtonType.CANCEL
+                );
+
+
+        dialog.showAndWait().ifPresent(result -> {
+
+            if (result == ButtonType.OK) {
+
+                try {
+
+                    int rows =
+                            Integer.parseInt(
+                                    rowsField.getText()
+                            );
+
+                    int columns =
+                            Integer.parseInt(
+                                    columnsField.getText()
+                            );
+
+
+                    if (rows < MIN_CHART_SIZE ||
+                            columns < MIN_CHART_SIZE ||
+                            rows > MAX_CHART_SIZE ||
+                            columns > MAX_CHART_SIZE) {
+
+                        throw new NumberFormatException();
+
+                    }
+
+
+                    KnittingChart newChartData =
+                            new KnittingChart(
+                                    rows,
+                                    columns
+                            );
+
+
+                    setChart(newChartData);
+
+
+                } catch (NumberFormatException e) {
+
+                    Alert alert =
+                            new Alert(
+                                    Alert.AlertType.ERROR
+                            );
+
+                    alert.setTitle("Invalid Chart Size");
+                    alert.setHeaderText(
+                            "Please enter valid numbers"
+                    );
+
+                    alert.setContentText(
+                            "Rows and columns must be positive numbers smaller than 500."
+                    );
+
+                    alert.showAndWait();
+
+                }
+            }
+
+        });
+    }
+
+    private void loadChart() {
+
+        if (!confirmDiscardChanges()) {
+            return;
+        }
+
+
+        FileChooser fileChooser = new FileChooser();
+
+        fileChooser.setTitle("Open Knitting Pattern");
+
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter(
+                        "Knitting Pattern (*.knit)",
+                        "*.knit"
+                )
+        );
+
+
+        File file =
+                fileChooser.showOpenDialog(stage);
+
+
+        if (file != null) {
+
+            try {
+
+                FileManager manager =
+                        new FileManager();
+
+
+                KnittingChart loadedChart =
+                        manager.load(file);
+
+
+                setChart(loadedChart);
+
+
+            } catch (IOException e) {
+
+                Alert alert =
+                        new Alert(Alert.AlertType.ERROR);
+
+                alert.setTitle("Load Error");
+                alert.setHeaderText("Could not load pattern");
+                alert.setContentText(e.getMessage());
+
+                alert.showAndWait();
+
+            }
+        }
+    }
+    private boolean saveChart() {
 
         FileChooser fileChooser = new FileChooser();
 
@@ -644,7 +512,7 @@ public class Main extends Application {
         );
 
 
-        File file = fileChooser.showSaveDialog(stage);
+        File file = fileChooser.showSaveDialog(this.stage);
 
 
         if (file == null) {
@@ -681,7 +549,7 @@ public class Main extends Application {
             return false;
         }
     }
-    private boolean confirmDiscardChanges(Stage stage) {
+    private boolean confirmDiscardChanges() {
 
         if (!canvas.isModified()) {
             return true;
@@ -726,7 +594,7 @@ public class Main extends Application {
 
                     if (result == save) {
 
-                        return saveChart(stage);
+                        return saveChart();
 
                     }
 
@@ -771,7 +639,18 @@ public class Main extends Application {
     }
 
 
+    private void setChart(KnittingChart chart) {
 
+        canvas = new ChartCanvas(
+                chart,
+                selectedType,
+                selectedColor,
+                selectedColorIndex
+        );
+
+        root.setCenter(canvas);
+
+    }
 
 
     public static void main(String[] args) {
