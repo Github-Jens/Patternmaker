@@ -104,6 +104,77 @@ public class ChartEditor {
 
     }
 
+    public void fillSelection(
+            ChartSelection selection,
+            StitchType selectedType,
+            Color selectedColor,
+            int selectedColorIndex
+    ) {
+
+
+        if (!selection.hasSelection()) {
+
+            return;
+
+        }
+
+
+        int startColumn =
+                Math.min(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+
+        int endColumn =
+                Math.max(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+
+        int startRow =
+                Math.min(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+
+        int endRow =
+                Math.max(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+
+        beginStroke();
+
+
+        for (int row = startRow; row <= endRow; row++) {
+
+
+            for (int column = startColumn;
+                 column <= endColumn;
+                 column++) {
+
+
+                paintCell(
+                        row,
+                        column,
+                        selectedType,
+                        selectedColor,
+                        selectedColorIndex
+                );
+
+            }
+
+        }
+
+
+        endStroke();
+
+    }
+
     public void beginStroke() {
 
         currentStroke = new Stroke();

@@ -28,8 +28,9 @@ public class EditorState {
     private final ChartSelection selection =
             new ChartSelection();
 
-    private final int debugId =
-            System.identityHashCode(this);
+    //Currentl Symbol Palette
+    private final SymbolPalette symbolPalette =
+            new SymbolPalette();
 
 
     // Index in palette
@@ -73,9 +74,9 @@ public class EditorState {
         return selection;
 
     }
-    public int getDebugId() {
+    public SymbolPalette getSymbolPalette() {
 
-        return debugId;
+        return symbolPalette;
 
     }
 

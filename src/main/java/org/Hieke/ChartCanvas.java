@@ -519,7 +519,13 @@ public class ChartCanvas extends Canvas {
 
 
         activeSelectionMenu =
-                new SelectionMenu();
+                new SelectionMenu(
+                        editor,
+                        editorState,
+                        editorState.getSymbolPalette(),
+                        this::drawChart,
+                        this
+                );
 
 
         activeSelectionMenu.show(
