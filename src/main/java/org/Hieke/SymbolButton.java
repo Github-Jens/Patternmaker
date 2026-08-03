@@ -21,9 +21,16 @@ public class SymbolButton extends Button {
         this.type = type;
 
 
-        setText(
-                type.getSymbol()
-        );
+        if (type == null) {
+
+            setText("");
+
+        }
+        else {
+
+            setText(type.getSymbol());
+
+        }
 
 
         setPrefSize(
@@ -104,7 +111,7 @@ public class SymbolButton extends Button {
         );
 
 
-        if (selected != null && selected == type) {
+        if (selected == type) {
 
             style.append(
                     "-fx-border-color: blue;"

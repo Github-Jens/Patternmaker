@@ -1,16 +1,8 @@
-/**
- * Displays the user's customizable stitch palette.
- *
- * The view delegates the creation and behaviour of individual
- * stitch buttons to SymbolGridView.
- *
- * Used by:
- * - ToolPanel
- */
-
 package org.Hieke;
 
 import javafx.beans.property.ObjectProperty;
+import javafx.scene.control.Button;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class SymbolPaletteView extends VBox {
@@ -24,29 +16,54 @@ public class SymbolPaletteView extends VBox {
             ObjectProperty<StitchType> selectedType
     ) {
 
+        System.out.println(
+                "SymbolPaletteView received: " + palette
+        );
+
+
         symbolGrid =
                 new SymbolGridView(
                         palette,
                         selectedType,
                         type -> {
 
-                            if (selectedType.get() == type) {
-
-                                selectedType.set(null);
-
-                            }
-                            else {
-
-                                selectedType.set(type);
-
-                            }
+                            selectedType.set(type);
 
                         }
                 );
 
 
+        Button addButton =
+                new Button("+");
+
+
+        addButton.setOnAction(event -> {
+
+            System.out.println(
+                    "Adding to: " + palette
+            );
+
+            palette.addSymbol(
+                    StitchType.PURL
+            );
+
+        });
+
+
+        HBox controls =
+                new HBox(
+                        addButton
+                );
+
+
+        setSpacing(5);
+
+
         getChildren()
-                .add(symbolGrid);
+                .addAll(
+                        symbolGrid,
+                        controls
+                );
 
     }
 

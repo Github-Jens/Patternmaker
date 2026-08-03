@@ -9,8 +9,9 @@ public class FileManager {
     public void save(
             KnittingChart chart,
             Palette palette,
+            SymbolPalette symbolPalette,
             File file
-    ) throws IOException {
+    )throws IOException {
 
 
         try (PrintWriter writer = new PrintWriter(file)) {
@@ -45,6 +46,20 @@ public class FileManager {
 
             writer.println("END_PALETTE");
 
+            writer.println("SYMBOL_PALETTE");
+
+
+            for (StitchType symbol : symbolPalette.getSymbols()) {
+
+                writer.println(
+                        symbol.name()
+                );
+
+            }
+
+
+            writer.println("END_SYMBOL_PALETTE");
+
 
             // Save stitches
             for (int row = 0; row < chart.getRows(); row++) {
@@ -57,9 +72,20 @@ public class FileManager {
                             chart.getStitch(row, column);
 
 
-                    writer.print(
-                            stitch.getType().name()
-                    );
+                    // Save stitch type
+// Null means the stitch has been erased
+                    if (stitch.getType() == null) {
+
+                        writer.print("null");
+
+                    }
+                    else {
+
+                        writer.print(
+                                stitch.getType().name()
+                        );
+
+                    }
 
 
                     if (stitch.getBackgroundColor() != null) {
@@ -120,6 +146,8 @@ public class FileManager {
                     );
 
             Palette palette = new Palette();
+            SymbolPalette symbolPalette =
+                    new SymbolPalette();
 
 
 // Load palette
@@ -158,6 +186,30 @@ public class FileManager {
                 }
 
             }
+            String symbolHeader =
+                    reader.readLine();
+
+
+            if ("SYMBOL_PALETTE".equals(symbolHeader)) {
+
+                symbolPalette.getSymbols().clear();
+
+
+                String line;
+
+
+                while (!(line = reader.readLine())
+                        .equals("END_SYMBOL_PALETTE")) {
+
+
+                    symbolPalette.getSymbols()
+                            .add(
+                                    StitchType.valueOf(line)
+                            );
+
+                }
+
+            }
 
 
 // Load stitches
@@ -181,13 +233,23 @@ public class FileManager {
 
 
                     String[] parts =
-                            stitchData.split(":");
+                            stitchData.split(":", -1);
 
 
-                    StitchType type =
-                            StitchType.valueOf(
-                                    parts[0]
-                            );
+                    StitchType type;
+
+                    if (parts[0].equals("null")) {
+
+                        type = null;
+
+                    }
+                    else {
+
+                        type = StitchType.valueOf(
+                                parts[0]
+                        );
+
+                    }
 
 
                     Stitch stitch =
@@ -212,6 +274,11 @@ public class FileManager {
                         );
 
                     }
+                    else {
+
+                        stitch.setBackgroundColor(null);
+
+                    }
 
                 }
 
@@ -220,7 +287,8 @@ public class FileManager {
 
             return new PatternData(
                     chart,
-                    palette
+                    palette,
+                    symbolPalette
             );
 
         }

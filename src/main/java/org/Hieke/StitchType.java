@@ -2,10 +2,10 @@ package org.Hieke;
 
 public enum StitchType {
 
-    KNIT("K"),
     PURL("P"),
     YARN_OVER("O"),
-    K2TOG("/");
+    K2TOG("/"),
+    NORMAL("");
 
     private String symbol;
 

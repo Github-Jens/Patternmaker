@@ -13,7 +13,7 @@ public class SymbolPalette {
 
     public SymbolPalette() {
 
-        symbols.add(StitchType.KNIT);
+        symbols.add(StitchType.NORMAL);
         symbols.add(StitchType.PURL);
         symbols.add(StitchType.YARN_OVER);
         symbols.add(StitchType.K2TOG);
@@ -46,7 +46,11 @@ public class SymbolPalette {
             StitchType symbol
     ) {
 
-        symbols.add(symbol);
+
+
+            symbols.add(symbol);
+
+
 
     }
 

@@ -53,7 +53,12 @@ public class ChartEditor {
             newBackground = null;
 
         }
-        else if (selectedType != null) {
+        else if (selectedType == StitchType.NORMAL) {
+
+            newType = null;
+
+        }
+        else {
 
             newType = selectedType;
 

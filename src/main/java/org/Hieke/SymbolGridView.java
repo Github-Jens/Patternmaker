@@ -21,6 +21,7 @@ public class SymbolGridView extends GridPane {
             ObjectProperty<StitchType> selectedType,
             Consumer<StitchType> action
     ) {
+        System.out.println("Creating SymbolGridView with palette: " + palette);
 
         this.palette = palette;
         this.selectedType = selectedType;
@@ -34,7 +35,16 @@ public class SymbolGridView extends GridPane {
 
         palette.getSymbols()
                 .addListener(
-                        (ListChangeListener<StitchType>) change -> refresh()
+                        (ListChangeListener<StitchType>) change -> {
+
+                            System.out.println(
+                                    "Symbol list changed. Size: "
+                                            + palette.size()
+                            );
+
+                            refresh();
+
+                        }
                 );
 
 

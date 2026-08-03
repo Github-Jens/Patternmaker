@@ -23,6 +23,7 @@ public class PatternData {
 
     // The colour palette used in the pattern
     private final Palette palette;
+    private final SymbolPalette symbolPalette;
 
 
     /*
@@ -33,11 +34,13 @@ public class PatternData {
      */
     public PatternData(
             KnittingChart chart,
-            Palette palette
+            Palette palette,
+            SymbolPalette symbolPalette
     ) {
 
         this.chart = chart;
         this.palette = palette;
+        this.symbolPalette = symbolPalette;
 
     }
 
@@ -58,6 +61,11 @@ public class PatternData {
     public Palette getPalette() {
 
         return palette;
+
+    }
+    public SymbolPalette getSymbolPalette() {
+
+        return symbolPalette;
 
     }
 

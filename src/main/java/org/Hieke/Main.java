@@ -355,6 +355,15 @@ public class Main extends Application {
                         data.getPalette().getColors()
                 );
 
+
+                editorState.getSymbolPalette()
+                        .getSymbols()
+                        .setAll(
+                                data.getSymbolPalette()
+                                        .getSymbols()
+                        );
+
+
                 setChart(
                         data.getChart()
                 );
@@ -403,6 +412,7 @@ public class Main extends Application {
             manager.save(
                     canvas.getChart(),
                     palette,
+                    editorState.getSymbolPalette(),
                     file
             );
 
