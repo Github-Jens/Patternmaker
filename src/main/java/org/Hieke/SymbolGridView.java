@@ -34,6 +34,7 @@ public class SymbolGridView extends GridPane {
         setHgap(5);
         setVgap(5);
         setAlignment(Pos.CENTER_LEFT);
+        setStyle("-fx-background-color: white;");
 
 
         palette.getSymbols()
@@ -86,13 +87,6 @@ public class SymbolGridView extends GridPane {
                     button,
                     i
             );
-
-
-            createContextMenu(
-                    button,
-                    i
-            );
-
 
             int column =
                     i % 2;

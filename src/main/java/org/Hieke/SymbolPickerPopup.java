@@ -1,23 +1,14 @@
 package org.Hieke;
 
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.CustomMenuItem;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Popup;
 
 import java.util.function.Consumer;
 
 
-public class SymbolPickerPopup extends ContextMenu {
+public class SymbolPickerPopup extends Popup {
 
 
-    /**
-     * Creates a popup symbol selector.
-     *
-     * Uses the same SymbolGridView as the main symbol palette
-     * so both interfaces share the same appearance and behaviour.
-     *
-     * @param palette available stitch symbols
-     * @param onSelected action executed when a symbol is selected
-     */
     public SymbolPickerPopup(
             SymbolPalette palette,
             Consumer<StitchDefinition> onSelected
@@ -38,17 +29,23 @@ public class SymbolPickerPopup extends ContextMenu {
                 );
 
 
-        CustomMenuItem item =
-                new CustomMenuItem(
-                        grid
-                );
+        StackPane container =
+                new StackPane(grid);
 
 
-        item.setHideOnClick(false);
+        container.setStyle("""
+        -fx-background-color: white;
+        -fx-border-color: black;
+        -fx-border-width: 1;
+        -fx-padding: 5;
+        """);
 
 
-        getItems()
-                .add(item);
+        getContent()
+                .add(container);
+
+
+        setAutoHide(true);
 
     }
 

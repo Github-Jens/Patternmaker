@@ -15,7 +15,8 @@ public class SelectionMenu extends ContextMenu {
     private final Runnable refresh;
     private final SymbolPalette symbolPalette;
     private final Palette palette;
-    private final Node owner;
+    private final ChartCanvas chartCanvas;
+
 
     private SymbolPickerPopup symbolPicker;
     private ColourPickerPopup colourPicker;
@@ -30,15 +31,15 @@ public class SelectionMenu extends ContextMenu {
             SymbolPalette symbolPalette,
             Palette palette,
             Runnable refresh,
-            Node owner
+            ChartCanvas chartCanvas
     ){
 
         this.editor = editor;
         this.editorState = editorState;
         this.refresh = refresh;
         this.symbolPalette = symbolPalette;
-        this.owner = owner;
         this.palette = palette;
+        this.chartCanvas = chartCanvas;
 
         //Symbol Picker menu
         MenuItem fillSymbol =
@@ -62,10 +63,10 @@ public class SelectionMenu extends ContextMenu {
 
                                     editor.fillSelection(
                                             editorState.getSelection(),
-                                            editorState.activeToolProperty().get(),
+                                            Tool.DRAW,
                                             definition,
-                                            editorState.selectedColorProperty().get(),
-                                            editorState.selectedColorIndexProperty().get()
+                                            null,
+                                            -1
                                     );
 
 
@@ -82,7 +83,7 @@ public class SelectionMenu extends ContextMenu {
 
 
             symbolPicker.show(
-                    owner,
+                    chartCanvas,
                     menuX + 50,
                     menuY
             );
@@ -132,13 +133,12 @@ public class SelectionMenu extends ContextMenu {
 
 
             colourPicker.show(
-                    owner,
+                    chartCanvas,
                     menuX + 50,
                     menuY
             );
 
         });
-
 
         MenuItem copy =
                 new MenuItem(
@@ -146,16 +146,90 @@ public class SelectionMenu extends ContextMenu {
                 );
 
 
+        copy.setOnAction(event -> {
+
+            editor.copySelection(
+                    editorState.getSelection()
+            );
+
+
+            editorState.getSelection()
+                    .clear();
+
+
+            refresh.run();
+
+        });
+
+
+        MenuItem paste =
+                new MenuItem(
+                        "Paste"
+                );
+
+        paste.setDisable(
+                !editor.hasClipboardData()
+        );
+
+
+        paste.setOnAction(event -> {
+
+            chartCanvas.paste();
+
+        });
+
+
         MenuItem cut =
                 new MenuItem(
                         "Cut"
                 );
+
+        cut.setOnAction(event -> {
+
+            editor.copySelection(
+                    editorState.getSelection()
+            );
+
+
+            editor.clearSelection(
+                    editorState.getSelection()
+            );
+
+
+            editorState.getSelection()
+                    .clear();
+
+
+            refresh.run();
+
+        });
 
 
         MenuItem cancel =
                 new MenuItem(
                         "Cancel"
                 );
+
+        MenuItem clear =
+                new MenuItem(
+                        "Delete"
+                );
+
+
+        clear.setOnAction(event -> {
+
+            editor.clearSelection(
+                    editorState.getSelection()
+            );
+
+
+            editorState.getSelection()
+                    .clear();
+
+
+            refresh.run();
+
+        });
 
 
         getItems()
@@ -164,7 +238,10 @@ public class SelectionMenu extends ContextMenu {
                         fillColour,
                         new SeparatorMenuItem(),
                         copy,
+                        paste,
                         cut,
+                        new SeparatorMenuItem(),
+                        clear,
                         new SeparatorMenuItem(),
                         cancel
                 );

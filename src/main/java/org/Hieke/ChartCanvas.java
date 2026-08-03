@@ -24,6 +24,9 @@ public class ChartCanvas extends Canvas {
     private double offsetX = 0;
     private double offsetY = 0;
 
+    private int cursorRow = -1;
+    private int cursorColumn = -1;
+
     private double lastMouseX;
     private double lastMouseY;
 
@@ -269,6 +272,11 @@ public class ChartCanvas extends Canvas {
 
         setOnMouseDragged(event -> {
 
+            updateCursorPosition(
+                    event.getX(),
+                    event.getY()
+            );
+
             if (panning) {
 
                 double deltaX =
@@ -318,6 +326,15 @@ public class ChartCanvas extends Canvas {
                 );
 
             }
+
+        });
+
+        setOnMouseMoved(event -> {
+
+            updateCursorPosition(
+                    event.getX(),
+                    event.getY()
+            );
 
         });
 
@@ -391,6 +408,61 @@ public class ChartCanvas extends Canvas {
         );
 
         drawChart();
+    }
+
+    private void updateCursorPosition(
+            double mouseX,
+            double mouseY
+    ) {
+
+        double scaledCellSize = CELL_SIZE * zoom;
+
+
+        int column =
+                (int)((mouseX - offsetX - RULER_SIZE)
+                        / scaledCellSize);
+
+
+        int row =
+                (int)((mouseY - offsetY - RULER_SIZE)
+                        / scaledCellSize);
+
+
+        if (row < 0 ||
+                column < 0 ||
+                row >= editor.getChart().getRows() ||
+                column >= editor.getChart().getColumns()) {
+
+            cursorRow = -1;
+            cursorColumn = -1;
+
+            return;
+        }
+
+
+        cursorRow = row;
+        cursorColumn = column;
+
+    }
+
+    public void paste() {
+
+        if (cursorRow < 0 ||
+                cursorColumn < 0) {
+
+            return;
+
+        }
+
+
+        editor.paste(
+                cursorRow,
+                cursorColumn
+        );
+
+
+        drawChart();
+
     }
 
     public void undo() {

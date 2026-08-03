@@ -30,6 +30,9 @@ public class EditorState {
     private final IntegerProperty selectedColorIndex =
             new SimpleIntegerProperty(-1);
 
+    private int pasteRow = -1;
+    private int pasteColumn = -1;
+
 
 
     public EditorState(
@@ -84,5 +87,27 @@ public class EditorState {
         return symbolPalette;
 
     }
+    public void setPastePosition(
+            int row,
+            int column
+    ) {
 
+        pasteRow = row;
+        pasteColumn = column;
+
+    }
+
+
+    public int getPasteRow() {
+
+        return pasteRow;
+
+    }
+
+
+    public int getPasteColumn() {
+
+        return pasteColumn;
+
+    }
 }
