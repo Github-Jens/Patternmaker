@@ -18,7 +18,7 @@ public class StitchLibrary {
         stitches.add(
                 new StitchDefinition(
                         "normal",
-                        "Normal Stitch",
+                        "Knit Stitch",
                         "",
                         1,
                         1
@@ -30,7 +30,7 @@ public class StitchLibrary {
                 new StitchDefinition(
                         "purl",
                         "Purl",
-                        "P",
+                        "●",
                         1,
                         1
                 )
@@ -41,7 +41,7 @@ public class StitchLibrary {
                 new StitchDefinition(
                         "yarn_over",
                         "Yarn Over",
-                        "O",
+                        "○",
                         1,
                         1
                 )
@@ -52,12 +52,11 @@ public class StitchLibrary {
                 new StitchDefinition(
                         "k2tog",
                         "Knit Two Together",
-                        "/",
+                        "⟋",
                         1,
                         1
                 )
         );
-
 
     }
 

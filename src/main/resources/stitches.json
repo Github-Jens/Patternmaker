@@ -1,0 +1,30 @@
+[
+  {
+    "id": "normal",
+    "name": "Knit Stitch",
+    "symbol": "",
+    "width": 1,
+    "height": 1
+  },
+  {
+    "id": "purl",
+    "name": "Purl",
+    "symbol": "●",
+    "width": 1,
+    "height": 1
+  },
+  {
+    "id": "yarn_over",
+    "name": "Yarn Over",
+    "symbol": "O",
+    "width": 1,
+    "height": 1
+  },
+  {
+    "id": "k2tog",
+    "name": "Knit Two Together",
+    "symbol": "/",
+    "width": 1,
+    "height": 1
+  }
+]
