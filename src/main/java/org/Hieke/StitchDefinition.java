@@ -1,5 +1,8 @@
 package org.Hieke;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class StitchDefinition {
 
 
@@ -14,17 +17,26 @@ public class StitchDefinition {
     private final int width;
     private final int height;
 
+    private final String category;
+    private final String svg;
+
+
+    @JsonCreator
     public StitchDefinition(
-            String id,
-            String name,
-            String symbol,
-            int width,
-            int height
-    ) {
+            @JsonProperty("id") String id,
+            @JsonProperty("name") String name,
+            @JsonProperty("category") String category,
+            @JsonProperty("symbol") String symbol,
+            @JsonProperty("svg") String svg,
+            @JsonProperty("width") int width,
+            @JsonProperty("height") int height
+    ){
 
         this.id = id;
         this.name = name;
+        this.category = category;
         this.symbol = symbol;
+        this.svg = svg;
         this.width = width;
         this.height = height;
 
@@ -63,6 +75,16 @@ public class StitchDefinition {
     public int getHeight() {
 
         return height;
+
+    }
+    public String getCategory() {
+
+        return category;
+
+    }
+    public String getSvg() {
+
+        return svg;
 
     }
 

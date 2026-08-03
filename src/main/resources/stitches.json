@@ -2,28 +2,36 @@
   {
     "id": "normal",
     "name": "Knit Stitch",
+    "category": "basic",
     "symbol": "",
+    "svg": "",
     "width": 1,
     "height": 1
   },
   {
     "id": "purl",
     "name": "Purl",
+    "category": "basic",
     "symbol": "●",
+    "svg": "",
     "width": 1,
     "height": 1
   },
   {
     "id": "yarn_over",
     "name": "Yarn Over",
+    "category": "increase",
     "symbol": "O",
+    "svg": "",
     "width": 1,
     "height": 1
   },
   {
     "id": "k2tog",
     "name": "Knit Two Together",
+    "category": "decrease",
     "symbol": "/",
+    "svg": "",
     "width": 1,
     "height": 1
   }

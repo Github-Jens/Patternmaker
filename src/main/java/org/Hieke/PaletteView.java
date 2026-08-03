@@ -4,6 +4,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ListChangeListener;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -131,6 +132,20 @@ public class PaletteView extends VBox {
         button.setPrefSize(
                 35,
                 35
+        );
+
+        button.setMinSize(
+                35,
+                35
+        );
+
+        button.setMaxSize(
+                35,
+                35
+        );
+
+        button.setPadding(
+                Insets.EMPTY
         );
 
 
@@ -330,6 +345,14 @@ public class PaletteView extends VBox {
         StringBuilder style =
                 new StringBuilder();
 
+        style.append(
+                "-fx-background-radius: 0;"
+        );
+
+        style.append(
+                "-fx-padding: 0;"
+        );
+
 
         if (color == null) {
 
@@ -365,7 +388,7 @@ public class PaletteView extends VBox {
             );
 
             style.append(
-                    "-fx-border-width: 3;"
+                    "-fx-border-width: 2;"
             );
 
         }

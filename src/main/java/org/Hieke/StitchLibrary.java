@@ -1,7 +1,13 @@
 package org.Hieke;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 
 public class StitchLibrary {
@@ -14,49 +20,51 @@ public class StitchLibrary {
 
     public StitchLibrary() {
 
+        loadLibrary();
 
-        stitches.add(
-                new StitchDefinition(
-                        "normal",
-                        "Knit Stitch",
-                        "",
-                        1,
-                        1
-                )
-        );
+    }
+
+    private void loadLibrary() {
+
+        ObjectMapper mapper =
+                new ObjectMapper();
 
 
-        stitches.add(
-                new StitchDefinition(
-                        "purl",
-                        "Purl",
-                        "●",
-                        1,
-                        1
-                )
-        );
+        try (InputStream input =
+                     getClass()
+                             .getResourceAsStream("/stitches.json")) {
 
 
-        stitches.add(
-                new StitchDefinition(
-                        "yarn_over",
-                        "Yarn Over",
-                        "○",
-                        1,
-                        1
-                )
-        );
+            if (input == null) {
+
+                throw new RuntimeException(
+                        "stitches.json not found"
+                );
+
+            }
 
 
-        stitches.add(
-                new StitchDefinition(
-                        "k2tog",
-                        "Knit Two Together",
-                        "⟋",
-                        1,
-                        1
-                )
-        );
+            List<StitchDefinition> loaded =
+                    mapper.readValue(
+                            input,
+                            new TypeReference<List<StitchDefinition>>() {}
+                    );
+
+
+            stitches.addAll(
+                    loaded
+            );
+
+
+        }
+        catch (IOException e) {
+
+            throw new RuntimeException(
+                    "Could not load stitch library",
+                    e
+            );
+
+        }
 
     }
 

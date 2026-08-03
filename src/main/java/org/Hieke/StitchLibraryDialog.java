@@ -2,14 +2,29 @@ package org.Hieke;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 
 
 public class StitchLibraryDialog extends Dialog<StitchDefinition> {
 
 
     private final StitchLibrary library;
+
+
+    private final GridPane grid =
+            new GridPane();
+
+
+    private final TextField searchField =
+            new TextField();
+
+
+    private final ComboBox<String> categoryBox =
+            new ComboBox<>();
 
 
     public StitchLibraryDialog(
@@ -23,55 +38,59 @@ public class StitchLibraryDialog extends Dialog<StitchDefinition> {
         setHeaderText("Choose a stitch");
 
 
-        GridPane grid =
-                new GridPane();
-
         grid.setHgap(10);
         grid.setVgap(10);
 
 
-        for (int i = 0; i < library.getStitches().size(); i++) {
+        searchField.setPromptText(
+                "Search stitch..."
+        );
 
 
-            StitchDefinition definition =
-                    library.getStitches()
-                            .get(i);
+        categoryBox.getItems()
+                .add("All");
 
 
-            Button button =
-                    new Button(
-                            definition.getSymbol()
-                    );
-
-
-            button.setPrefSize(
-                    50,
-                    50
-            );
-
-
-            button.setOnAction(event -> {
-
-                setResult(
-                        definition
+        library.getStitches()
+                .stream()
+                .map(StitchDefinition::getCategory)
+                .distinct()
+                .sorted()
+                .forEach(
+                        categoryBox.getItems()::add
                 );
 
-                close();
 
-            });
+        categoryBox.getSelectionModel()
+                .selectFirst();
 
 
-            grid.add(
-                    button,
-                    i % 5,
-                    i / 5
-            );
 
-        }
+        searchField.textProperty()
+                .addListener(
+                        (observable, oldValue, newValue) -> refresh()
+                );
+
+
+        categoryBox.valueProperty()
+                .addListener(
+                        (observable, oldValue, newValue) -> refresh()
+                );
+
+
+
+        VBox content =
+                new VBox(
+                        10,
+                        searchField,
+                        categoryBox,
+                        grid
+                );
 
 
         getDialogPane()
-                .setContent(grid);
+                .setContent(content);
+
 
 
         getDialogPane()
@@ -79,6 +98,132 @@ public class StitchLibraryDialog extends Dialog<StitchDefinition> {
                 .add(
                         ButtonType.CANCEL
                 );
+
+
+        setResultConverter(buttonType -> {
+
+            if (buttonType == ButtonType.CANCEL) {
+
+                return null;
+
+            }
+
+            return null;
+
+        });
+
+
+        refresh();
+
+    }
+
+
+
+    private void refresh() {
+
+
+        grid.getChildren()
+                .clear();
+
+
+        String search =
+                searchField.getText()
+                        .toLowerCase();
+
+
+        String selectedCategory =
+                categoryBox.getValue();
+
+
+
+        int index = 0;
+
+
+
+        for (StitchDefinition definition :
+                library.getStitches()) {
+
+
+            boolean matchesSearch =
+                    search.isEmpty()
+                            ||
+                            definition.getName()
+                                    .toLowerCase()
+                                    .contains(search);
+
+
+
+            boolean matchesCategory =
+                    selectedCategory.equals("All")
+                            ||
+                            definition.getCategory()
+                                    .equals(selectedCategory);
+
+
+
+            if (!matchesSearch ||
+                    !matchesCategory) {
+
+                continue;
+
+            }
+
+
+
+            Button button =
+                    createButton(definition);
+
+
+
+            grid.add(
+                    button,
+                    index % 5,
+                    index / 5
+            );
+
+
+            index++;
+
+        }
+
+    }
+
+
+
+    private Button createButton(
+            StitchDefinition definition
+    ) {
+
+
+        Button button =
+                new Button(
+                        definition.getSymbol()
+                );
+
+
+        button.setPrefSize(
+                50,
+                50
+        );
+
+
+
+        button.setOnAction(event -> {
+
+
+            setResult(
+                    definition
+            );
+
+
+            close();
+
+
+        });
+
+
+
+        return button;
 
     }
 
