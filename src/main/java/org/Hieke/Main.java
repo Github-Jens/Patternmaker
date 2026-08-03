@@ -496,6 +496,7 @@ public class Main extends Application {
         canvas = new ChartCanvas(
                 chart,
                 editorState,
+                palette,
                 scrollPane
         );
 

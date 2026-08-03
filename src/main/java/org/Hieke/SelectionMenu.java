@@ -14,14 +14,21 @@ public class SelectionMenu extends ContextMenu {
     private final EditorState editorState;
     private final Runnable refresh;
     private final SymbolPalette symbolPalette;
+    private final Palette palette;
     private final Node owner;
+
     private SymbolPickerPopup symbolPicker;
+    private ColourPickerPopup colourPicker;
+
+    private double menuX;
+    private double menuY;
 
 
     public SelectionMenu(
             ChartEditor editor,
             EditorState editorState,
             SymbolPalette symbolPalette,
+            Palette palette,
             Runnable refresh,
             Node owner
     ){
@@ -31,8 +38,9 @@ public class SelectionMenu extends ContextMenu {
         this.refresh = refresh;
         this.symbolPalette = symbolPalette;
         this.owner = owner;
+        this.palette = palette;
 
-
+        //Symbol Picker menu
         MenuItem fillSymbol =
                 new MenuItem(
                         "Fill with Symbol..."
@@ -75,18 +83,61 @@ public class SelectionMenu extends ContextMenu {
 
             symbolPicker.show(
                     owner,
-                    javafx.geometry.Side.RIGHT,
-                    0,
-                    0
+                    menuX + 50,
+                    menuY
             );
 
         });
 
+        //Colourpicker Menu
+
+        //Colour Picker menu
 
         MenuItem fillColour =
                 new MenuItem(
                         "Fill with Colour..."
                 );
+
+
+        fillColour.setOnAction(event -> {
+
+
+            if (colourPicker == null) {
+
+                colourPicker =
+                        new ColourPickerPopup(
+                                palette,
+                                index -> {
+
+
+                                    editor.fillSelection(
+                                            editorState.getSelection(),
+                                            Tool.DRAW,
+                                            null,
+                                            palette.getColor(index),
+                                            index
+                                    );
+
+
+                                    editorState.getSelection()
+                                            .clear();
+
+
+                                    refresh.run();
+
+                                }
+                        );
+
+            }
+
+
+            colourPicker.show(
+                    owner,
+                    menuX + 50,
+                    menuY
+            );
+
+        });
 
 
         MenuItem copy =
@@ -117,6 +168,32 @@ public class SelectionMenu extends ContextMenu {
                         new SeparatorMenuItem(),
                         cancel
                 );
+
+    }
+    public void setMenuPosition(
+            double x,
+            double y
+    ) {
+
+        this.menuX = x;
+        this.menuY = y;
+
+    }
+
+    public void closeAllPickers() {
+
+        if (symbolPicker != null) {
+
+            symbolPicker.hide();
+
+        }
+
+
+        if (colourPicker != null) {
+
+            colourPicker.hide();
+
+        }
 
     }
 

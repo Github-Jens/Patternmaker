@@ -14,6 +14,7 @@ public class ChartCanvas extends Canvas {
     private final SelectionController selectionController;
 
     private final EditorState editorState;
+    private final Palette palette;
 
     private final ChartRenderer renderer;
     private CanvasRenderContext renderContext;
@@ -33,10 +34,13 @@ public class ChartCanvas extends Canvas {
     public ChartCanvas(
             KnittingChart chart,
             EditorState editorState,
-            ScrollPane scrollPane) {
+            Palette palette,
+            ScrollPane scrollPane
+    ) {
 
         this.editor = new ChartEditor(chart);
         this.editorState = editorState;
+        this.palette = palette;
         this.selectionController =
                 new SelectionController(
                         editorState,
@@ -210,6 +214,8 @@ public class ChartCanvas extends Canvas {
 
             if (activeSelectionMenu != null) {
 
+                activeSelectionMenu.closeAllPickers();
+
                 activeSelectionMenu.hide();
 
                 activeSelectionMenu = null;
@@ -329,6 +335,8 @@ public class ChartCanvas extends Canvas {
             if (selectionController.isSelecting()) {
 
                 selectionController.finishSelection();
+
+                drawChart();
 
                 showSelectionMenu(
                         event.getScreenX(),
@@ -529,9 +537,16 @@ public class ChartCanvas extends Canvas {
                         editor,
                         editorState,
                         editorState.getSymbolPalette(),
+                        palette,
                         this::drawChart,
                         this
                 );
+
+
+        activeSelectionMenu.setMenuPosition(
+                screenX,
+                screenY
+        );
 
 
         activeSelectionMenu.show(
