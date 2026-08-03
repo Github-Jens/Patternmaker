@@ -1,13 +1,9 @@
 package org.Hieke;
 
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.paint.Color;
-
-import java.util.Stack;
 
 public class ChartCanvas extends Canvas {
 
@@ -15,6 +11,7 @@ public class ChartCanvas extends Canvas {
     private static final int RULER_SIZE = 30;
 
     private final ChartEditor editor;
+    private final SelectionController selectionController;
 
     private final EditorState editorState;
 
@@ -30,7 +27,7 @@ public class ChartCanvas extends Canvas {
     private double lastMouseY;
 
     private boolean panning = false;
-    private boolean selecting = false;
+
     private SelectionMenu activeSelectionMenu;
 
     public ChartCanvas(
@@ -40,6 +37,11 @@ public class ChartCanvas extends Canvas {
 
         this.editor = new ChartEditor(chart);
         this.editorState = editorState;
+        this.selectionController =
+                new SelectionController(
+                        editorState,
+                        chart
+                );
         this.scrollPane = scrollPane;
         this.renderer = new ChartRenderer(chart);
         setWidth(
@@ -232,11 +234,12 @@ public class ChartCanvas extends Canvas {
 
             if (editorState.activeToolProperty().get() == Tool.SELECT) {
 
-                selecting = true;
-
-                startSelection(
+                selectionController.startSelection(
                         event.getX(),
-                        event.getY()
+                        event.getY(),
+                        zoom,
+                        offsetX,
+                        offsetY
                 );
 
                 return;
@@ -283,12 +286,17 @@ public class ChartCanvas extends Canvas {
 
 
             if (editorState.activeToolProperty().get() == Tool.SELECT
-                    && selecting) {
+                    && selectionController.isSelecting()) {
 
-                updateSelection(
+                selectionController.updateSelection(
                         event.getX(),
-                        event.getY()
+                        event.getY(),
+                        zoom,
+                        offsetX,
+                        offsetY
                 );
+
+                drawChart();
 
                 return;
             }
@@ -316,9 +324,9 @@ public class ChartCanvas extends Canvas {
             }
 
 
-            if (selecting) {
+            if (selectionController.isSelecting()) {
 
-                selecting = false;
+                selectionController.finishSelection();
 
                 showSelectionMenu(
                         event.getScreenX(),
@@ -476,84 +484,6 @@ public class ChartCanvas extends Canvas {
         );
     }
 
-    private void startSelection(
-            double mouseX,
-            double mouseY
-    ) {
-
-        double scaledCellSize = CELL_SIZE * zoom;
-
-
-        int column =
-                (int)((mouseX - offsetX - RULER_SIZE)
-                        / scaledCellSize);
-
-
-        int row =
-                (int)((mouseY - offsetY - RULER_SIZE)
-                        / scaledCellSize);
-
-
-        if (row < 0 || column < 0 ||
-                row >= editor.getChart().getRows() ||
-                column >= editor.getChart().getColumns()) {
-
-            return;
-
-        }
-
-
-        editorState.getSelection()
-                .setStart(
-                        row,
-                        column
-                );
-
-        editorState.getSelection()
-                .setEnd(
-                        row,
-                        column
-                );
-
-        drawChart();
-
-    }
-
-    private void updateSelection(
-            double mouseX,
-            double mouseY
-    ) {
-
-        double scaledCellSize = CELL_SIZE * zoom;
-
-
-        int column =
-                (int)((mouseX - offsetX - RULER_SIZE)
-                        / scaledCellSize);
-
-
-        int row =
-                (int)((mouseY - offsetY - RULER_SIZE)
-                        / scaledCellSize);
-
-
-        if (row < 0 || column < 0 ||
-                row >= editor.getChart().getRows() ||
-                column >= editor.getChart().getColumns()) {
-
-            return;
-
-        }
-
-
-        editorState.getSelection()
-                .setEnd(
-                        row,
-                        column
-                );
-        drawChart();
-
-    }
     public boolean isModified() {
 
         return editor.isModified();
