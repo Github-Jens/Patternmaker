@@ -10,7 +10,8 @@ public class ToolPanel extends VBox {
 
     public ToolPanel(
             Palette palette,
-            EditorState editorState
+            EditorState editorState,
+            StitchLibrary stitchLibrary
     ) {
 
         this.editorState = editorState;
@@ -19,7 +20,8 @@ public class ToolPanel extends VBox {
         SymbolPaletteView symbolPaletteView =
                 new SymbolPaletteView(
                         editorState.getSymbolPalette(),
-                        editorState.selectedTypeProperty()
+                        editorState.selectedStitchProperty(),
+                        stitchLibrary
                 );
 
 

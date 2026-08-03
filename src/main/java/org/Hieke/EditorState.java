@@ -8,38 +8,40 @@ import javafx.scene.paint.Color;
 
 public class EditorState {
 
-
-    // Currently active tool
     private final ObjectProperty<Tool> activeTool =
             new SimpleObjectProperty<>(Tool.DRAW);
 
 
-    // Currently selected stitch type
-    private final ObjectProperty<StitchType> selectedType =
+    private final ObjectProperty<StitchDefinition> selectedStitch =
             new SimpleObjectProperty<>(null);
 
 
-    // Currently selected colour
     private final ObjectProperty<Color> selectedColor =
             new SimpleObjectProperty<>(null);
 
-    //Currently selected Grid tiles
 
     private final ChartSelection selection =
             new ChartSelection();
 
-    //Currentl Symbol Palette
-    private final SymbolPalette symbolPalette =
-            new SymbolPalette();
+
+    private final SymbolPalette symbolPalette;
 
 
-    // Index in palette
-    // -1 = no colour operation
-    // 0  = remove colour
-    // 1+ = apply palette colour
     private final IntegerProperty selectedColorIndex =
             new SimpleIntegerProperty(-1);
 
+
+
+    public EditorState(
+            StitchLibrary library
+    ) {
+
+        symbolPalette =
+                new SymbolPalette(
+                        library
+                );
+
+    }
 
 
     public ObjectProperty<Tool> activeToolProperty() {
@@ -49,9 +51,9 @@ public class EditorState {
     }
 
 
-    public ObjectProperty<StitchType> selectedTypeProperty() {
+    public ObjectProperty<StitchDefinition> selectedStitchProperty() {
 
-        return selectedType;
+        return selectedStitch;
 
     }
 
@@ -69,11 +71,14 @@ public class EditorState {
 
     }
 
+
     public ChartSelection getSelection() {
 
         return selection;
 
     }
+
+
     public SymbolPalette getSymbolPalette() {
 
         return symbolPalette;

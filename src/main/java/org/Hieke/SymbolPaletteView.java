@@ -2,67 +2,75 @@ package org.Hieke;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.control.Button;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class SymbolPaletteView extends VBox {
 
 
     private final SymbolGridView symbolGrid;
+    private final StitchLibrary library;
 
 
     public SymbolPaletteView(
             SymbolPalette palette,
-            ObjectProperty<StitchType> selectedType
+            ObjectProperty<StitchDefinition> selectedStitch,
+            StitchLibrary library
     ) {
 
-        System.out.println(
-                "SymbolPaletteView received: " + palette
-        );
+        this.library = library;
 
 
         symbolGrid =
                 new SymbolGridView(
                         palette,
-                        selectedType,
-                        type -> {
+                        selectedStitch,
+                        definition -> {
 
-                            selectedType.set(type);
+                            if (selectedStitch.get() == definition) {
+
+                                selectedStitch.set(null);
+
+                            }
+                            else {
+
+                                selectedStitch.set(definition);
+
+                            }
 
                         }
                 );
 
 
         Button addButton =
-                new Button("+");
+                new Button(
+                        "+ Add Stitch"
+                );
 
 
         addButton.setOnAction(event -> {
 
-            System.out.println(
-                    "Adding to: " + palette
-            );
+            StitchLibraryDialog dialog =
+                    new StitchLibraryDialog(
+                            library
+                    );
 
-            palette.addSymbol(
-                    StitchType.PURL
-            );
+
+            dialog.showAndWait()
+                    .ifPresent(definition -> {
+
+                        palette.addSymbol(
+                                definition
+                        );
+
+                    });
 
         });
-
-
-        HBox controls =
-                new HBox(
-                        addButton
-                );
-
-
-        setSpacing(5);
 
 
         getChildren()
                 .addAll(
                         symbolGrid,
-                        controls
+                        addButton
                 );
 
     }

@@ -6,8 +6,8 @@ public class StitchChange {
 
     private final Stitch stitch;
 
-    private final StitchType oldType;
-    private final StitchType newType;
+    private final StitchDefinition oldStitch;
+    private final StitchDefinition newStitch;
 
     private final Color oldBackgroundColor;
     private final Color newBackgroundColor;
@@ -15,16 +15,16 @@ public class StitchChange {
 
     public StitchChange(
             Stitch stitch,
-            StitchType oldType,
-            StitchType newType,
+            StitchDefinition oldStitch,
+            StitchDefinition newStitch,
             Color oldBackgroundColor,
             Color newBackgroundColor
     ) {
 
         this.stitch = stitch;
 
-        this.oldType = oldType;
-        this.newType = newType;
+        this.oldStitch = oldStitch;
+        this.newStitch = newStitch;
 
         this.oldBackgroundColor = oldBackgroundColor;
         this.newBackgroundColor = newBackgroundColor;
@@ -33,20 +33,27 @@ public class StitchChange {
 
     public void undo() {
 
-        stitch.setType(oldType);
+        stitch.setDefinition(
+                oldStitch
+        );
 
         stitch.setBackgroundColor(
                 oldBackgroundColor
         );
+
     }
 
 
     public void redo() {
 
-        stitch.setType(newType);
+        stitch.setDefinition(
+                newStitch
+        );
 
         stitch.setBackgroundColor(
                 newBackgroundColor
         );
+
     }
+
 }

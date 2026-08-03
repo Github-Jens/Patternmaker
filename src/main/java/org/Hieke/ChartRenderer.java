@@ -204,7 +204,7 @@ public class ChartRenderer {
                 cellY + scaledCellSize / 2;
 
 
-        if (stitch.getType() != null) {
+        if (stitch.getDefinition() != null) {
 
             context.drawText(
                     stitch.getSymbol(),

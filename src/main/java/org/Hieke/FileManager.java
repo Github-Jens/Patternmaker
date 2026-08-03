@@ -49,10 +49,10 @@ public class FileManager {
             writer.println("SYMBOL_PALETTE");
 
 
-            for (StitchType symbol : symbolPalette.getSymbols()) {
+            for (StitchDefinition symbol : symbolPalette.getSymbols()) {
 
                 writer.println(
-                        symbol.name()
+                        symbol.getId()
                 );
 
             }
@@ -74,7 +74,7 @@ public class FileManager {
 
                     // Save stitch type
 // Null means the stitch has been erased
-                    if (stitch.getType() == null) {
+                    if (stitch.getDefinition() == null) {
 
                         writer.print("null");
 
@@ -82,7 +82,7 @@ public class FileManager {
                     else {
 
                         writer.print(
-                                stitch.getType().name()
+                                stitch.getDefinition().getId()
                         );
 
                     }
@@ -117,7 +117,8 @@ public class FileManager {
 
 
     public PatternData load(
-            File file
+            File file,
+            StitchLibrary stitchLibrary
     ) throws IOException {
 
 
@@ -145,9 +146,15 @@ public class FileManager {
                             columns
                     );
 
-            Palette palette = new Palette();
+
+            Palette palette =
+                    new Palette();
+
+
             SymbolPalette symbolPalette =
-                    new SymbolPalette();
+                    new SymbolPalette(
+                            stitchLibrary
+                    );
 
 
 // Load palette
@@ -202,10 +209,20 @@ public class FileManager {
                         .equals("END_SYMBOL_PALETTE")) {
 
 
-                    symbolPalette.getSymbols()
-                            .add(
-                                    StitchType.valueOf(line)
-                            );
+                    for (StitchDefinition stitch :
+                            stitchLibrary.getStitches()) {
+
+
+                        if (stitch.getId().equals(line)) {
+
+                            symbolPalette.getSymbols()
+                                    .add(stitch);
+
+                            break;
+
+                        }
+
+                    }
 
                 }
 
@@ -236,18 +253,19 @@ public class FileManager {
                             stitchData.split(":", -1);
 
 
-                    StitchType type;
+                    StitchDefinition definition;
 
                     if (parts[0].equals("null")) {
 
-                        type = null;
+                        definition = null;
 
                     }
                     else {
 
-                        type = StitchType.valueOf(
-                                parts[0]
-                        );
+                        definition =
+                                stitchLibrary.findById(
+                                        parts[0]
+                                );
 
                     }
 
@@ -259,7 +277,7 @@ public class FileManager {
                             );
 
 
-                    stitch.setType(type);
+                    stitch.setDefinition(definition);
 
 
                     // Load colour if present

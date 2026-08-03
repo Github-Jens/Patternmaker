@@ -20,7 +20,7 @@ public class SymbolPickerPopup extends ContextMenu {
      */
     public SymbolPickerPopup(
             SymbolPalette palette,
-            Consumer<StitchType> onSelected
+            Consumer<StitchDefinition> onSelected
     ) {
 
 
@@ -28,9 +28,9 @@ public class SymbolPickerPopup extends ContextMenu {
                 new SymbolGridView(
                         palette,
                         null,
-                        type -> {
+                        definition -> {
 
-                            onSelected.accept(type);
+                            onSelected.accept(definition);
 
                             hide();
 

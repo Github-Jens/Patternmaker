@@ -374,7 +374,7 @@ public class ChartCanvas extends Canvas {
             return;
         }
         if (editorState.activeToolProperty().get() != Tool.ERASE
-                && editorState.selectedTypeProperty().get() == null
+                && editorState.selectedStitchProperty().get() == null
                 && editorState.selectedColorIndexProperty().get() == -1) {
 
             return;
@@ -385,7 +385,7 @@ public class ChartCanvas extends Canvas {
                 row,
                 column,
                 editorState.activeToolProperty().get(),
-                editorState.selectedTypeProperty().get(),
+                editorState.selectedStitchProperty().get(),
                 editorState.selectedColorProperty().get(),
                 editorState.selectedColorIndexProperty().get()
         );

@@ -56,14 +56,14 @@ public class SelectionMenu extends ContextMenu {
                 symbolPicker =
                         new SymbolPickerPopup(
                                 symbolPalette,
-                                type -> {
+                                definition -> {
 
 
 
                                     editor.fillSelection(
                                             editorState.getSelection(),
                                             editorState.activeToolProperty().get(),
-                                            type,
+                                            definition,
                                             editorState.selectedColorProperty().get(),
                                             editorState.selectedColorIndexProperty().get()
                                     );

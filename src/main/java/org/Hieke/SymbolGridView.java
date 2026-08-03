@@ -3,6 +3,8 @@ package org.Hieke;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Pos;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.layout.GridPane;
 
 import java.util.function.Consumer;
@@ -12,19 +14,20 @@ public class SymbolGridView extends GridPane {
 
 
     private final SymbolPalette palette;
-    private final ObjectProperty<StitchType> selectedType;
-    private final Consumer<StitchType> action;
+    private final ObjectProperty<StitchDefinition> selectedStitch;
+    private final Consumer<StitchDefinition> action;
+
+    private ContextMenu activeMenu;
 
 
     public SymbolGridView(
             SymbolPalette palette,
-            ObjectProperty<StitchType> selectedType,
-            Consumer<StitchType> action
+            ObjectProperty<StitchDefinition> selectedStitch,
+            Consumer<StitchDefinition> action
     ) {
-        System.out.println("Creating SymbolGridView with palette: " + palette);
 
         this.palette = palette;
-        this.selectedType = selectedType;
+        this.selectedStitch = selectedStitch;
         this.action = action;
 
 
@@ -35,12 +38,9 @@ public class SymbolGridView extends GridPane {
 
         palette.getSymbols()
                 .addListener(
-                        (ListChangeListener<StitchType>) change -> {
+                        (ListChangeListener<StitchDefinition>) change -> {
 
-                            System.out.println(
-                                    "Symbol list changed. Size: "
-                                            + palette.size()
-                            );
+
 
                             refresh();
 
@@ -48,9 +48,9 @@ public class SymbolGridView extends GridPane {
                 );
 
 
-        if (selectedType != null) {
+        if (selectedStitch != null)  {
 
-            selectedType.addListener(
+            selectedStitch.addListener(
                     (observable, oldValue, newValue) -> refresh()
             );
 
@@ -77,9 +77,21 @@ public class SymbolGridView extends GridPane {
             SymbolButton button =
                     new SymbolButton(
                             palette.getSymbol(i),
-                            selectedType,
+                            selectedStitch,
                             action
                     );
+
+
+            createContextMenu(
+                    button,
+                    i
+            );
+
+
+            createContextMenu(
+                    button,
+                    i
+            );
 
 
             int column =
@@ -97,6 +109,73 @@ public class SymbolGridView extends GridPane {
             );
 
         }
+
+    }
+
+    private void createContextMenu(
+            SymbolButton button,
+            int index
+    ) {
+
+        button.setOnContextMenuRequested(event -> {
+
+
+            // Do not allow removing the normal stitch
+            if (index == 0) {
+                return;
+            }
+
+
+            if (activeMenu != null) {
+
+                activeMenu.hide();
+
+            }
+
+
+            ContextMenu menu =
+                    new ContextMenu();
+
+
+            MenuItem remove =
+                    new MenuItem(
+                            "Remove Stitch"
+                    );
+
+
+            remove.setOnAction(e -> {
+
+
+                if (selectedStitch.get()
+                        == button.getDefinition()) {
+
+                    selectedStitch.set(null);
+
+                }
+
+
+                palette.removeSymbol(
+                        index
+                );
+
+
+            });
+
+
+            menu.getItems()
+                    .add(remove);
+
+
+            menu.show(
+                    button,
+                    event.getScreenX(),
+                    event.getScreenY()
+            );
+
+
+            activeMenu = menu;
+
+        });
 
     }
 

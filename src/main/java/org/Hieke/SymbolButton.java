@@ -9,26 +9,28 @@ import java.util.function.Consumer;
 public class SymbolButton extends Button {
 
 
-    private final StitchType type;
+    private final StitchDefinition definition;
 
 
     public SymbolButton(
-            StitchType type,
-            ObjectProperty<StitchType> selectedType,
-            Consumer<StitchType> action
+            StitchDefinition definition,
+            ObjectProperty<StitchDefinition> selectedStitch,
+            Consumer<StitchDefinition> action
     ) {
 
-        this.type = type;
+        this.definition = definition;
 
 
-        if (type == null) {
+        if (definition.getSymbol() == null) {
 
             setText("");
 
         }
         else {
 
-            setText(type.getSymbol());
+            setText(
+                    definition.getSymbol()
+            );
 
         }
 
@@ -52,13 +54,13 @@ public class SymbolButton extends Button {
         setFocusTraversable(false);
 
 
-        if (selectedType != null) {
+        if (selectedStitch != null) {
 
-            selectedType.addListener(
+            selectedStitch.addListener(
                     (observable, oldValue, newValue) -> {
 
                         updateStyle(
-                                selectedType.get()
+                                selectedStitch.get()
                         );
 
                     }
@@ -69,15 +71,17 @@ public class SymbolButton extends Button {
 
         setOnAction(event -> {
 
-            action.accept(type);
+            action.accept(
+                    definition
+            );
 
         });
 
 
-        if (selectedType != null) {
+        if (selectedStitch != null) {
 
             updateStyle(
-                    selectedType.get()
+                    selectedStitch.get()
             );
 
         }
@@ -91,7 +95,7 @@ public class SymbolButton extends Button {
 
 
     private void updateStyle(
-            StitchType selected
+            StitchDefinition selected
     ) {
 
         StringBuilder style =
@@ -111,7 +115,7 @@ public class SymbolButton extends Button {
         );
 
 
-        if (selected == type) {
+        if (selected == definition) {
 
             style.append(
                     "-fx-border-color: blue;"
@@ -142,9 +146,9 @@ public class SymbolButton extends Button {
     }
 
 
-    public StitchType getType() {
+    public StitchDefinition getDefinition() {
 
-        return type;
+        return definition;
 
     }
 

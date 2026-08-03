@@ -25,7 +25,7 @@ public class ChartEditor {
             int row,
             int column,
             Tool activeTool,
-            StitchType selectedType,
+            StitchDefinition selectedStitch,
             Color selectedColor,
             int selectedColorIndex
     ) {
@@ -34,14 +34,14 @@ public class ChartEditor {
                 chart.getStitch(row, column);
 
 
-        StitchType oldType =
-                stitch.getType();
+        StitchDefinition oldStitch =
+                stitch.getDefinition();
 
         Color oldBackground =
                 stitch.getBackgroundColor();
 
 
-        StitchType newType = oldType;
+        StitchDefinition newStitch = oldStitch;
 
         Color newBackground = oldBackground;
 
@@ -49,23 +49,15 @@ public class ChartEditor {
         // Tool handling
         if (activeTool == Tool.ERASE) {
 
-            newType = null;
+            newStitch = null;
             newBackground = null;
-
-        }
-        else if (selectedType == StitchType.NORMAL) {
-
-            newType = null;
 
         }
         else {
 
-            newType = selectedType;
+            newStitch = selectedStitch;
 
         }
-
-
-
 
         // Colour handling
         if (activeTool == Tool.ERASE) {
@@ -89,8 +81,8 @@ public class ChartEditor {
         StitchChange change =
                 new StitchChange(
                         stitch,
-                        oldType,
-                        newType,
+                        oldStitch,
+                        newStitch,
                         oldBackground,
                         newBackground
                 );
@@ -111,7 +103,7 @@ public class ChartEditor {
     public void fillSelection(
             ChartSelection selection,
             Tool activeTool,
-            StitchType selectedType,
+            StitchDefinition definition,
             Color selectedColor,
             int selectedColorIndex
     ){
@@ -167,7 +159,7 @@ public class ChartEditor {
                         row,
                         column,
                         activeTool,
-                        selectedType,
+                        definition,
                         selectedColor,
                         selectedColorIndex
                 );

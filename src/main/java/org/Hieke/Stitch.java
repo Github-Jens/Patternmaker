@@ -4,7 +4,7 @@ import javafx.scene.paint.Color;
 
 public class Stitch {
 
-    private StitchType type;
+    private StitchDefinition definition;
 
     private Color backgroundColor;
 
@@ -13,12 +13,12 @@ public class Stitch {
 
 
     public Stitch(
-            StitchType type,
+            StitchDefinition definition,
             int row,
             int column
     ) {
 
-        this.type = type;
+        this.definition = definition;
         this.row = row;
         this.column = column;
 
@@ -26,52 +26,73 @@ public class Stitch {
     }
 
 
-    public void setType(StitchType type) {
-        this.type = type;
+    public void setDefinition(
+            StitchDefinition definition
+    ) {
+
+        this.definition = definition;
+
     }
 
 
-    public StitchType getType() {
-        return type;
+    public StitchDefinition getDefinition() {
+
+        return definition;
+
     }
 
 
     public Color getBackgroundColor() {
+
         return backgroundColor;
+
     }
 
 
-    public void setBackgroundColor(Color backgroundColor) {
+    public void setBackgroundColor(
+            Color backgroundColor
+    ) {
+
         this.backgroundColor = backgroundColor;
+
     }
 
 
     public String getSymbol() {
 
-        if (type == null) {
+        if (definition == null) {
+
             return "";
+
         }
 
-        return type.getSymbol();
+        return definition.getSymbol();
+
     }
 
 
     public int getRow() {
+
         return row;
+
     }
 
 
     public int getColumn() {
+
         return column;
+
     }
 
 
     @Override
     public String toString() {
 
-        return "Stitch " + type +
+        return "Stitch " + definition +
                 " at row " + row +
                 " column " + column +
                 " background " + backgroundColor;
+
     }
+
 }

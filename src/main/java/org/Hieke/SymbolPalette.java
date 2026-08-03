@@ -7,21 +7,34 @@ import javafx.collections.ObservableList;
 public class SymbolPalette {
 
 
-    private final ObservableList<StitchType> symbols =
+    private final ObservableList<StitchDefinition> symbols =
             FXCollections.observableArrayList();
 
 
-    public SymbolPalette() {
+    public SymbolPalette(
+            StitchLibrary library
+    ) {
 
-        symbols.add(StitchType.NORMAL);
-        symbols.add(StitchType.PURL);
-        symbols.add(StitchType.YARN_OVER);
-        symbols.add(StitchType.K2TOG);
+        symbols.add(
+                library.getStitches().get(0)
+        );
+
+        symbols.add(
+                library.getStitches().get(1)
+        );
+
+        symbols.add(
+                library.getStitches().get(2)
+        );
+
+        symbols.add(
+                library.getStitches().get(3)
+        );
 
     }
 
 
-    public ObservableList<StitchType> getSymbols() {
+    public ObservableList<StitchDefinition> getSymbols() {
 
         return symbols;
 
@@ -35,7 +48,7 @@ public class SymbolPalette {
     }
 
 
-    public StitchType getSymbol(int index) {
+    public StitchDefinition getSymbol(int index) {
 
         return symbols.get(index);
 
@@ -43,11 +56,8 @@ public class SymbolPalette {
 
 
     public void addSymbol(
-            StitchType symbol
+            StitchDefinition symbol
     ) {
-
-
-
             symbols.add(symbol);
 
 

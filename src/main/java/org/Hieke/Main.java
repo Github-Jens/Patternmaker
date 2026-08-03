@@ -27,6 +27,7 @@ public class Main extends Application {
     private Palette palette;
     private ScrollPane scrollPane;
     private EditorState editorState;
+    private StitchLibrary stitchLibrary;
 
     private static final int MIN_CHART_SIZE = 1;
     private static final int MAX_CHART_SIZE = 300;
@@ -36,11 +37,25 @@ public class Main extends Application {
     public void start(Stage stage) {
         this.stage = stage;
         root = new BorderPane();
-        KnittingChart chart = new KnittingChart(20, 20);
+        KnittingChart chart =
+                new KnittingChart(
+                        20,
+                        20
+                );
 
-        editorState = new EditorState();
 
-        palette = new Palette();
+        stitchLibrary =
+                new StitchLibrary();
+
+
+        editorState =
+                new EditorState(
+                        stitchLibrary
+                );
+
+
+        palette =
+                new Palette();
 
         // TOP Menu Bar + Toolbar
 
@@ -78,7 +93,8 @@ public class Main extends Application {
         ToolPanel toolPanel =
                 new ToolPanel(
                         palette,
-                        editorState
+                        editorState,
+                        stitchLibrary
                 );
 
         root.setLeft(toolPanel);
@@ -348,7 +364,10 @@ public class Main extends Application {
 
 
                 PatternData data =
-                        manager.load(file);
+                        manager.load(
+                                file,
+                                stitchLibrary
+                        );
 
 
                 palette.replaceColors(
