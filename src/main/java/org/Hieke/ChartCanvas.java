@@ -31,6 +31,7 @@ public class ChartCanvas extends Canvas {
 
     private boolean panning = false;
     private boolean selecting = false;
+    private SelectionMenu activeSelectionMenu;
 
     public ChartCanvas(
             KnittingChart chart,
@@ -189,7 +190,7 @@ public class ChartCanvas extends Canvas {
 
 
         gc.setStroke(Color.BLUE);
-        gc.setLineWidth(2);
+        gc.setLineWidth(1);
 
 
         gc.strokeRect(
@@ -204,6 +205,19 @@ public class ChartCanvas extends Canvas {
     private void setupMouseControls() {
 
         setOnMousePressed(event -> {
+
+            if (activeSelectionMenu != null) {
+
+                activeSelectionMenu.hide();
+
+                activeSelectionMenu = null;
+
+            }
+
+            editorState.getSelection()
+                    .clear();
+
+            drawChart();
 
             if (event.isMiddleButtonDown()) {
 
@@ -306,7 +320,13 @@ public class ChartCanvas extends Canvas {
 
                 selecting = false;
 
+                showSelectionMenu(
+                        event.getScreenX(),
+                        event.getScreenY()
+                );
+
                 return;
+
             }
 
 
@@ -489,6 +509,14 @@ public class ChartCanvas extends Canvas {
                         column
                 );
 
+        editorState.getSelection()
+                .setEnd(
+                        row,
+                        column
+                );
+
+        drawChart();
+
     }
 
     private void updateSelection(
@@ -546,6 +574,29 @@ public class ChartCanvas extends Canvas {
     public KnittingChart getChart() {
 
         return editor.getChart();
+
+    }
+    private void showSelectionMenu(
+            double screenX,
+            double screenY
+    ) {
+
+        if (activeSelectionMenu != null) {
+
+            activeSelectionMenu.hide();
+
+        }
+
+
+        activeSelectionMenu =
+                new SelectionMenu();
+
+
+        activeSelectionMenu.show(
+                this,
+                screenX,
+                screenY
+        );
 
     }
 
