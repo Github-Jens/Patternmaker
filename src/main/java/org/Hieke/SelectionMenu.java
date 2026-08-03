@@ -54,6 +54,7 @@ public class SelectionMenu extends ContextMenu {
 
                                     editor.fillSelection(
                                             editorState.getSelection(),
+                                            editorState.activeToolProperty().get(),
                                             type,
                                             editorState.selectedColorProperty().get(),
                                             editorState.selectedColorIndexProperty().get()

@@ -246,7 +246,8 @@ public class ChartCanvas extends Canvas {
             }
 
 
-            if (editorState.activeToolProperty().get() == Tool.DRAW) {
+            if (editorState.activeToolProperty().get() == Tool.DRAW
+                    || editorState.activeToolProperty().get() == Tool.ERASE) {
 
                 editor.beginStroke();
 
@@ -302,7 +303,8 @@ public class ChartCanvas extends Canvas {
             }
 
 
-            if (editorState.activeToolProperty().get() == Tool.DRAW) {
+            if (editorState.activeToolProperty().get() == Tool.DRAW
+                    || editorState.activeToolProperty().get() == Tool.ERASE) {
 
                 paintAt(
                         event.getX(),
@@ -363,14 +365,18 @@ public class ChartCanvas extends Canvas {
                 column >= editor.getChart().getColumns()) {
             return;
         }
-        if (editorState.selectedTypeProperty().get() == null &&
-                editorState.selectedColorIndexProperty().get() == -1) {
+        if (editorState.activeToolProperty().get() != Tool.ERASE
+                && editorState.selectedTypeProperty().get() == null
+                && editorState.selectedColorIndexProperty().get() == -1) {
+
             return;
+
         }
 
         editor.paintCell(
                 row,
                 column,
+                editorState.activeToolProperty().get(),
                 editorState.selectedTypeProperty().get(),
                 editorState.selectedColorProperty().get(),
                 editorState.selectedColorIndexProperty().get()

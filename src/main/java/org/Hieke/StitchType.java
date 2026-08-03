@@ -5,8 +5,7 @@ public enum StitchType {
     KNIT("K"),
     PURL("P"),
     YARN_OVER("O"),
-    K2TOG("/"),
-    EMPTY(" ");
+    K2TOG("/");
 
     private String symbol;
 

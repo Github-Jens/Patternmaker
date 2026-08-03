@@ -24,6 +24,7 @@ public class ChartEditor {
     public void paintCell(
             int row,
             int column,
+            Tool activeTool,
             StitchType selectedType,
             Color selectedColor,
             int selectedColorIndex
@@ -45,26 +46,24 @@ public class ChartEditor {
         Color newBackground = oldBackground;
 
 
-        // Symbol handling
-        if (selectedType != null) {
+        // Tool handling
+        if (activeTool == Tool.ERASE) {
 
-            if (selectedType == StitchType.EMPTY) {
+            newType = null;
+            newBackground = null;
 
-                newType = StitchType.EMPTY;
-                newBackground = null;
+        }
+        else if (selectedType != null) {
 
-            }
-            else {
-
-                newType = selectedType;
-
-            }
+            newType = selectedType;
 
         }
 
 
+
+
         // Colour handling
-        if (selectedType == StitchType.EMPTY) {
+        if (activeTool == Tool.ERASE) {
 
             newBackground = null;
 
@@ -106,10 +105,11 @@ public class ChartEditor {
 
     public void fillSelection(
             ChartSelection selection,
+            Tool activeTool,
             StitchType selectedType,
             Color selectedColor,
             int selectedColorIndex
-    ) {
+    ){
 
 
         if (!selection.hasSelection()) {
@@ -161,6 +161,7 @@ public class ChartEditor {
                 paintCell(
                         row,
                         column,
+                        activeTool,
                         selectedType,
                         selectedColor,
                         selectedColorIndex

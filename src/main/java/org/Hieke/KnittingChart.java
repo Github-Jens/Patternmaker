@@ -17,7 +17,7 @@ public class KnittingChart {
             for (int column = 0; column < columns; column++) {
 
                 stitches[row][column] =
-                        new Stitch(StitchType.EMPTY, row, column);
+                        new Stitch(null, row, column);
 
             }
         }
