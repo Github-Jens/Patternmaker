@@ -29,6 +29,15 @@ public class KnittingChart {
     public Stitch getStitch(int row, int column) {
         return stitches[row][column];
     }
+    public void setStitch(
+            int row,
+            int column,
+            Stitch stitch
+    ) {
+
+        stitches[row][column] = stitch;
+
+    }
     public int getRows() {
         return rows;
     }
@@ -237,6 +246,73 @@ public class KnittingChart {
         updateCoordinates();
 
     }
+    public void restoreRow(
+            Stitch[] row,
+            int index
+    ) {
+
+        insertRow(index);
+
+        for (int column = 0; column < columns; column++) {
+
+            stitches[index][column] = row[column];
+
+        }
+
+        updateCoordinates();
+
+    }
+
+    public void restoreColumn(
+            Stitch[] column,
+            int index
+    ) {
+
+        if (index < 0 || index > columns) {
+            return;
+        }
+
+
+        Stitch[][] newStitches =
+                new Stitch[rows][columns + 1];
+
+
+        for (int row = 0; row < rows; row++) {
+
+            int newColumn = 0;
+
+
+            for (int currentColumn = 0;
+                 currentColumn < columns + 1;
+                 currentColumn++) {
+
+
+                if (currentColumn == index) {
+
+                    newStitches[row][currentColumn] =
+                            column[row];
+
+                }
+                else {
+
+                    newStitches[row][currentColumn] =
+                            stitches[row][newColumn];
+
+                    newColumn++;
+
+                }
+
+            }
+
+        }
+
+
+        stitches = newStitches;
+        columns++;
+
+        updateCoordinates();
+
+    }
 
     private void updateCoordinates() {
 
@@ -255,4 +331,19 @@ public class KnittingChart {
         }
 
     }
+    public Stitch[] getRow(int index) {
+
+        Stitch[] row = new Stitch[columns];
+
+        for (int column = 0; column < columns; column++) {
+
+            row[column] = stitches[index][column];
+
+        }
+
+        return row;
+
+    }
+
+
 }

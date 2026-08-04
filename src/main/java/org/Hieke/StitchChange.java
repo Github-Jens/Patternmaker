@@ -2,7 +2,7 @@ package org.Hieke;
 
 import javafx.scene.paint.Color;
 
-public class StitchChange {
+public class StitchChange implements UndoableChange {
 
     private final Stitch stitch;
 
@@ -67,7 +67,7 @@ public class StitchChange {
         this.newLeftBorderColor = newLeftBorderColor;
     }
 
-
+    @Override
     public void undo() {
 
         stitch.setDefinition(
@@ -96,7 +96,7 @@ public class StitchChange {
 
     }
 
-
+    @Override
     public void redo() {
 
         stitch.setDefinition(

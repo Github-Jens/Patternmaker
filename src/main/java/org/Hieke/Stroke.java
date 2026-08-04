@@ -5,11 +5,14 @@ import java.util.List;
 
 public class Stroke {
 
-    private final List<StitchChange> changes = new ArrayList<>();
+    private final List<UndoableChange> changes =
+            new ArrayList<>();
 
 
-    public void addChange(StitchChange change) {
+    public void addChange(UndoableChange change) {
+
         changes.add(change);
+
     }
 
 
@@ -20,14 +23,18 @@ public class Stroke {
             changes.get(i).undo();
 
         }
+
     }
 
 
     public void redo() {
 
-        for (StitchChange change : changes) {
+        for (UndoableChange change : changes) {
+
             change.redo();
+
         }
 
     }
+
 }

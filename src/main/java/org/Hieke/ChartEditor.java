@@ -570,6 +570,16 @@ public class ChartEditor {
 
     }
 
+    private void addChange(UndoableChange change) {
+
+        if (currentStroke != null) {
+
+            currentStroke.addChange(change);
+
+        }
+
+    }
+
     public void undo() {
 
         if (!undoStack.isEmpty()) {
@@ -579,6 +589,8 @@ public class ChartEditor {
             stroke.undo();
 
             redoStack.push(stroke);
+
+            modified = true;
 
         }
 
@@ -595,13 +607,27 @@ public class ChartEditor {
 
             undoStack.push(stroke);
 
+            modified = true;
+
         }
 
     }
 
+
     public void insertRow(int index) {
 
+        beginStroke();
+
         chart.insertRow(index);
+
+        currentStroke.addChange(
+                new InsertRowChange(
+                        chart,
+                        index
+                )
+        );
+
+        endStroke();
 
         modified = true;
 
@@ -609,7 +635,18 @@ public class ChartEditor {
 
     public void insertColumn(int index) {
 
+        beginStroke();
+
         chart.insertColumn(index);
+
+        currentStroke.addChange(
+                new InsertColumnChange(
+                        chart,
+                        index
+                )
+        );
+
+        endStroke();
 
         modified = true;
 
@@ -617,9 +654,37 @@ public class ChartEditor {
 
     public void deleteRow(int index) {
 
-        chart.deleteRow(index);
+        if (index < 0 || index >= chart.getRows()) {
+            return;
+        }
 
 
+        beginStroke();
+
+        deleteRowInternal(index);
+
+        endStroke();
+
+        modified = true;
+
+    }
+
+    public void deleteRows(
+            int startRow,
+            int endRow
+    ) {
+
+        beginStroke();
+
+
+        for (int row = endRow; row >= startRow; row--) {
+
+            deleteRowInternal(row);
+
+        }
+
+
+        endStroke();
 
         modified = true;
 
@@ -628,9 +693,87 @@ public class ChartEditor {
 
     public void deleteColumn(int index) {
 
-        chart.deleteColumn(index);
+        beginStroke();
+
+        deleteColumnInternal(index);
+
+        endStroke();
 
         modified = true;
+
+    }
+    public void deleteColumns(
+            int startColumn,
+            int endColumn
+    ) {
+
+        beginStroke();
+
+
+        for (int column = endColumn; column >= startColumn; column--) {
+
+            deleteColumnInternal(column);
+
+        }
+
+
+        endStroke();
+
+        modified = true;
+
+    }
+
+    private void deleteRowInternal(int index) {
+
+        Stitch[] deletedRow =
+                new Stitch[chart.getColumns()];
+
+
+        for (int column = 0; column < chart.getColumns(); column++) {
+
+            deletedRow[column] =
+                    chart.getStitch(index, column);
+
+        }
+
+
+        chart.deleteRow(index);
+
+
+        addChange(
+                new DeleteRowChange(
+                        chart,
+                        deletedRow,
+                        index
+                )
+        );
+
+    }
+
+    private void deleteColumnInternal(int index) {
+
+        Stitch[] deletedColumn =
+                new Stitch[chart.getRows()];
+
+
+        for (int row = 0; row < chart.getRows(); row++) {
+
+            deletedColumn[row] =
+                    chart.getStitch(row, index);
+
+        }
+
+
+        chart.deleteColumn(index);
+
+
+        addChange(
+                new DeleteColumnChange(
+                        chart,
+                        deletedColumn,
+                        index
+                )
+        );
 
     }
 

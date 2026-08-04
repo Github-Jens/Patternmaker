@@ -258,13 +258,17 @@ public class ChartCanvas extends Canvas {
 
         editor.undo();
 
+        updateCanvasSize();
         drawChart();
 
     }
+
+
     public void redo() {
 
         editor.redo();
 
+        updateCanvasSize();
         drawChart();
 
     }

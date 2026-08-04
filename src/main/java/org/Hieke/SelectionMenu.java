@@ -248,13 +248,10 @@ public class SelectionMenu extends ContextMenu {
                     );
 
 
-            for (int row = startRow;
-                 row <= endRow;
-                 row++) {
-
-                editor.deleteRow(startRow);
-
-            }
+            editor.deleteRows(
+                    startRow,
+                    endRow
+            );
 
             finishAction();
 
@@ -284,13 +281,10 @@ public class SelectionMenu extends ContextMenu {
                     );
 
 
-            for (int column = startColumn;
-                 column <= endColumn;
-                 column++) {
-
-                editor.deleteColumn(startColumn);
-
-            }
+            editor.deleteColumns(
+                    startColumn,
+                    endColumn
+            );
 
             finishAction();
 
