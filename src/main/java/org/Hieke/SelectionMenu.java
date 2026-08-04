@@ -1,8 +1,6 @@
 package org.Hieke;
 
-import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 
@@ -70,12 +68,7 @@ public class SelectionMenu extends ContextMenu {
                                             -1
                                     );
 
-
-                                    editorState.getSelection()
-                                            .clear();
-
-
-                                    refresh.run();
+                                    finishAction();
 
                                 }
                         );
@@ -120,12 +113,7 @@ public class SelectionMenu extends ContextMenu {
                                             index
                                     );
 
-
-                                    editorState.getSelection()
-                                            .clear();
-
-
-                                    refresh.run();
+                                    finishAction();
 
                                 }
                         );
@@ -165,12 +153,7 @@ public class SelectionMenu extends ContextMenu {
                                             palette.getColor(index)
                                     );
 
-
-                                    editorState.getSelection()
-                                            .clear();
-
-
-                                    refresh.run();
+                                    finishAction();
 
                                 }
                         );
@@ -198,12 +181,7 @@ public class SelectionMenu extends ContextMenu {
                     editorState.getSelection()
             );
 
-
-            editorState.getSelection()
-                    .clear();
-
-
-            refresh.run();
+            finishAction();
 
         });
 
@@ -221,6 +199,7 @@ public class SelectionMenu extends ContextMenu {
         paste.setOnAction(event -> {
 
             chartCanvas.paste();
+            finishAction();
 
         });
 
@@ -241,12 +220,79 @@ public class SelectionMenu extends ContextMenu {
                     editorState.getSelection()
             );
 
+            finishAction();
 
-            editorState.getSelection()
-                    .clear();
+        });
+
+        MenuItem deleteRows =
+                new MenuItem(
+                        "Delete Selected Rows"
+                );
+
+        deleteRows.setOnAction(event -> {
+
+            ChartSelection selection =
+                    editorState.getSelection();
 
 
-            refresh.run();
+            int startRow =
+                    Math.min(
+                            selection.getStartRow(),
+                            selection.getEndRow()
+                    );
+
+            int endRow =
+                    Math.max(
+                            selection.getStartRow(),
+                            selection.getEndRow()
+                    );
+
+
+            for (int row = startRow;
+                 row <= endRow;
+                 row++) {
+
+                editor.deleteRow(startRow);
+
+            }
+
+            finishAction();
+
+        });
+
+        MenuItem deleteColumns =
+                new MenuItem(
+                        "Delete Selected Columns"
+                );
+
+        deleteColumns.setOnAction(event -> {
+
+            ChartSelection selection =
+                    editorState.getSelection();
+
+
+            int startColumn =
+                    Math.min(
+                            selection.getStartColumn(),
+                            selection.getEndColumn()
+                    );
+
+            int endColumn =
+                    Math.max(
+                            selection.getStartColumn(),
+                            selection.getEndColumn()
+                    );
+
+
+            for (int column = startColumn;
+                 column <= endColumn;
+                 column++) {
+
+                editor.deleteColumn(startColumn);
+
+            }
+
+            finishAction();
 
         });
 
@@ -255,6 +301,13 @@ public class SelectionMenu extends ContextMenu {
                 new MenuItem(
                         "Cancel"
                 );
+
+        cancel.setOnAction(event -> {
+
+            hide();
+            finishAction();
+
+        });
 
         MenuItem clear =
                 new MenuItem(
@@ -268,12 +321,7 @@ public class SelectionMenu extends ContextMenu {
                     editorState.getSelection()
             );
 
-
-            editorState.getSelection()
-                    .clear();
-
-
-            refresh.run();
+            finishAction();
 
         });
 
@@ -287,13 +335,25 @@ public class SelectionMenu extends ContextMenu {
                         copy,
                         paste,
                         cut,
-                        new SeparatorMenuItem(),
                         clear,
+                        new SeparatorMenuItem(),
+                        deleteRows,
+                        deleteColumns,
                         new SeparatorMenuItem(),
                         cancel
                 );
 
     }
+
+    private void finishAction() {
+
+        editorState.getSelection()
+                .clear();
+
+        refresh.run();
+
+    }
+
     public void setMenuPosition(
             double x,
             double y

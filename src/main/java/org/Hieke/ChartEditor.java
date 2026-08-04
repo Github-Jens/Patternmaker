@@ -599,6 +599,43 @@ public class ChartEditor {
 
     }
 
+    public void insertRow(int index) {
+
+        chart.insertRow(index);
+
+        modified = true;
+
+    }
+
+    public void insertColumn(int index) {
+
+        chart.insertColumn(index);
+
+        modified = true;
+
+    }
+
+    public void deleteRow(int index) {
+
+        chart.deleteRow(index);
+
+
+
+        modified = true;
+
+    }
+
+
+    public void deleteColumn(int index) {
+
+        chart.deleteColumn(index);
+
+        modified = true;
+
+    }
+
+
+
     public KnittingChart getChart() {
         return chart;
     }

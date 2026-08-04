@@ -412,4 +412,52 @@ public class ChartCanvas extends Canvas {
 
     }
 
+    public void insertRow(int index) {
+
+        editor.insertRow(index);
+
+        updateCanvasSize();
+
+    }
+
+
+    public void deleteRow(int index) {
+
+        editor.deleteRow(index);
+        updateCanvasSize();
+
+    }
+
+
+    public void insertColumn(int index) {
+
+        editor.insertColumn(index);
+        updateCanvasSize();
+
+    }
+
+
+    public void deleteColumn(int index) {
+
+        editor.deleteColumn(index);
+        updateCanvasSize();
+
+    }
+
+    private void updateCanvasSize() {
+
+        setWidth(
+                (editor.getChart().getColumns() + 2)
+                        * transform.getCellSize()
+        );
+
+        setHeight(
+                (editor.getChart().getRows() + 2)
+                        * transform.getCellSize()
+        );
+
+        drawChart();
+
+    }
+
 }

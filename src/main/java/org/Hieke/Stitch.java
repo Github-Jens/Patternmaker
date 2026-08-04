@@ -137,4 +137,14 @@ public class Stitch {
         this.leftBorderColor = color;
     }
 
+    public void setPosition(
+            int row,
+            int column
+    ) {
+
+        this.row = row;
+        this.column = column;
+
+    }
+
 }

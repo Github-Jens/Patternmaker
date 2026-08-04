@@ -68,7 +68,11 @@ public class Main extends Application {
                         () -> canvas.redo(),
                         () -> canvas.resetView(),
                         this::exportPDF,
-                        this::exportSVG
+                        this::exportSVG,
+                        () -> canvas.insertRow(canvas.getChart().getRows()),
+                        () -> canvas.deleteRow(canvas.getChart().getRows() - 1),
+                        () -> canvas.insertColumn(canvas.getChart().getColumns()),
+                        () -> canvas.deleteColumn(canvas.getChart().getColumns() - 1)
                 ).createMenuBar();
 
 

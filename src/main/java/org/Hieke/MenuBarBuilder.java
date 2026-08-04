@@ -18,6 +18,11 @@ public class MenuBarBuilder {
     private final Runnable exportPDFAction;
     private final Runnable exportSVGAction;
 
+    private final Runnable insertRowAction;
+    private final Runnable deleteRowAction;
+    private final Runnable insertColumnAction;
+    private final Runnable deleteColumnAction;
+
 
     public MenuBarBuilder(
             Runnable newChartAction,
@@ -27,7 +32,11 @@ public class MenuBarBuilder {
             Runnable redoAction,
             Runnable resetViewAction,
             Runnable exportPDFAction,
-            Runnable exportSVGAction
+            Runnable exportSVGAction,
+            Runnable insertRowAction,
+            Runnable deleteRowAction,
+            Runnable insertColumnAction,
+            Runnable deleteColumnAction
     ) {
 
         this.newChartAction = newChartAction;
@@ -41,6 +50,11 @@ public class MenuBarBuilder {
 
         this.exportPDFAction = exportPDFAction;
         this.exportSVGAction = exportSVGAction;
+
+        this.insertRowAction = insertRowAction;
+        this.deleteRowAction = deleteRowAction;
+        this.insertColumnAction = insertColumnAction;
+        this.deleteColumnAction = deleteColumnAction;
     }
 
 
@@ -168,6 +182,51 @@ public class MenuBarBuilder {
         return fileMenu;
     }
 
+    private Menu createChartMenu() {
+
+        Menu chartMenu = new Menu("Chart");
+
+        MenuItem insertRow =
+                new MenuItem("Insert Row");
+
+        MenuItem deleteRow =
+                new MenuItem("Delete Row");
+
+        MenuItem insertColumn =
+                new MenuItem("Insert Column");
+
+        MenuItem deleteColumn =
+                new MenuItem("Delete Column");
+
+
+        insertRow.setOnAction(event ->
+                insertRowAction.run()
+        );
+
+        deleteRow.setOnAction(event ->
+                deleteRowAction.run()
+        );
+
+        insertColumn.setOnAction(event ->
+                insertColumnAction.run()
+        );
+
+        deleteColumn.setOnAction(event ->
+                deleteColumnAction.run()
+        );
+
+
+        chartMenu.getItems().addAll(
+                insertRow,
+                deleteRow,
+                insertColumn,
+                deleteColumn
+        );
+
+
+        return chartMenu;
+    }
+
     public MenuBar createMenuBar() {
 
         MenuBar menuBar = new MenuBar();
@@ -176,7 +235,8 @@ public class MenuBarBuilder {
                 createFileMenu(),
                 createEditMenu(),
                 createViewMenu(),
-                createExportMenu()
+                createExportMenu(),
+                createChartMenu()
         );
 
         return menuBar;
