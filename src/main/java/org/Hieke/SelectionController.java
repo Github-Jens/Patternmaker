@@ -3,11 +3,6 @@ package org.Hieke;
 
 public class SelectionController {
 
-
-    private static final int CELL_SIZE = 30;
-    private static final int RULER_SIZE = 30;
-
-
     private final EditorState editorState;
     private final KnittingChart chart;
 
@@ -28,18 +23,14 @@ public class SelectionController {
     public void startSelection(
             double mouseX,
             double mouseY,
-            double zoom,
-            double offsetX,
-            double offsetY
+            ViewTransform transform
     ) {
 
         int[] cell =
                 getCell(
                         mouseX,
                         mouseY,
-                        zoom,
-                        offsetX,
-                        offsetY
+                        transform
                 );
 
 
@@ -72,10 +63,8 @@ public class SelectionController {
     public void updateSelection(
             double mouseX,
             double mouseY,
-            double zoom,
-            double offsetX,
-            double offsetY
-    ) {
+            ViewTransform transform
+    ){
 
 
         if (!selecting) {
@@ -89,9 +78,7 @@ public class SelectionController {
                 getCell(
                         mouseX,
                         mouseY,
-                        zoom,
-                        offsetX,
-                        offsetY
+                        transform
                 );
 
 
@@ -128,26 +115,19 @@ public class SelectionController {
     private int[] getCell(
             double mouseX,
             double mouseY,
-            double zoom,
-            double offsetX,
-            double offsetY
+            ViewTransform transform
     ) {
 
-        double scaledCellSize =
-                CELL_SIZE * zoom;
-
-        double scaledRulerSize =
-                RULER_SIZE * zoom;
-
-
         int column =
-                (int)((mouseX - offsetX - scaledRulerSize)
-                        / scaledCellSize);
+                transform.screenToColumn(
+                        mouseX
+                );
 
 
         int row =
-                (int)((mouseY - offsetY - scaledRulerSize)
-                        / scaledCellSize);
+                transform.screenToRow(
+                        mouseY
+                );
 
 
         if (row < 0 || column < 0 ||

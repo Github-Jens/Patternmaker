@@ -64,14 +64,14 @@ public class ChartEditor {
         Color newLeftBorder = oldLeftBorder;
 
 
-        // Tool handling
+        // Stitch handling
         if (activeTool == Tool.ERASE) {
 
             newStitch = null;
             newBackground = null;
 
         }
-        else {
+        else if (selectedStitch != null) {
 
             newStitch = selectedStitch;
 

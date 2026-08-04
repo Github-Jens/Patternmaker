@@ -7,9 +7,6 @@ import javafx.scene.paint.Color;
 
 public class ChartCanvas extends Canvas {
 
-    private static final int CELL_SIZE = 30;
-    private static final int RULER_SIZE = 30;
-
     private final ChartEditor editor;
     private final SelectionController selectionController;
 
@@ -19,18 +16,12 @@ public class ChartCanvas extends Canvas {
     private final ChartRenderer renderer;
     private CanvasRenderContext renderContext;
     private ScrollPane scrollPane;
-    private double zoom = 1.0;
-
-    private double offsetX = 0;
-    private double offsetY = 0;
+    private final ViewTransform transform;
+    private final ChartMouseController mouseController;
+    private final SelectionRenderer selectionRenderer;
 
     private int cursorRow = -1;
     private int cursorColumn = -1;
-
-    private double lastMouseX;
-    private double lastMouseY;
-
-    private boolean panning = false;
 
     private SelectionMenu activeSelectionMenu;
 
@@ -51,38 +42,71 @@ public class ChartCanvas extends Canvas {
                 );
         this.scrollPane = scrollPane;
         this.renderer = new ChartRenderer(chart);
+
+        this.transform =
+                new ViewTransform(
+                        ViewTransform.DEFAULT_CELL_SIZE,
+                        ViewTransform.DEFAULT_RULER_SIZE
+                );
+
+        this.selectionRenderer =
+                new SelectionRenderer(
+                        transform
+                );
+
         setWidth(
-                (chart.getColumns() + 2) * CELL_SIZE
+                (chart.getColumns() + 2)
+                        * ViewTransform.DEFAULT_CELL_SIZE
         );
 
         setHeight(
-                (chart.getRows() + 2) * CELL_SIZE
+                (chart.getRows() + 2)
+                        * ViewTransform.DEFAULT_CELL_SIZE
         );
+
+
+
         this.renderContext =
                 new CanvasRenderContext(getGraphicsContext2D());
         drawChart();
-        setupMouseControls();
+
+        this.mouseController =
+                new ChartMouseController(
+                        this,
+                        editor,
+                        editorState,
+                        selectionController,
+                        transform,
+                        this::drawChart,
+                        this::paintAt,
+                        this::updateCursorPosition,
+                        this::showSelectionMenu
+                );
+
+        mouseController.install();
+
         setupZoomControls();
 
     }
 
     private void drawChart() {
 
-        double scaledCellSize = CELL_SIZE * zoom;
+        double scaledCellSize = transform.getScaledCellSize();
         int renderColumns = editor.getChart().getColumns() + 2;
         int renderRows    = editor.getChart().getRows() + 2;
 
         int firstColumn = Math.max(
                 0,
                 (int)Math.floor(
-                        -offsetX / scaledCellSize
+                        -transform.getOffsetX()
+                                / scaledCellSize
                 )
         );
 
         int lastColumn = Math.min(
                 renderColumns - 1,
                 (int)Math.ceil(
-                        (getWidth() - offsetX)
+                        (getWidth() - transform.getOffsetX())
                                 / scaledCellSize
                 )
         );
@@ -90,14 +114,15 @@ public class ChartCanvas extends Canvas {
         int firstRow = Math.max(
                 0,
                 (int)Math.floor(
-                        -offsetY / scaledCellSize
+                        -transform.getOffsetY()
+                                / scaledCellSize
                 )
         );
 
         int lastRow = Math.min(
                 renderRows - 1,
                 (int)Math.ceil(
-                        (getHeight() - offsetY)
+                        (getHeight() - transform.getOffsetY())
                                 / scaledCellSize
                 )
         );
@@ -123,272 +148,27 @@ public class ChartCanvas extends Canvas {
                 getHeight()
         );
 
-        drawSelection();
+        selectionRenderer.render(
+                getGraphicsContext2D(),
+                editorState.getSelection()
+        );
 
         gc.restore();
 
     }
 
-    private void drawSelection() {
-
-        ChartSelection selection =
-                editorState.getSelection();
-
-
-
-        if (!selection.hasSelection()) {
-
-            return;
-
-        }
-
-
-        double scaledCellSize = CELL_SIZE * zoom;
-
-
-        int startColumn =
-                Math.min(
-                        selection.getStartColumn(),
-                        selection.getEndColumn()
-                );
-
-        int endColumn =
-                Math.max(
-                        selection.getStartColumn(),
-                        selection.getEndColumn()
-                );
-
-
-        int startRow =
-                Math.min(
-                        selection.getStartRow(),
-                        selection.getEndRow()
-                );
-
-        int endRow =
-                Math.max(
-                        selection.getStartRow(),
-                        selection.getEndRow()
-                );
-
-
-        double scaledRulerSize =
-                RULER_SIZE * zoom;
-
-
-        double x =
-                offsetX
-                        + scaledRulerSize
-                        + startColumn * scaledCellSize;
-
-
-        double y =
-                offsetY
-                        + scaledRulerSize
-                        + startRow * scaledCellSize;
-
-
-        double width =
-                (endColumn - startColumn + 1)
-                        * scaledCellSize;
-
-
-        double height =
-                (endRow - startRow + 1)
-                        * scaledCellSize;
-
-
-        GraphicsContext gc =
-                getGraphicsContext2D();
-
-
-        gc.setStroke(Color.BLUE);
-        gc.setLineWidth(1);
-
-
-        gc.strokeRect(
-                x,
-                y,
-                width,
-                height
-        );
-
-    }
-
-    private void setupMouseControls() {
-
-        setOnMousePressed(event -> {
-
-            if (activeSelectionMenu != null) {
-
-                activeSelectionMenu.closeAllPickers();
-
-                activeSelectionMenu.hide();
-
-                activeSelectionMenu = null;
-
-            }
-
-            editorState.getSelection()
-                    .clear();
-
-            drawChart();
-
-            if (event.isMiddleButtonDown()) {
-
-                panning = true;
-
-                lastMouseX = event.getX();
-                lastMouseY = event.getY();
-
-                return;
-            }
-
-
-            if (editorState.activeToolProperty().get() == Tool.SELECT) {
-
-                selectionController.startSelection(
-                        event.getX(),
-                        event.getY(),
-                        zoom,
-                        offsetX,
-                        offsetY
-                );
-
-                return;
-            }
-
-
-            if (editorState.activeToolProperty().get() == Tool.DRAW
-                    || editorState.activeToolProperty().get() == Tool.ERASE) {
-
-                editor.beginStroke();
-
-                paintAt(
-                        event.getX(),
-                        event.getY()
-                );
-
-            }
-
-        });
-
-
-        setOnMouseDragged(event -> {
-
-            updateCursorPosition(
-                    event.getX(),
-                    event.getY()
-            );
-
-            if (panning) {
-
-                double deltaX =
-                        event.getX() - lastMouseX;
-
-                double deltaY =
-                        event.getY() - lastMouseY;
-
-
-                offsetX += deltaX;
-                offsetY += deltaY;
-
-
-                lastMouseX = event.getX();
-                lastMouseY = event.getY();
-
-
-                drawChart();
-
-                return;
-            }
-
-
-            if (editorState.activeToolProperty().get() == Tool.SELECT
-                    && selectionController.isSelecting()) {
-
-                selectionController.updateSelection(
-                        event.getX(),
-                        event.getY(),
-                        zoom,
-                        offsetX,
-                        offsetY
-                );
-
-                drawChart();
-
-                return;
-            }
-
-
-            if (editorState.activeToolProperty().get() == Tool.DRAW
-                    || editorState.activeToolProperty().get() == Tool.ERASE) {
-
-                paintAt(
-                        event.getX(),
-                        event.getY()
-                );
-
-            }
-
-        });
-
-        setOnMouseMoved(event -> {
-
-            updateCursorPosition(
-                    event.getX(),
-                    event.getY()
-            );
-
-        });
-
-
-        setOnMouseReleased(event -> {
-
-            if (panning) {
-
-                panning = false;
-
-                return;
-            }
-
-
-            if (selectionController.isSelecting()) {
-
-                selectionController.finishSelection();
-
-                drawChart();
-
-                showSelectionMenu(
-                        event.getScreenX(),
-                        event.getScreenY()
-                );
-
-                return;
-
-            }
-
-
-            editor.endStroke();
-
-        });
-
-    }
-
     private void paintAt(double mouseX, double mouseY) {
 
-        double scaledCellSize = CELL_SIZE * zoom;
-        double scaledRulerSize = RULER_SIZE * zoom;
-
-
         int column =
-                (int)((mouseX - offsetX - scaledRulerSize)
-                        / scaledCellSize);
+                transform.screenToColumn(
+                        mouseX
+                );
 
 
         int row =
-                (int)((mouseY - offsetY - scaledRulerSize)
-                        / scaledCellSize);
+                transform.screenToRow(
+                        mouseY
+                );
 
 
         if (row < 0 || column < 0 ||
@@ -425,17 +205,16 @@ public class ChartCanvas extends Canvas {
             double mouseY
     ) {
 
-        double scaledCellSize = CELL_SIZE * zoom;
-
-
         int column =
-                (int)((mouseX - offsetX - RULER_SIZE * zoom)
-                        / scaledCellSize);
+                transform.screenToColumn(
+                        mouseX
+                );
 
 
         int row =
-                (int)((mouseY - offsetY - RULER_SIZE * zoom)
-                        / scaledCellSize);
+                transform.screenToRow(
+                        mouseY
+                );
 
 
         if (row < 0 ||
@@ -494,43 +273,41 @@ public class ChartCanvas extends Canvas {
 
         setOnScroll(event -> {
 
-            double mouseX = event.getX();
-            double mouseY = event.getY();
-
-
-            double oldZoom = zoom;
+            double newZoom =
+                    transform.getZoom();
 
 
             if (event.getDeltaY() > 0) {
 
-                zoom *= 1.1;
+                newZoom *= 1.1;
 
-            } else {
+            }
+            else {
 
-                zoom /= 1.1;
+                newZoom /= 1.1;
 
             }
 
 
-            if (zoom < 0.25) {
-                zoom = 0.25;
+            if (newZoom < 0.25) {
+
+                newZoom = 0.25;
+
             }
 
-            if (zoom > 1.0) {
-                zoom = 1.0;
+
+            if (newZoom > 1.0) {
+
+                newZoom = 1.0;
+
             }
 
 
-            double zoomFactor = zoom / oldZoom;
-
-
-            offsetX =
-                    mouseX - (mouseX - offsetX) * zoomFactor;
-
-
-            offsetY =
-                    mouseY - (mouseY - offsetY) * zoomFactor;
-
+            transform.zoom(
+                    newZoom,
+                    event.getX(),
+                    event.getY()
+            );
 
 
             drawChart();
@@ -541,11 +318,7 @@ public class ChartCanvas extends Canvas {
 
     public void resetView() {
 
-        zoom = 1.0;
-
-        offsetX = 0;
-        offsetY = 0;
-
+        transform.reset();
 
         if (scrollPane != null) {
 
@@ -567,10 +340,10 @@ public class ChartCanvas extends Canvas {
     ) {
 
         return new RenderSettings(
-                CELL_SIZE,
-                zoom,
-                offsetX,
-                offsetY,
+                ViewTransform.DEFAULT_CELL_SIZE,
+                transform.getZoom(),
+                transform.getOffsetX(),
+                transform.getOffsetY(),
                 firstRow,
                 lastRow,
                 firstColumn,
