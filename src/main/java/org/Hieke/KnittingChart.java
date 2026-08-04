@@ -6,8 +6,11 @@ public class KnittingChart {
     private int rows;
     private int columns;
 
-    private static final int MIN_SIZE = 1;
-    private static final int MAX_SIZE = 300;
+    public static final int MIN_ROWS = 1;
+    public static final int MAX_ROWS = 300;
+
+    public static final int MIN_COLUMNS = 1;
+    public static final int MAX_COLUMNS = 300;
 
     public KnittingChart(int rows, int columns) {
 
@@ -48,7 +51,7 @@ public class KnittingChart {
 
     public void insertRow(int index) {
 
-        if (rows >= MAX_SIZE) {
+        if (rows >= MAX_ROWS) {
             return;
         }
 
@@ -107,7 +110,7 @@ public class KnittingChart {
 
     public void insertColumn(int index) {
 
-        if (columns >= MAX_SIZE) {
+        if (columns >= MAX_COLUMNS) {
             return;
         }
 
@@ -168,7 +171,7 @@ public class KnittingChart {
 
     public void deleteRow(int index) {
 
-        if (index < 0 || index >= rows || rows <= MIN_SIZE) {
+        if (index < 0 || index >= rows || rows <= MIN_ROWS) {
             return;
         }
 
@@ -209,7 +212,7 @@ public class KnittingChart {
 
     public void deleteColumn(int index) {
 
-        if (index < 0 || index >= columns || columns <= MIN_SIZE) {
+        if (index < 0 || index >= columns || columns <= MIN_COLUMNS) {
             return;
         }
 

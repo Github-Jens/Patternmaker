@@ -5,6 +5,8 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.paint.Color;
 
+import java.util.Optional;
+
 public class ChartCanvas extends Canvas {
 
     private final ChartEditor editor;
@@ -418,7 +420,21 @@ public class ChartCanvas extends Canvas {
 
     public void insertRow(int index) {
 
-        editor.insertRow(index);
+        editor.insertRows(
+                index,
+                1
+        );
+
+        updateCanvasSize();
+
+    }
+
+    public void insertColumn(int index) {
+
+        editor.insertColumns(
+                index,
+                1
+        );
 
         updateCanvasSize();
 
@@ -433,18 +449,80 @@ public class ChartCanvas extends Canvas {
     }
 
 
-    public void insertColumn(int index) {
-
-        editor.insertColumn(index);
-        updateCanvasSize();
-
-    }
-
-
     public void deleteColumn(int index) {
 
         editor.deleteColumn(index);
         updateCanvasSize();
+
+    }
+    public void modifyChart() {
+
+        Optional<ChartResizeDialog> result =
+                ChartResizeDialog.show();
+
+
+        result.ifPresent(
+                request -> {
+
+                    int amount =
+                            request.getAmount();
+
+
+                    if (request.getAction()
+                            == ChartResizeDialog.Action.INSERT) {
+
+
+                        if (request.getType()
+                                == ChartResizeDialog.Type.ROW) {
+
+
+                            editor.insertRows(
+                                    editor.getChart().getRows(),
+                                    amount
+                            );
+
+                        }
+                        else {
+
+
+                            editor.insertColumns(
+                                    editor.getChart().getColumns(),
+                                    amount
+                            );
+
+                        }
+
+                    }
+                    else {
+
+
+                        if (request.getType()
+                                == ChartResizeDialog.Type.ROW) {
+
+
+                            editor.deleteRows(
+                                    editor.getChart().getRows() - amount,
+                                    editor.getChart().getRows() - 1
+                            );
+
+                        }
+                        else {
+
+
+                            editor.deleteColumns(
+                                    editor.getChart().getColumns() - amount,
+                                    editor.getChart().getColumns() - 1
+                            );
+
+                        }
+
+                    }
+
+
+                    updateCanvasSize();
+
+                }
+        );
 
     }
 

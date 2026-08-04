@@ -4,6 +4,8 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 
+import java.util.Optional;
+
 
 public class SelectionMenu extends ContextMenu {
 
@@ -224,6 +226,38 @@ public class SelectionMenu extends ContextMenu {
 
         });
 
+        MenuItem insert =
+                new MenuItem(
+                        "Insert..."
+                );
+
+
+        insert.setOnAction(event -> {
+
+            Optional<InsertDialog> result =
+                    InsertDialog.show();
+
+
+            result.ifPresent(
+                    request -> {
+
+                        System.out.println(
+                                "Type: " + request.getType()
+                        );
+
+                        System.out.println(
+                                "Direction: " + request.getDirection()
+                        );
+
+                        System.out.println(
+                                "Amount: " + request.getAmount()
+                        );
+
+                    }
+            );
+
+        });
+
         MenuItem deleteRows =
                 new MenuItem(
                         "Delete Selected Rows"
@@ -331,6 +365,7 @@ public class SelectionMenu extends ContextMenu {
                         cut,
                         clear,
                         new SeparatorMenuItem(),
+                        insert,
                         deleteRows,
                         deleteColumns,
                         new SeparatorMenuItem(),

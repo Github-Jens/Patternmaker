@@ -4,15 +4,18 @@ public class InsertColumnChange implements UndoableChange {
 
     private final KnittingChart chart;
     private final int index;
+    private final int amount;
 
 
     public InsertColumnChange(
             KnittingChart chart,
-            int index
+            int index,
+            int amount
     ) {
 
         this.chart = chart;
         this.index = index;
+        this.amount = amount;
 
     }
 
@@ -20,7 +23,11 @@ public class InsertColumnChange implements UndoableChange {
     @Override
     public void undo() {
 
-        chart.deleteColumn(index);
+        for (int i = 0; i < amount; i++) {
+
+            chart.deleteColumn(index);
+
+        }
 
     }
 
@@ -28,8 +35,11 @@ public class InsertColumnChange implements UndoableChange {
     @Override
     public void redo() {
 
-        chart.insertColumn(index);
+        for (int i = 0; i < amount; i++) {
+
+            chart.insertColumn(index);
+
+        }
 
     }
-
 }

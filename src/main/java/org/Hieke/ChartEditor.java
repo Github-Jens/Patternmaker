@@ -614,18 +614,38 @@ public class ChartEditor {
     }
 
 
-    public void insertRow(int index) {
+    public void insertRows(
+            int index,
+            int amount
+    ) {
+
+        if (!canInsertRows(amount)) {
+            return;
+        }
+
+        if (amount <= 0) {
+            return;
+        }
+
 
         beginStroke();
 
-        chart.insertRow(index);
+
+        for (int i = 0; i < amount; i++) {
+
+            chart.insertRow(index);
+
+        }
+
 
         currentStroke.addChange(
                 new InsertRowChange(
                         chart,
-                        index
+                        index,
+                        amount
                 )
         );
+
 
         endStroke();
 
@@ -633,18 +653,38 @@ public class ChartEditor {
 
     }
 
-    public void insertColumn(int index) {
+    public void insertColumns(
+            int index,
+            int amount
+    ) {
+
+        if (!canInsertColumns(amount)) {
+            return;
+        }
+
+        if (amount <= 0) {
+            return;
+        }
+
 
         beginStroke();
 
-        chart.insertColumn(index);
+
+        for (int i = 0; i < amount; i++) {
+
+            chart.insertColumn(index);
+
+        }
+
 
         currentStroke.addChange(
                 new InsertColumnChange(
                         chart,
-                        index
+                        index,
+                        amount
                 )
         );
+
 
         endStroke();
 
@@ -674,6 +714,12 @@ public class ChartEditor {
             int endRow
     ) {
 
+        int amount = endRow - startRow + 1;
+
+        if (!canDeleteRows(amount)) {
+            return;
+        }
+
         beginStroke();
 
 
@@ -702,10 +748,17 @@ public class ChartEditor {
         modified = true;
 
     }
+
     public void deleteColumns(
             int startColumn,
             int endColumn
     ) {
+
+        int amount = endColumn - startColumn + 1;
+
+        if (!canDeleteColumns(amount)) {
+            return;
+        }
 
         beginStroke();
 
@@ -774,6 +827,37 @@ public class ChartEditor {
                         index
                 )
         );
+
+    }
+
+    public boolean canInsertRows(int amount) {
+
+        return amount > 0 &&
+                chart.getRows() + amount <= KnittingChart.MAX_ROWS;
+
+    }
+
+
+    public boolean canInsertColumns(int amount) {
+
+        return amount > 0 &&
+                chart.getColumns() + amount <= KnittingChart.MAX_COLUMNS;
+
+    }
+
+
+    public boolean canDeleteRows(int amount) {
+
+        return amount > 0 &&
+                chart.getRows() - amount >= KnittingChart.MIN_ROWS;
+
+    }
+
+
+    public boolean canDeleteColumns(int amount) {
+
+        return amount > 0 &&
+                chart.getColumns() - amount >= KnittingChart.MIN_COLUMNS;
 
     }
 

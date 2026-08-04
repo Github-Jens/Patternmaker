@@ -18,10 +18,7 @@ public class MenuBarBuilder {
     private final Runnable exportPDFAction;
     private final Runnable exportSVGAction;
 
-    private final Runnable insertRowAction;
-    private final Runnable deleteRowAction;
-    private final Runnable insertColumnAction;
-    private final Runnable deleteColumnAction;
+    private final Runnable modifyChartAction;
 
 
     public MenuBarBuilder(
@@ -33,10 +30,7 @@ public class MenuBarBuilder {
             Runnable resetViewAction,
             Runnable exportPDFAction,
             Runnable exportSVGAction,
-            Runnable insertRowAction,
-            Runnable deleteRowAction,
-            Runnable insertColumnAction,
-            Runnable deleteColumnAction
+            Runnable modifyChartAction
     ) {
 
         this.newChartAction = newChartAction;
@@ -51,10 +45,7 @@ public class MenuBarBuilder {
         this.exportPDFAction = exportPDFAction;
         this.exportSVGAction = exportSVGAction;
 
-        this.insertRowAction = insertRowAction;
-        this.deleteRowAction = deleteRowAction;
-        this.insertColumnAction = insertColumnAction;
-        this.deleteColumnAction = deleteColumnAction;
+        this.modifyChartAction = modifyChartAction;
     }
 
 
@@ -186,45 +177,26 @@ public class MenuBarBuilder {
 
         Menu chartMenu = new Menu("Chart");
 
-        MenuItem insertRow =
-                new MenuItem("Insert Row");
 
-        MenuItem deleteRow =
-                new MenuItem("Delete Row");
-
-        MenuItem insertColumn =
-                new MenuItem("Insert Column");
-
-        MenuItem deleteColumn =
-                new MenuItem("Delete Column");
+        MenuItem modifyChart =
+                new MenuItem(
+                        "Modify Chart..."
+                );
 
 
-        insertRow.setOnAction(event ->
-                insertRowAction.run()
-        );
-
-        deleteRow.setOnAction(event ->
-                deleteRowAction.run()
-        );
-
-        insertColumn.setOnAction(event ->
-                insertColumnAction.run()
-        );
-
-        deleteColumn.setOnAction(event ->
-                deleteColumnAction.run()
+        modifyChart.setOnAction(event ->
+                modifyChartAction.run()
         );
 
 
-        chartMenu.getItems().addAll(
-                insertRow,
-                deleteRow,
-                insertColumn,
-                deleteColumn
-        );
+        chartMenu.getItems()
+                .add(
+                        modifyChart
+                );
 
 
         return chartMenu;
+
     }
 
     public MenuBar createMenuBar() {
