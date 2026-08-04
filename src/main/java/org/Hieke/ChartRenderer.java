@@ -1,5 +1,7 @@
 package org.Hieke;
 
+import javafx.scene.paint.Color;
+
 public class ChartRenderer {
 
     private final KnittingChart chart;
@@ -27,6 +29,12 @@ public class ChartRenderer {
                 context,
               settings
         );
+
+        renderBorders(
+                context,
+                settings
+        );
+
 
 
         renderStitches(
@@ -135,6 +143,124 @@ public class ChartRenderer {
                 settings.offsetY
                         + (settings.renderRows - 1) * scaledCellSize
         );
+    }
+
+    private void renderBorders(
+            RenderContext context,
+            RenderSettings settings
+    ) {
+
+        double scaledCellSize =
+                settings.cellSize * settings.zoom;
+
+
+        for (int row = settings.firstRow;
+             row <= settings.lastRow;
+             row++) {
+
+
+            for (int column = settings.firstColumn;
+                 column <= settings.lastColumn;
+                 column++) {
+
+
+                if (!isStitchCell(row, column, settings)) {
+                    continue;
+                }
+
+
+                Stitch stitch =
+                        chart.getStitch(
+                                chartRow(row),
+                                chartColumn(column)
+                        );
+
+
+                double x =
+                        column * scaledCellSize
+                                + settings.offsetX;
+
+
+                double y =
+                        row * scaledCellSize
+                                + settings.offsetY;
+
+
+                if (stitch.getTopBorderColor() != null) {
+
+                    context.setStroke(
+                            colorToHex(
+                            stitch.getTopBorderColor()
+                            )
+                    );
+
+                    context.drawLine(
+                            x,
+                            y,
+                            x + scaledCellSize,
+                            y
+                    );
+
+                }
+
+
+                if (stitch.getBottomBorderColor() != null) {
+
+                    context.setStroke(
+                            colorToHex(
+                                    stitch.getBottomBorderColor()
+                            )
+                    );
+
+                    context.drawLine(
+                            x,
+                            y + scaledCellSize,
+                            x + scaledCellSize,
+                            y + scaledCellSize
+                    );
+
+                }
+
+
+                if (stitch.getLeftBorderColor() != null) {
+
+                    context.setStroke(
+                            colorToHex(
+                                    stitch.getLeftBorderColor()
+                            )
+                    );
+
+                    context.drawLine(
+                            x,
+                            y,
+                            x,
+                            y + scaledCellSize
+                    );
+
+                }
+
+
+                if (stitch.getRightBorderColor() != null) {
+
+                    context.setStroke(
+                            colorToHex(
+                                    stitch.getRightBorderColor()
+                            )
+                    );
+
+                    context.drawLine(
+                            x + scaledCellSize,
+                            y,
+                            x + scaledCellSize,
+                            y + scaledCellSize
+                    );
+
+                }
+
+            }
+
+        }
+
     }
     public void renderStitches(
             RenderContext context,
@@ -424,6 +550,17 @@ public class ChartRenderer {
                 && renderRow < chart.getRows() + 1
                 && renderColumn > 0
                 && renderColumn < chart.getColumns() + 1;
+    }
+
+    private String colorToHex(Color color) {
+
+        return String.format(
+                "#%02X%02X%02X",
+                (int)(color.getRed() * 255),
+                (int)(color.getGreen() * 255),
+                (int)(color.getBlue() * 255)
+        );
+
     }
 
 

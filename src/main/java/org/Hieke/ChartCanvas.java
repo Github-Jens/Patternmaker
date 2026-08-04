@@ -172,15 +172,19 @@ public class ChartCanvas extends Canvas {
                 );
 
 
+        double scaledRulerSize =
+                RULER_SIZE * zoom;
+
+
         double x =
                 offsetX
-                        + RULER_SIZE
+                        + scaledRulerSize
                         + startColumn * scaledCellSize;
 
 
         double y =
                 offsetY
-                        + RULER_SIZE
+                        + scaledRulerSize
                         + startRow * scaledCellSize;
 
 
@@ -374,14 +378,16 @@ public class ChartCanvas extends Canvas {
     private void paintAt(double mouseX, double mouseY) {
 
         double scaledCellSize = CELL_SIZE * zoom;
+        double scaledRulerSize = RULER_SIZE * zoom;
 
 
         int column =
-                (int)((mouseX - offsetX - RULER_SIZE)
+                (int)((mouseX - offsetX - scaledRulerSize)
                         / scaledCellSize);
 
+
         int row =
-                (int)((mouseY - offsetY - RULER_SIZE)
+                (int)((mouseY - offsetY - scaledRulerSize)
                         / scaledCellSize);
 
 
@@ -390,6 +396,8 @@ public class ChartCanvas extends Canvas {
                 column >= editor.getChart().getColumns()) {
             return;
         }
+
+
         if (editorState.activeToolProperty().get() != Tool.ERASE
                 && editorState.selectedStitchProperty().get() == null
                 && editorState.selectedColorIndexProperty().get() == -1) {
@@ -397,6 +405,7 @@ public class ChartCanvas extends Canvas {
             return;
 
         }
+
 
         editor.paintCell(
                 row,
@@ -408,6 +417,7 @@ public class ChartCanvas extends Canvas {
         );
 
         drawChart();
+
     }
 
     private void updateCursorPosition(
@@ -419,12 +429,12 @@ public class ChartCanvas extends Canvas {
 
 
         int column =
-                (int)((mouseX - offsetX - RULER_SIZE)
+                (int)((mouseX - offsetX - RULER_SIZE * zoom)
                         / scaledCellSize);
 
 
         int row =
-                (int)((mouseY - offsetY - RULER_SIZE)
+                (int)((mouseY - offsetY - RULER_SIZE * zoom)
                         / scaledCellSize);
 
 

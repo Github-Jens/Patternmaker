@@ -20,6 +20,7 @@ public class SelectionMenu extends ContextMenu {
 
     private SymbolPickerPopup symbolPicker;
     private ColourPickerPopup colourPicker;
+    private ColourPickerPopup frameColourPicker;
 
     private double menuX;
     private double menuY;
@@ -140,6 +141,51 @@ public class SelectionMenu extends ContextMenu {
 
         });
 
+        //Frame Colour menu
+
+        MenuItem frameColour =
+                new MenuItem(
+                        "Frame with Colour..."
+                );
+
+
+        frameColour.setOnAction(event -> {
+
+
+            if (frameColourPicker == null) {
+
+                frameColourPicker =
+                        new ColourPickerPopup(
+                                palette,
+                                index -> {
+
+
+                                    editor.frameSelection(
+                                            editorState.getSelection(),
+                                            palette.getColor(index)
+                                    );
+
+
+                                    editorState.getSelection()
+                                            .clear();
+
+
+                                    refresh.run();
+
+                                }
+                        );
+
+            }
+
+
+            frameColourPicker.show(
+                    chartCanvas,
+                    menuX + 50,
+                    menuY
+            );
+
+        });
+
         MenuItem copy =
                 new MenuItem(
                         "Copy"
@@ -236,6 +282,7 @@ public class SelectionMenu extends ContextMenu {
                 .addAll(
                         fillSymbol,
                         fillColour,
+                        frameColour,
                         new SeparatorMenuItem(),
                         copy,
                         paste,
@@ -269,6 +316,12 @@ public class SelectionMenu extends ContextMenu {
         if (colourPicker != null) {
 
             colourPicker.hide();
+
+        }
+
+        if (frameColourPicker != null) {
+
+            frameColourPicker.hide();
 
         }
 

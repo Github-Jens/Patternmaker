@@ -42,10 +42,26 @@ public class ChartEditor {
         Color oldBackground =
                 stitch.getBackgroundColor();
 
+        Color oldTopBorder =
+                stitch.getTopBorderColor();
+
+        Color oldRightBorder =
+                stitch.getRightBorderColor();
+
+        Color oldBottomBorder =
+                stitch.getBottomBorderColor();
+
+        Color oldLeftBorder =
+                stitch.getLeftBorderColor();
+
 
         StitchDefinition newStitch = oldStitch;
 
         Color newBackground = oldBackground;
+        Color newTopBorder = oldTopBorder;
+        Color newRightBorder = oldRightBorder;
+        Color newBottomBorder = oldBottomBorder;
+        Color newLeftBorder = oldLeftBorder;
 
 
         // Tool handling
@@ -67,11 +83,19 @@ public class ChartEditor {
             newBackground = null;
 
         }
-        else if (selectedColor != null) {
+        else if (selectedColorIndex == 0) {
 
+            // Null palette colour selected
+            newBackground = null;
+
+        }
+        else if (selectedColorIndex > 0) {
+
+            // Normal colour selected
             newBackground = selectedColor;
 
         }
+
 
 
         StitchChange change =
@@ -80,7 +104,19 @@ public class ChartEditor {
                         oldStitch,
                         newStitch,
                         oldBackground,
-                        newBackground
+                        newBackground,
+
+                        oldTopBorder,
+                        newTopBorder,
+
+                        oldRightBorder,
+                        newRightBorder,
+
+                        oldBottomBorder,
+                        newBottomBorder,
+
+                        oldLeftBorder,
+                        newLeftBorder
                 );
 
 
@@ -93,6 +129,158 @@ public class ChartEditor {
             currentStroke.addChange(change);
 
         }
+
+    }
+
+    private void changeBorders(
+            Stitch stitch,
+            Color top,
+            Color right,
+            Color bottom,
+            Color left
+    ) {
+
+        Color oldTop =
+                stitch.getTopBorderColor();
+
+        Color oldRight =
+                stitch.getRightBorderColor();
+
+        Color oldBottom =
+                stitch.getBottomBorderColor();
+
+        Color oldLeft =
+                stitch.getLeftBorderColor();
+
+
+        StitchChange change =
+                new StitchChange(
+                        stitch,
+
+                        stitch.getDefinition(),
+                        stitch.getDefinition(),
+
+                        stitch.getBackgroundColor(),
+                        stitch.getBackgroundColor(),
+
+                        oldTop,
+                        top,
+
+                        oldRight,
+                        right,
+
+                        oldBottom,
+                        bottom,
+
+                        oldLeft,
+                        left
+                );
+
+
+        change.redo();
+
+
+        if (currentStroke != null) {
+
+            currentStroke.addChange(change);
+
+        }
+
+    }
+
+    public void frameSelection(
+            ChartSelection selection,
+            Color color
+    ) {
+
+        if (!selection.hasSelection()) {
+
+            return;
+
+        }
+
+
+        int startColumn =
+                Math.min(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+        int endColumn =
+                Math.max(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+
+        int startRow =
+                Math.min(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+        int endRow =
+                Math.max(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+
+        beginStroke();
+
+
+        for (int row = startRow; row <= endRow; row++) {
+
+            for (int column = startColumn;
+                 column <= endColumn;
+                 column++) {
+
+
+                Stitch stitch =
+                        chart.getStitch(
+                                row,
+                                column
+                        );
+
+
+                Color top =
+                        row == startRow
+                                ? color
+                                : stitch.getTopBorderColor();
+
+
+                Color bottom =
+                        row == endRow
+                                ? color
+                                : stitch.getBottomBorderColor();
+
+
+                Color left =
+                        column == startColumn
+                                ? color
+                                : stitch.getLeftBorderColor();
+
+
+                Color right =
+                        column == endColumn
+                                ? color
+                                : stitch.getRightBorderColor();
+
+
+                changeBorders(
+                        stitch,
+                        top,
+                        right,
+                        bottom,
+                        left
+                );
+
+            }
+
+        }
+
+
+        endStroke();
 
     }
 
@@ -349,7 +537,7 @@ public class ChartEditor {
                         Tool.DRAW,
                         cell.getDefinition(),
                         cell.getColor(),
-                        -1
+                        cell.getColor() == null ? 0 : 1
                 );
 
             }

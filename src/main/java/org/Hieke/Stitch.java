@@ -11,6 +11,11 @@ public class Stitch {
     private int row;
     private int column;
 
+    private Color topBorderColor;
+    private Color rightBorderColor;
+    private Color bottomBorderColor;
+    private Color leftBorderColor;
+
 
     public Stitch(
             StitchDefinition definition,
@@ -23,6 +28,11 @@ public class Stitch {
         this.column = column;
 
         this.backgroundColor = null;
+
+        this.topBorderColor = null;
+        this.rightBorderColor = null;
+        this.bottomBorderColor = null;
+        this.leftBorderColor = null;
     }
 
 
@@ -93,6 +103,38 @@ public class Stitch {
                 " column " + column +
                 " background " + backgroundColor;
 
+    }
+
+    public Color getTopBorderColor() {
+        return topBorderColor;
+    }
+
+    public void setTopBorderColor(Color color) {
+        this.topBorderColor = color;
+    }
+
+    public Color getRightBorderColor() {
+        return rightBorderColor;
+    }
+
+    public void setRightBorderColor(Color color) {
+        this.rightBorderColor = color;
+    }
+
+    public Color getBottomBorderColor() {
+        return bottomBorderColor;
+    }
+
+    public void setBottomBorderColor(Color color) {
+        this.bottomBorderColor = color;
+    }
+
+    public Color getLeftBorderColor() {
+        return leftBorderColor;
+    }
+
+    public void setLeftBorderColor(Color color) {
+        this.leftBorderColor = color;
     }
 
 }

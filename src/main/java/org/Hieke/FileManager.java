@@ -88,17 +88,37 @@ public class FileManager {
                     }
 
 
-                    if (stitch.getBackgroundColor() != null) {
+                    writer.print(":");
 
-                        writer.print(":");
+                    writer.print(
+                            stitch.getBackgroundColor() == null
+                                    ? "null"
+                                    : toHex(stitch.getBackgroundColor())
+                    );
 
-                        writer.print(
-                                toHex(
-                                        stitch.getBackgroundColor()
-                                )
-                        );
+                    writer.print(":");
 
-                    }
+                    writer.print(
+                            colorToString(stitch.getTopBorderColor())
+                    );
+
+                    writer.print(":");
+
+                    writer.print(
+                            colorToString(stitch.getRightBorderColor())
+                    );
+
+                    writer.print(":");
+
+                    writer.print(
+                            colorToString(stitch.getBottomBorderColor())
+                    );
+
+                    writer.print(":");
+
+                    writer.print(
+                            colorToString(stitch.getLeftBorderColor())
+                    );
 
 
                     if (column < chart.getColumns() - 1) {
@@ -280,21 +300,56 @@ public class FileManager {
                     stitch.setDefinition(definition);
 
 
-                    // Load colour if present
-                    if (parts.length > 1 &&
-                            !parts[1].isEmpty()) {
-
+                    // Load background colour if present
+                    if (parts.length > 1) {
 
                         stitch.setBackgroundColor(
-                                Color.web(
-                                        parts[1]
-                                )
+                                parseColor(parts[1])
                         );
 
                     }
                     else {
 
                         stitch.setBackgroundColor(null);
+
+                    }
+
+                    stitch.setTopBorderColor(null);
+                    stitch.setRightBorderColor(null);
+                    stitch.setBottomBorderColor(null);
+                    stitch.setLeftBorderColor(null);
+
+
+// Load border colours if present
+                    if (parts.length > 2) {
+
+                        stitch.setTopBorderColor(
+                                parseColor(parts[2])
+                        );
+
+                    }
+
+                    if (parts.length > 3) {
+
+                        stitch.setRightBorderColor(
+                                parseColor(parts[3])
+                        );
+
+                    }
+
+                    if (parts.length > 4) {
+
+                        stitch.setBottomBorderColor(
+                                parseColor(parts[4])
+                        );
+
+                    }
+
+                    if (parts.length > 5) {
+
+                        stitch.setLeftBorderColor(
+                                parseColor(parts[5])
+                        );
 
                     }
 
@@ -322,6 +377,27 @@ public class FileManager {
                 (int)(color.getGreen() * 255),
                 (int)(color.getBlue() * 255)
         );
+
+    }
+
+    private String colorToString(Color color) {
+
+        if (color == null) {
+            return "null";
+        }
+
+        return toHex(color);
+    }
+
+    private Color parseColor(String value) {
+
+        if (value == null || value.equals("null")) {
+
+            return null;
+
+        }
+
+        return Color.web(value);
 
     }
 

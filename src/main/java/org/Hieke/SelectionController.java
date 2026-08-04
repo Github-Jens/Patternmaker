@@ -133,18 +133,20 @@ public class SelectionController {
             double offsetY
     ) {
 
-
         double scaledCellSize =
                 CELL_SIZE * zoom;
 
+        double scaledRulerSize =
+                RULER_SIZE * zoom;
+
 
         int column =
-                (int)((mouseX - offsetX - RULER_SIZE)
+                (int)((mouseX - offsetX - scaledRulerSize)
                         / scaledCellSize);
 
 
         int row =
-                (int)((mouseY - offsetY - RULER_SIZE)
+                (int)((mouseY - offsetY - scaledRulerSize)
                         / scaledCellSize);
 
 
