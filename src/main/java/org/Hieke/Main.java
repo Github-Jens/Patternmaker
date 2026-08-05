@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
@@ -16,6 +17,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 public class Main extends Application {
 
@@ -36,6 +38,12 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
         this.stage = stage;
+        stage.getIcons().add(
+                new Image(
+                        Objects.requireNonNull(getClass().getResourceAsStream("/icons/P&S.JPG"))
+                )
+        );
+
         root = new BorderPane();
         KnittingChart chart =
                 new KnittingChart(
@@ -129,7 +137,7 @@ public class Main extends Application {
 
         });
 
-        stage.setTitle("Knitting Chart Maker");
+        stage.setTitle("Penny and Stitch Chartmaker");
         stage.setMaximized(true);
         stage.setScene(scene);
 
@@ -518,6 +526,8 @@ public class Main extends Application {
     }
 
     private void setChart(KnittingChart chart) {
+
+        editorState.getSelection().clear();
 
 
         scrollPane = new ScrollPane();
