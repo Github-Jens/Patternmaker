@@ -2,11 +2,13 @@ package org.Hieke;
 
 import javafx.scene.canvas.Canvas;
 
+import java.util.function.BiConsumer;
+
 
 public class ChartMouseController {
 
     private final Runnable refresh;
-    private final java.util.function.BiConsumer<Double, Double> paint;
+    private final java.util.function.BiConsumer<Integer, Integer> paint;
     private final java.util.function.BiConsumer<Double, Double> updateCursor;
     private final java.util.function.BiConsumer<Double, Double> showMenu;
 
@@ -31,9 +33,9 @@ public class ChartMouseController {
             SelectionController selectionController,
             ViewTransform transform,
             Runnable refresh,
-            java.util.function.BiConsumer<Double, Double> paint,
-            java.util.function.BiConsumer<Double, Double> updateCursor,
-            java.util.function.BiConsumer<Double, Double> showMenu
+            BiConsumer<Integer, Integer> paint,
+            BiConsumer<Double, Double> updateCursor,
+            BiConsumer<Double, Double> showMenu
     ) {
 
         this.canvas = canvas;
@@ -92,11 +94,21 @@ public class ChartMouseController {
             if (editorState.activeToolProperty().get() == Tool.DRAW
                     || editorState.activeToolProperty().get() == Tool.ERASE) {
 
-                editor.beginStroke();
+                editor.startPainting();
+
+                int column =
+                        transform.screenToColumn(
+                                event.getX()
+                        );
+
+                int row =
+                        transform.screenToRow(
+                                event.getY()
+                        );
 
                 paint.accept(
-                        event.getX(),
-                        event.getY()
+                        row,
+                        column
                 );
 
             }
@@ -157,9 +169,19 @@ public class ChartMouseController {
                     || editorState.activeToolProperty().get() == Tool.ERASE) {
 
 
+                int column =
+                        transform.screenToColumn(
+                                event.getX()
+                        );
+
+                int row =
+                        transform.screenToRow(
+                                event.getY()
+                        );
+
                 paint.accept(
-                        event.getX(),
-                        event.getY()
+                        row,
+                        column
                 );
 
             }
@@ -203,7 +225,7 @@ public class ChartMouseController {
             }
 
 
-            editor.endStroke();
+            editor.finishPainting();
 
         });
 

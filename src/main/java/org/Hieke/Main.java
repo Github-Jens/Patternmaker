@@ -1,17 +1,12 @@
 package org.Hieke;
 
 import javafx.application.Application;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -30,6 +25,8 @@ public class Main extends Application {
     private ScrollPane scrollPane;
     private EditorState editorState;
     private StitchLibrary stitchLibrary;
+
+    private ChartModificationController modificationController;
 
     private static final int MIN_CHART_SIZE = 1;
     private static final int MAX_CHART_SIZE = 300;
@@ -65,6 +62,10 @@ public class Main extends Application {
         palette =
                 new Palette();
 
+        // Create canvas
+
+        setChart(chart);
+
         // TOP Menu Bar + Toolbar
 
         MenuBar menuBar =
@@ -77,7 +78,7 @@ public class Main extends Application {
                         () -> canvas.resetView(),
                         this::exportPDF,
                         this::exportSVG,
-                        () -> canvas.modifyChart()
+                        this::modifyChart
                 ).createMenuBar();
 
 
@@ -108,9 +109,7 @@ public class Main extends Application {
 
         root.setLeft(toolPanel);
 
-// Create canvas
 
-        setChart(chart);
 
         root.setBottom(new Label("Status: Ready"));
 
@@ -464,6 +463,12 @@ public class Main extends Application {
             return false;
         }
     }
+
+    private void modifyChart() {
+
+        modificationController.modifyChart();
+
+    }
     private boolean confirmDiscardChanges() {
 
         if (!canvas.isModified()) {
@@ -539,6 +544,12 @@ public class Main extends Application {
                 palette,
                 scrollPane
         );
+
+        modificationController =
+                new ChartModificationController(
+                        canvas.getEditor(),
+                        canvas::refresh
+                );
 
 
         scrollPane.setContent(canvas);

@@ -9,13 +9,10 @@ import java.util.Optional;
 
 public class SelectionMenu extends ContextMenu {
 
-
-    private final ChartEditor editor;
-    private final EditorState editorState;
-    private final Runnable refresh;
     private final SymbolPalette symbolPalette;
     private final Palette palette;
     private final ChartCanvas chartCanvas;
+    private final SelectionMenuController controller;
 
 
     private SymbolPickerPopup symbolPicker;
@@ -27,17 +24,13 @@ public class SelectionMenu extends ContextMenu {
 
 
     public SelectionMenu(
-            ChartEditor editor,
-            EditorState editorState,
+            SelectionMenuController controller,
             SymbolPalette symbolPalette,
             Palette palette,
-            Runnable refresh,
             ChartCanvas chartCanvas
     ){
 
-        this.editor = editor;
-        this.editorState = editorState;
-        this.refresh = refresh;
+        this.controller = controller;
         this.symbolPalette = symbolPalette;
         this.palette = palette;
         this.chartCanvas = chartCanvas;
@@ -60,17 +53,7 @@ public class SelectionMenu extends ContextMenu {
                                 symbolPalette,
                                 definition -> {
 
-
-
-                                    editor.fillSelection(
-                                            editorState.getSelection(),
-                                            Tool.DRAW,
-                                            definition,
-                                            null,
-                                            -1
-                                    );
-
-                                    finishAction();
+                                    controller.fillWithSymbol(definition);
 
                                 }
                         );
@@ -106,16 +89,7 @@ public class SelectionMenu extends ContextMenu {
                                 palette,
                                 index -> {
 
-
-                                    editor.fillSelection(
-                                            editorState.getSelection(),
-                                            Tool.DRAW,
-                                            null,
-                                            palette.getColor(index),
-                                            index
-                                    );
-
-                                    finishAction();
+                                    controller.fillWithColour(index);
 
                                 }
                         );
@@ -149,13 +123,7 @@ public class SelectionMenu extends ContextMenu {
                                 palette,
                                 index -> {
 
-
-                                    editor.frameSelection(
-                                            editorState.getSelection(),
-                                            palette.getColor(index)
-                                    );
-
-                                    finishAction();
+                                    controller.frameWithColour(index);
 
                                 }
                         );
@@ -179,11 +147,7 @@ public class SelectionMenu extends ContextMenu {
 
         copy.setOnAction(event -> {
 
-            editor.copySelection(
-                    editorState.getSelection()
-            );
-
-            finishAction();
+            controller.copy();
 
         });
 
@@ -194,14 +158,13 @@ public class SelectionMenu extends ContextMenu {
                 );
 
         paste.setDisable(
-                !editor.hasClipboardData()
+                !controller.hasClipboardData()
         );
 
 
         paste.setOnAction(event -> {
 
-            chartCanvas.paste();
-            finishAction();
+            controller.paste();
 
         });
 
@@ -213,16 +176,7 @@ public class SelectionMenu extends ContextMenu {
 
         cut.setOnAction(event -> {
 
-            editor.copySelection(
-                    editorState.getSelection()
-            );
-
-
-            editor.clearSelection(
-                    editorState.getSelection()
-            );
-
-            finishAction();
+            controller.cut();
 
         });
 
@@ -234,27 +188,7 @@ public class SelectionMenu extends ContextMenu {
 
         insert.setOnAction(event -> {
 
-            Optional<InsertDialog> result =
-                    InsertDialog.show();
-
-
-            result.ifPresent(
-                    request -> {
-
-                        System.out.println(
-                                "Type: " + request.getType()
-                        );
-
-                        System.out.println(
-                                "Direction: " + request.getDirection()
-                        );
-
-                        System.out.println(
-                                "Amount: " + request.getAmount()
-                        );
-
-                    }
-            );
+            controller.insert();
 
         });
 
@@ -265,29 +199,7 @@ public class SelectionMenu extends ContextMenu {
 
         deleteRows.setOnAction(event -> {
 
-            ChartSelection selection =
-                    editorState.getSelection();
-
-
-            int startRow =
-                    Math.min(
-                            selection.getStartRow(),
-                            selection.getEndRow()
-                    );
-
-            int endRow =
-                    Math.max(
-                            selection.getStartRow(),
-                            selection.getEndRow()
-                    );
-
-
-            editor.deleteRows(
-                    startRow,
-                    endRow
-            );
-
-            finishAction();
+            controller.deleteRows();
 
         });
 
@@ -298,29 +210,7 @@ public class SelectionMenu extends ContextMenu {
 
         deleteColumns.setOnAction(event -> {
 
-            ChartSelection selection =
-                    editorState.getSelection();
-
-
-            int startColumn =
-                    Math.min(
-                            selection.getStartColumn(),
-                            selection.getEndColumn()
-                    );
-
-            int endColumn =
-                    Math.max(
-                            selection.getStartColumn(),
-                            selection.getEndColumn()
-                    );
-
-
-            editor.deleteColumns(
-                    startColumn,
-                    endColumn
-            );
-
-            finishAction();
+            controller.deleteColumns();
 
         });
 
@@ -333,7 +223,6 @@ public class SelectionMenu extends ContextMenu {
         cancel.setOnAction(event -> {
 
             hide();
-            finishAction();
 
         });
 
@@ -345,11 +234,7 @@ public class SelectionMenu extends ContextMenu {
 
         clear.setOnAction(event -> {
 
-            editor.clearSelection(
-                    editorState.getSelection()
-            );
-
-            finishAction();
+            controller.clear();
 
         });
 
@@ -371,15 +256,6 @@ public class SelectionMenu extends ContextMenu {
                         new SeparatorMenuItem(),
                         cancel
                 );
-
-    }
-
-    private void finishAction() {
-
-        editorState.getSelection()
-                .clear();
-
-        refresh.run();
 
     }
 

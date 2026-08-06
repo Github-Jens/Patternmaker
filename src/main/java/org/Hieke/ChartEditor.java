@@ -549,6 +549,35 @@ public class ChartEditor {
 
     }
 
+    public void paint(
+            int row,
+            int column,
+            EditorState state
+    ) {
+
+        paintCell(
+                row,
+                column,
+                state.activeToolProperty().get(),
+                state.selectedStitchProperty().get(),
+                state.selectedColorProperty().get(),
+                state.selectedColorIndexProperty().get()
+        );
+
+    }
+
+    public void startPainting() {
+
+        beginStroke();
+
+    }
+
+    public void finishPainting() {
+
+        endStroke();
+
+    }
+
     public void beginStroke() {
 
         currentStroke = new Stroke();

@@ -3,14 +3,12 @@ package org.Hieke;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.paint.Color;
-
-import java.util.Optional;
 
 public class ChartCanvas extends Canvas {
 
     private final ChartEditor editor;
-    private final SelectionController selectionController;
+    private final SelectionMenuController selectionMenuController;
+    private final ChartModificationController modificationController;
 
     private final EditorState editorState;
     private final Palette palette;
@@ -22,9 +20,6 @@ public class ChartCanvas extends Canvas {
     private final ChartMouseController mouseController;
     private final SelectionRenderer selectionRenderer;
 
-    private int cursorRow = -1;
-    private int cursorColumn = -1;
-
     private SelectionMenu activeSelectionMenu;
 
     public ChartCanvas(
@@ -35,9 +30,16 @@ public class ChartCanvas extends Canvas {
     ) {
 
         this.editor = new ChartEditor(chart);
+
+        this.modificationController =
+                new ChartModificationController(
+                        editor,
+                        this::drawChart
+                );
+
         this.editorState = editorState;
         this.palette = palette;
-        this.selectionController =
+        SelectionController selectionController =
                 new SelectionController(
                         editorState,
                         chart
@@ -70,7 +72,6 @@ public class ChartCanvas extends Canvas {
 
         this.renderContext =
                 new CanvasRenderContext(getGraphicsContext2D());
-        drawChart();
 
         this.mouseController =
                 new ChartMouseController(
@@ -80,14 +81,35 @@ public class ChartCanvas extends Canvas {
                         selectionController,
                         transform,
                         this::drawChart,
-                        this::paintAt,
+                        (row, column) -> {
+
+                            editor.paint(
+                                    row,
+                                    column,
+                                    editorState
+                            );
+
+                            drawChart();
+
+                        },
                         this::updateCursorPosition,
                         this::showSelectionMenu
+                );
+
+        this.selectionMenuController =
+                new SelectionMenuController(
+                        editor,
+                        editorState,
+                        palette,
+                        editorState.getSymbolPalette(),
+                        this::drawChart,
+                        this::updateCanvasSize
                 );
 
         mouseController.install();
 
         setupZoomControls();
+        drawChart();
 
     }
 
@@ -159,64 +181,16 @@ public class ChartCanvas extends Canvas {
 
     }
 
-    private void paintAt(double mouseX, double mouseY) {
-
-        int column =
-                transform.screenToColumn(
-                        mouseX
-                );
-
-
-        int row =
-                transform.screenToRow(
-                        mouseY
-                );
-
-
-        if (row < 0 || column < 0 ||
-                row >= editor.getChart().getRows() ||
-                column >= editor.getChart().getColumns()) {
-            return;
-        }
-
-
-        if (editorState.activeToolProperty().get() != Tool.ERASE
-                && editorState.selectedStitchProperty().get() == null
-                && editorState.selectedColorIndexProperty().get() == -1) {
-
-            return;
-
-        }
-
-
-        editor.paintCell(
-                row,
-                column,
-                editorState.activeToolProperty().get(),
-                editorState.selectedStitchProperty().get(),
-                editorState.selectedColorProperty().get(),
-                editorState.selectedColorIndexProperty().get()
-        );
-
-        drawChart();
-
-    }
-
     private void updateCursorPosition(
             double mouseX,
             double mouseY
     ) {
 
         int column =
-                transform.screenToColumn(
-                        mouseX
-                );
-
+                transform.screenToColumn(mouseX);
 
         int row =
-                transform.screenToRow(
-                        mouseY
-                );
+                transform.screenToRow(mouseY);
 
 
         if (row < 0 ||
@@ -224,35 +198,19 @@ public class ChartCanvas extends Canvas {
                 row >= editor.getChart().getRows() ||
                 column >= editor.getChart().getColumns()) {
 
-            cursorRow = -1;
-            cursorColumn = -1;
+            selectionMenuController.updateCursorPosition(
+                    -1,
+                    -1
+            );
 
             return;
         }
 
 
-        cursorRow = row;
-        cursorColumn = column;
-
-    }
-
-    public void paste() {
-
-        if (cursorRow < 0 ||
-                cursorColumn < 0) {
-
-            return;
-
-        }
-
-
-        editor.paste(
-                cursorRow,
-                cursorColumn
+        selectionMenuController.updateCursorPosition(
+                row,
+                column
         );
-
-
-        drawChart();
 
     }
 
@@ -391,15 +349,11 @@ public class ChartCanvas extends Canvas {
             activeSelectionMenu.hide();
 
         }
-
-
         activeSelectionMenu =
                 new SelectionMenu(
-                        editor,
-                        editorState,
+                        selectionMenuController,
                         editorState.getSymbolPalette(),
                         palette,
-                        this::drawChart,
                         this
                 );
 
@@ -418,113 +372,7 @@ public class ChartCanvas extends Canvas {
 
     }
 
-    public void insertRow(int index) {
 
-        editor.insertRows(
-                index,
-                1
-        );
-
-        updateCanvasSize();
-
-    }
-
-    public void insertColumn(int index) {
-
-        editor.insertColumns(
-                index,
-                1
-        );
-
-        updateCanvasSize();
-
-    }
-
-
-    public void deleteRow(int index) {
-
-        editor.deleteRow(index);
-        updateCanvasSize();
-
-    }
-
-
-    public void deleteColumn(int index) {
-
-        editor.deleteColumn(index);
-        updateCanvasSize();
-
-    }
-    public void modifyChart() {
-
-        Optional<ChartResizeDialog> result =
-                ChartResizeDialog.show();
-
-
-        result.ifPresent(
-                request -> {
-
-                    int amount =
-                            request.getAmount();
-
-
-                    if (request.getAction()
-                            == ChartResizeDialog.Action.INSERT) {
-
-
-                        if (request.getType()
-                                == ChartResizeDialog.Type.ROW) {
-
-
-                            editor.insertRows(
-                                    editor.getChart().getRows(),
-                                    amount
-                            );
-
-                        }
-                        else {
-
-
-                            editor.insertColumns(
-                                    editor.getChart().getColumns(),
-                                    amount
-                            );
-
-                        }
-
-                    }
-                    else {
-
-
-                        if (request.getType()
-                                == ChartResizeDialog.Type.ROW) {
-
-
-                            editor.deleteRows(
-                                    editor.getChart().getRows() - amount,
-                                    editor.getChart().getRows() - 1
-                            );
-
-                        }
-                        else {
-
-
-                            editor.deleteColumns(
-                                    editor.getChart().getColumns() - amount,
-                                    editor.getChart().getColumns() - 1
-                            );
-
-                        }
-
-                    }
-
-
-                    updateCanvasSize();
-
-                }
-        );
-
-    }
 
     private void updateCanvasSize() {
 
@@ -539,6 +387,19 @@ public class ChartCanvas extends Canvas {
         );
 
         drawChart();
+
+    }
+
+    public void refresh() {
+
+        updateCanvasSize();
+        drawChart();
+
+    }
+
+    public ChartEditor getEditor() {
+
+        return editor;
 
     }
 
