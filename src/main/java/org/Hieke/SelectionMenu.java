@@ -180,6 +180,29 @@ public class SelectionMenu extends ContextMenu {
 
         });
 
+        MenuItem mirrorHorizontal =
+                new MenuItem(
+                        "Mirror Horizontal"
+                );
+
+        mirrorHorizontal.setOnAction(event -> {
+
+            controller.mirrorHorizontal();
+
+        });
+
+
+        MenuItem mirrorVertical =
+                new MenuItem(
+                        "Mirror Vertical"
+                );
+
+        mirrorVertical.setOnAction(event -> {
+
+            controller.mirrorVertical();
+
+        });
+
         MenuItem insert =
                 new MenuItem(
                         "Insert..."
@@ -249,6 +272,9 @@ public class SelectionMenu extends ContextMenu {
                         paste,
                         cut,
                         clear,
+                        new SeparatorMenuItem(),
+                        mirrorHorizontal,
+                        mirrorVertical,
                         new SeparatorMenuItem(),
                         insert,
                         deleteRows,

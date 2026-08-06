@@ -14,6 +14,8 @@ public class ChartEditor {
     private Stroke currentStroke;
     private final ChartClipboard clipboard =
             new ChartClipboard();
+    private final SelectionTransformer transformer =
+            new SelectionTransformer();
 
     private boolean modified = false;
 
@@ -566,6 +568,120 @@ public class ChartEditor {
 
     }
 
+    public void mirrorHorizontal(
+            ChartSelection selection
+    ) {
+
+        if (!selection.hasSelection()) {
+            return;
+        }
+
+
+        int startRow =
+                getSelectionStartRow(selection);
+
+        int startColumn =
+                getSelectionStartColumn(selection);
+
+
+        SelectionSnapshot before =
+                transformer.createSnapshot(
+                        chart,
+                        selection
+                );
+
+
+        SelectionSnapshot after =
+                transformer.mirrorHorizontal(
+                        before
+                );
+
+
+        beginStroke();
+
+
+        transformer.applySnapshot(
+                chart,
+                startRow,
+                startColumn,
+                after
+        );
+
+
+        currentStroke.addChange(
+                new TransformationChange(
+                        chart,
+                        startRow,
+                        startColumn,
+                        before,
+                        after
+                )
+        );
+
+
+        endStroke();
+
+        modified = true;
+
+    }
+
+    public void mirrorVertical(
+            ChartSelection selection
+    ) {
+
+        if (!selection.hasSelection()) {
+            return;
+        }
+
+
+        int startRow =
+                getSelectionStartRow(selection);
+
+        int startColumn =
+                getSelectionStartColumn(selection);
+
+
+        SelectionSnapshot before =
+                transformer.createSnapshot(
+                        chart,
+                        selection
+                );
+
+
+        SelectionSnapshot after =
+                transformer.mirrorVertical(
+                        before
+                );
+
+
+        beginStroke();
+
+
+        transformer.applySnapshot(
+                chart,
+                startRow,
+                startColumn,
+                after
+        );
+
+
+        currentStroke.addChange(
+                new TransformationChange(
+                        chart,
+                        startRow,
+                        startColumn,
+                        before,
+                        after
+                )
+        );
+
+
+        endStroke();
+
+        modified = true;
+
+    }
+
     public void startPainting() {
 
         beginStroke();
@@ -912,6 +1028,29 @@ public class ChartEditor {
     public void markSaved() {
 
         modified = false;
+
+    }
+
+    private int getSelectionStartRow(
+            ChartSelection selection
+    ) {
+
+        return Math.min(
+                selection.getStartRow(),
+                selection.getEndRow()
+        );
+
+    }
+
+
+    private int getSelectionStartColumn(
+            ChartSelection selection
+    ) {
+
+        return Math.min(
+                selection.getStartColumn(),
+                selection.getEndColumn()
+        );
 
     }
 

@@ -279,6 +279,27 @@ public class SelectionMenuController {
 
     }
 
+    public void mirrorHorizontal() {
+
+        editor.mirrorHorizontal(
+                editorState.getSelection()
+        );
+
+        finishAction();
+
+    }
+
+
+    public void mirrorVertical() {
+
+        editor.mirrorVertical(
+                editorState.getSelection()
+        );
+
+        finishAction();
+
+    }
+
     public boolean hasClipboardData() {
 
         return editor.hasClipboardData();

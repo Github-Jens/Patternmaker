@@ -147,4 +147,69 @@ public class Stitch {
 
     }
 
+    // use copy() to create a temporary snapshot of the selected area and copyFrom() to write the transformed stitches back into the chart.
+
+    public Stitch copy() {
+
+        Stitch copy =
+                new Stitch(
+                        definition,
+                        row,
+                        column
+                );
+
+        copy.setBackgroundColor(
+                backgroundColor
+        );
+
+        copy.setTopBorderColor(
+                topBorderColor
+        );
+
+        copy.setRightBorderColor(
+                rightBorderColor
+        );
+
+        copy.setBottomBorderColor(
+                bottomBorderColor
+        );
+
+        copy.setLeftBorderColor(
+                leftBorderColor
+        );
+
+        return copy;
+
+    }
+
+    public void copyFrom(
+            Stitch other
+    ) {
+
+        setDefinition(
+                other.getDefinition()
+        );
+
+        setBackgroundColor(
+                other.getBackgroundColor()
+        );
+
+        setTopBorderColor(
+                other.getTopBorderColor()
+        );
+
+        setRightBorderColor(
+                other.getRightBorderColor()
+        );
+
+        setBottomBorderColor(
+                other.getBottomBorderColor()
+        );
+
+        setLeftBorderColor(
+                other.getLeftBorderColor()
+        );
+
+    }
+
 }
