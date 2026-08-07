@@ -1,5 +1,6 @@
 package org.Hieke;
 
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -13,6 +14,9 @@ public class SelectionMenu extends ContextMenu {
     private final Palette palette;
     private final ChartCanvas chartCanvas;
     private final SelectionMenuController controller;
+
+    private FloatingSelectionMenu floatingSelectionMenu;
+    private FloatingSelectionMenuController floatingSelectionMenuController;
 
 
     private SymbolPickerPopup symbolPicker;
@@ -197,11 +201,75 @@ public class SelectionMenu extends ContextMenu {
                         "Mirror Vertical"
                 );
 
+
+
         mirrorVertical.setOnAction(event -> {
 
             controller.mirrorVertical();
 
         });
+
+        MenuItem rotate =
+                new MenuItem(
+                        "Rotate..."
+                );
+
+
+        rotate.setOnAction(event -> {
+
+            controller.startRotationMode();
+
+
+            if (floatingSelectionMenuController == null) {
+
+                floatingSelectionMenuController =
+                        controller.openRotationMode();
+
+            }
+
+
+            if (floatingSelectionMenu == null) {
+
+                floatingSelectionMenu =
+                        new FloatingSelectionMenu(
+                                floatingSelectionMenuController
+                        );
+
+            }
+
+
+            floatingSelectionMenu.show(
+                    chartCanvas,
+                    menuX,
+                    menuY
+            );
+
+
+            hide();
+
+        });
+
+        MenuItem rotatefloating90 =
+                new MenuItem(
+                        "Rotate90"
+                );
+
+        rotatefloating90.setOnAction(event -> {
+
+            controller.rotateFloating90();
+
+        });
+
+        MenuItem placeButton =
+                new MenuItem(
+                        "Place"
+                );
+
+        placeButton.setOnAction(event -> {
+            controller.place();
+        });
+
+
 
         MenuItem insert =
                 new MenuItem(
@@ -275,6 +343,7 @@ public class SelectionMenu extends ContextMenu {
                         new SeparatorMenuItem(),
                         mirrorHorizontal,
                         mirrorVertical,
+                        rotate,
                         new SeparatorMenuItem(),
                         insert,
                         deleteRows,

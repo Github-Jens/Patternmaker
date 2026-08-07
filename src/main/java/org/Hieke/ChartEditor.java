@@ -1,7 +1,6 @@
 package org.Hieke;
 
 import javafx.scene.paint.Color;
-import org.Hieke.KnittingChart;
 
 import java.util.Stack;
 
@@ -610,6 +609,7 @@ public class ChartEditor {
 
         currentStroke.addChange(
                 new TransformationChange(
+                        transformer,
                         chart,
                         startRow,
                         startColumn,
@@ -667,6 +667,7 @@ public class ChartEditor {
 
         currentStroke.addChange(
                 new TransformationChange(
+                        transformer,
                         chart,
                         startRow,
                         startColumn,
@@ -682,6 +683,223 @@ public class ChartEditor {
 
     }
 
+    public void startRotation(
+            ChartSelection selection,
+            EditorState state
+    ) {
+
+        if (!selection.hasSelection()) {
+            return;
+        }
+
+
+        int startRow =
+                getSelectionStartRow(selection);
+
+
+        int startColumn =
+                getSelectionStartColumn(selection);
+
+
+        SelectionSnapshot before =
+                transformer.createSnapshot(
+                        chart,
+                        selection
+                );
+
+
+        transformer.clearArea(
+                chart,
+                startRow,
+                startColumn,
+                before.getRows(),
+                before.getColumns()
+        );
+
+
+        state.setFloatingSelection(
+                new FloatingSelection(
+                        before,
+                        before,
+                        startRow,
+                        startColumn
+                )
+        );
+
+    }
+
+    public void rotate90(
+            ChartSelection selection,
+            EditorState state
+    ) {
+
+        if (!selection.hasSelection()) {
+            return;
+        }
+
+
+        int startRow =
+                getSelectionStartRow(selection);
+
+        int startColumn =
+                getSelectionStartColumn(selection);
+
+
+        SelectionSnapshot before =
+                transformer.createSnapshot(
+                        chart,
+                        selection
+                );
+
+
+        SelectionSnapshot after =
+                transformer.rotate90(
+                        before
+                );
+
+        transformer.clearArea(
+                chart,
+                startRow,
+                startColumn,
+                before.getRows(),
+                before.getColumns()
+        );
+
+        state.setFloatingSelection(
+                new FloatingSelection(
+                        after,
+                        before,
+                        startRow,
+                        startColumn
+                )
+        );
+
+    }
+
+    public void rotateFloating90(
+            EditorState state
+    ) {
+
+        FloatingSelection floating =
+                state.getFloatingSelection();
+
+
+        if (floating == null) {
+
+            return;
+
+        }
+
+
+        floating.rotate90(
+                transformer
+        );
+
+    }
+
+    public void rotateFloatingCounterClockwise90(
+            EditorState state
+    ) {
+
+        FloatingSelection floating =
+                state.getFloatingSelection();
+
+
+        if (floating == null) {
+
+            return;
+
+        }
+
+
+        floating.rotateCounterClockwise90(
+                transformer
+        );
+
+    }
+
+    public void placeFloatingSelection(
+            EditorState state
+    ) {
+
+        FloatingSelection floating =
+                state.getFloatingSelection();
+
+        if (floating == null) {
+            return;
+        }
+
+
+        int startRow =
+                floating.getRow();
+
+        int startColumn =
+                floating.getColumn();
+
+
+        SelectionSnapshot before =
+                floating.getOriginalSnapshot();
+
+        SelectionSnapshot after =
+                floating.getSnapshot();
+
+
+        beginStroke();
+
+
+        FloatingSelectionPlacementChange change =
+                new FloatingSelectionPlacementChange(
+                        transformer,
+                        chart,
+                        startRow,
+                        startColumn,
+                        before,
+                        after
+                );
+
+
+        change.redo();
+
+
+        currentStroke.addChange(change);
+
+
+        endStroke();
+
+
+        state.setFloatingSelection(null);
+        state.getSelection().clear();
+
+        modified = true;
+
+    }
+
+    public void cancelFloatingSelection(
+            EditorState state
+    ) {
+
+        FloatingSelection floating =
+                state.getFloatingSelection();
+
+
+        if (floating == null) {
+            return;
+        }
+
+
+        transformer.applySnapshot(
+                chart,
+                floating.getRow(),
+                floating.getColumn(),
+                floating.getOriginalSnapshot()
+        );
+
+
+        state.setFloatingSelection(null);
+
+        state.getSelection().clear();
+
+    }
     public void startPainting() {
 
         beginStroke();
@@ -837,23 +1055,6 @@ public class ChartEditor {
 
     }
 
-    public void deleteRow(int index) {
-
-        if (index < 0 || index >= chart.getRows()) {
-            return;
-        }
-
-
-        beginStroke();
-
-        deleteRowInternal(index);
-
-        endStroke();
-
-        modified = true;
-
-    }
-
     public void deleteRows(
             int startRow,
             int endRow
@@ -881,18 +1082,6 @@ public class ChartEditor {
 
     }
 
-
-    public void deleteColumn(int index) {
-
-        beginStroke();
-
-        deleteColumnInternal(index);
-
-        endStroke();
-
-        modified = true;
-
-    }
 
     public void deleteColumns(
             int startColumn,

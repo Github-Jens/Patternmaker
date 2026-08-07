@@ -300,6 +300,8 @@ public class ChartRenderer {
             }
         }
     }
+
+
     private void drawStitch(
             RenderContext context,
             RenderSettings settings,

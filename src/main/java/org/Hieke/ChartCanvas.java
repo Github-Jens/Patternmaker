@@ -160,21 +160,26 @@ public class ChartCanvas extends Canvas {
                 getHeight()
         );
 
-        renderer.render(
-                renderContext,
+        RenderSettings settings =
                 getRenderSettings(
                         firstRow,
                         lastRow,
                         firstColumn,
                         lastColumn
-                ),
+                );
+
+
+        renderer.render(
+                renderContext,
+                settings,
                 getWidth(),
                 getHeight()
         );
 
         selectionRenderer.render(
                 getGraphicsContext2D(),
-                editorState.getSelection()
+                editorState.getSelection(),
+                editorState.getFloatingSelection()
         );
 
         gc.restore();

@@ -33,6 +33,8 @@ public class EditorState {
     private int pasteRow = -1;
     private int pasteColumn = -1;
 
+    private FloatingSelection floatingSelection;
+
 
 
     public EditorState(
@@ -108,6 +110,28 @@ public class EditorState {
     public int getPasteColumn() {
 
         return pasteColumn;
+
+    }
+
+    public FloatingSelection getFloatingSelection() {
+
+        return floatingSelection;
+
+    }
+
+
+    public void setFloatingSelection(
+            FloatingSelection selection
+    ) {
+
+        this.floatingSelection = selection;
+
+    }
+
+
+    public void clearFloatingSelection() {
+
+        floatingSelection = null;
 
     }
 }

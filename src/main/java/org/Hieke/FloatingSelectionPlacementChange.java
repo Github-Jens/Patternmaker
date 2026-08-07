@@ -1,24 +1,19 @@
 package org.Hieke;
 
-public class TransformationChange implements UndoableChange {
+public class FloatingSelectionPlacementChange implements UndoableChange {
 
     private final SelectionTransformer transformer;
 
     private final KnittingChart chart;
+
     private final int startRow;
     private final int startColumn;
 
     private final SelectionSnapshot before;
     private final SelectionSnapshot after;
 
-    private final int beforeRows;
-    private final int beforeColumns;
 
-    private final int afterRows;
-    private final int afterColumns;
-
-
-    public TransformationChange(
+    public FloatingSelectionPlacementChange(
             SelectionTransformer transformer,
             KnittingChart chart,
             int startRow,
@@ -28,19 +23,13 @@ public class TransformationChange implements UndoableChange {
     ) {
 
         this.transformer = transformer;
-
         this.chart = chart;
+
         this.startRow = startRow;
         this.startColumn = startColumn;
 
         this.before = before;
         this.after = after;
-
-        this.beforeRows = before.getRows();
-        this.beforeColumns = before.getColumns();
-
-        this.afterRows = after.getRows();
-        this.afterColumns = after.getColumns();
 
     }
 
@@ -52,8 +41,8 @@ public class TransformationChange implements UndoableChange {
                 chart,
                 startRow,
                 startColumn,
-                afterRows,
-                afterColumns,
+                after.getRows(),
+                after.getColumns(),
                 before
         );
 
@@ -67,8 +56,8 @@ public class TransformationChange implements UndoableChange {
                 chart,
                 startRow,
                 startColumn,
-                beforeRows,
-                beforeColumns,
+                before.getRows(),
+                before.getColumns(),
                 after
         );
 
