@@ -130,12 +130,10 @@ public class SymbolGridView extends GridPane {
             ContextMenu menu =
                     new ContextMenu();
 
-
             MenuItem remove =
                     new MenuItem(
                             "Remove Stitch"
                     );
-
 
             remove.setOnAction(e -> {
 

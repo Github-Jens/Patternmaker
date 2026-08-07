@@ -38,6 +38,19 @@ public class ChartCanvas extends Canvas {
                 );
 
         this.editorState = editorState;
+        editorState.activeToolProperty()
+                .addListener((observable, oldTool, newTool) -> {
+
+                    if (newTool != Tool.SELECT) {
+
+                        editorState.getSelection()
+                                .clear();
+
+                        drawChart();
+
+                    }
+
+                });
         this.palette = palette;
         SelectionController selectionController =
                 new SelectionController(
@@ -93,7 +106,8 @@ public class ChartCanvas extends Canvas {
 
                         },
                         this::updateCursorPosition,
-                        this::showSelectionMenu
+                        this::showSelectionMenu,
+                        this::closePopups
                 );
 
         this.selectionMenuController =
@@ -368,12 +382,28 @@ public class ChartCanvas extends Canvas {
                 screenY
         );
 
+        editorState.setPopupActive(true);
+
 
         activeSelectionMenu.show(
                 this,
                 screenX,
                 screenY
         );
+
+    }
+
+    private void closePopups() {
+
+        if (activeSelectionMenu != null) {
+
+            activeSelectionMenu.closeAllPickers();
+
+            activeSelectionMenu.hide();
+
+            activeSelectionMenu = null;
+
+        }
 
     }
 

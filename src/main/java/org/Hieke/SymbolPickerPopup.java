@@ -11,7 +11,8 @@ public class SymbolPickerPopup extends Popup {
 
     public SymbolPickerPopup(
             SymbolPalette palette,
-            Consumer<StitchDefinition> onSelected
+            Consumer<StitchDefinition> onSelected,
+            Runnable onClosed
     ) {
 
 
@@ -46,6 +47,12 @@ public class SymbolPickerPopup extends Popup {
 
 
         setAutoHide(true);
+
+        setOnHidden(event -> {
+
+            onClosed.run();
+
+        });
 
     }
 

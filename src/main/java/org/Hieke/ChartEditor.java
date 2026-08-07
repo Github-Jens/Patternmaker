@@ -726,52 +726,8 @@ public class ChartEditor {
                 )
         );
 
-    }
-
-    public void rotate90(
-            ChartSelection selection,
-            EditorState state
-    ) {
-
-        if (!selection.hasSelection()) {
-            return;
-        }
-
-
-        int startRow =
-                getSelectionStartRow(selection);
-
-        int startColumn =
-                getSelectionStartColumn(selection);
-
-
-        SelectionSnapshot before =
-                transformer.createSnapshot(
-                        chart,
-                        selection
-                );
-
-
-        SelectionSnapshot after =
-                transformer.rotate90(
-                        before
-                );
-
-        transformer.clearArea(
-                chart,
-                startRow,
-                startColumn,
-                before.getRows(),
-                before.getColumns()
-        );
-
-        state.setFloatingSelection(
-                new FloatingSelection(
-                        after,
-                        before,
-                        startRow,
-                        startColumn
-                )
+        state.setMode(
+                EditorMode.ROTATION
         );
 
     }
@@ -869,6 +825,9 @@ public class ChartEditor {
 
         state.setFloatingSelection(null);
         state.getSelection().clear();
+        state.setMode(
+                EditorMode.NORMAL
+        );
 
         modified = true;
 
@@ -898,6 +857,10 @@ public class ChartEditor {
         state.setFloatingSelection(null);
 
         state.getSelection().clear();
+
+        state.setMode(
+                EditorMode.NORMAL
+        );
 
     }
     public void startPainting() {

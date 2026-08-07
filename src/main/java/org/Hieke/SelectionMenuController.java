@@ -300,19 +300,6 @@ public class SelectionMenuController {
 
     }
 
-    //this is the original rotating method. Takes the selection and rotates it
-
-    public void rotate90() {
-
-        editor.rotate90(
-                editorState.getSelection(),
-                editorState
-        );
-
-        refresh.run();
-
-    }
-
     //this method takes the already taken selection and rotates it again
 
     public void rotateFloating90() {
@@ -381,5 +368,35 @@ public class SelectionMenuController {
         this.cursorColumn = column;
 
     }
+    public void openPopup() {
+
+        editorState.setPopupActive(true);
+
+    }
+
+
+    public void closePopup() {
+
+        editorState.getSelection()
+                .clear();
+
+        refresh.run();
+
+        editorState.setPopupActive(false);
+
+    }
+
+    public void closeSelectionMenu() {
+
+        editorState.setPopupActive(false);
+
+    }
+
+    public void cancelSelection() {
+
+        closePopup();
+
+    }
+
 
 }

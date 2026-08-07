@@ -1,11 +1,8 @@
 package org.Hieke;
 
-import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-
-import java.util.Optional;
 
 
 public class SelectionMenu extends ContextMenu {
@@ -26,6 +23,8 @@ public class SelectionMenu extends ContextMenu {
     private double menuX;
     private double menuY;
 
+    private boolean childPopupActive = false;
+
 
     public SelectionMenu(
             SelectionMenuController controller,
@@ -38,6 +37,16 @@ public class SelectionMenu extends ContextMenu {
         this.symbolPalette = symbolPalette;
         this.palette = palette;
         this.chartCanvas = chartCanvas;
+
+        setOnHidden(event -> {
+
+            if (!childPopupActive) {
+
+                controller.closeSelectionMenu();
+
+            }
+
+        });
 
         //Symbol Picker menu
         MenuItem fillSymbol =
@@ -59,12 +68,14 @@ public class SelectionMenu extends ContextMenu {
 
                                     controller.fillWithSymbol(definition);
 
-                                }
+                                },
+                                controller::closePopup
                         );
 
             }
+            childPopupActive = true;
 
-
+            controller.openPopup();
             symbolPicker.show(
                     chartCanvas,
                     menuX + 50,
@@ -95,12 +106,14 @@ public class SelectionMenu extends ContextMenu {
 
                                     controller.fillWithColour(index);
 
-                                }
+                                },
+                                controller::closePopup
                         );
 
             }
+            childPopupActive = true;
 
-
+            controller.openPopup();
             colourPicker.show(
                     chartCanvas,
                     menuX + 50,
@@ -129,12 +142,14 @@ public class SelectionMenu extends ContextMenu {
 
                                     controller.frameWithColour(index);
 
-                                }
+                                },
+                                controller::closePopup
                         );
 
             }
+            childPopupActive = true;
 
-
+            controller.openPopup();
             frameColourPicker.show(
                     chartCanvas,
                     menuX + 50,
@@ -249,28 +264,6 @@ public class SelectionMenu extends ContextMenu {
 
         });
 
-        MenuItem rotatefloating90 =
-                new MenuItem(
-                        "Rotate90"
-                );
-
-        rotatefloating90.setOnAction(event -> {
-
-            controller.rotateFloating90();
-
-        });
-
-        MenuItem placeButton =
-                new MenuItem(
-                        "Place"
-                );
-
-        placeButton.setOnAction(event -> {
-            controller.place();
-        });
-
-
-
         MenuItem insert =
                 new MenuItem(
                         "Insert..."
@@ -312,6 +305,8 @@ public class SelectionMenu extends ContextMenu {
                 );
 
         cancel.setOnAction(event -> {
+
+            controller.cancelSelection();
 
             hide();
 
@@ -367,23 +362,18 @@ public class SelectionMenu extends ContextMenu {
     public void closeAllPickers() {
 
         if (symbolPicker != null) {
-
             symbolPicker.hide();
-
         }
 
-
         if (colourPicker != null) {
-
             colourPicker.hide();
-
         }
 
         if (frameColourPicker != null) {
-
             frameColourPicker.hide();
-
         }
+
+        controller.closePopup();
 
     }
 

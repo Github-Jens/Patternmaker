@@ -49,32 +49,12 @@ public class SelectionTransformer {
 
             for (int column = 0; column < columns; column++) {
 
-
                 snapshot[row][column] =
                         chart.getStitch(
                                         startRow + row,
                                         startColumn + column
                                 )
                                 .copy();
-                Stitch original =
-                        chart.getStitch(
-                                startRow + row,
-                                startColumn + column
-                        );
-
-
-                System.out.println(
-                        "Chart stitch "
-                                + row + "," + column
-                                + " top=" + original.getTopBorderColor()
-                                + " right=" + original.getRightBorderColor()
-                                + " bottom=" + original.getBottomBorderColor()
-                                + " left=" + original.getLeftBorderColor()
-                );
-
-
-                snapshot[row][column] =
-                        original.copy();
 
             }
 
@@ -176,23 +156,6 @@ public class SelectionTransformer {
 
                 Stitch source =
                         snapshot.get(row, column);
-
-
-                System.out.println(
-                        "Applying "
-                                + chartRow
-                                + ","
-                                + chartColumn
-                                + " top="
-                                + source.getTopBorderColor()
-                                + " right="
-                                + source.getRightBorderColor()
-                                + " bottom="
-                                + source.getBottomBorderColor()
-                                + " left="
-                                + source.getLeftBorderColor()
-                );
-
 
                 chart.getStitch(
                                 chartRow,
@@ -316,14 +279,6 @@ public class SelectionTransformer {
                 Stitch original =
                         source.get(row, column);
 
-                System.out.println(
-                        "Before rotation "
-                                + row + "," + column
-                                + " top=" + original.getTopBorderColor()
-                                + " right=" + original.getRightBorderColor()
-                                + " bottom=" + original.getBottomBorderColor()
-                                + " left=" + original.getLeftBorderColor()
-                );
 
                 Stitch rotated =
                         original.copy();

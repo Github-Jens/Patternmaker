@@ -20,9 +20,14 @@ public class ColourPickerPopup extends ContextMenu {
 
     public ColourPickerPopup(
             Palette palette,
-            Consumer<Integer> onSelected
+            Consumer<Integer> onSelected,
+            Runnable onClosed
     ) {
+        setOnHidden(event -> {
 
+            onClosed.run();
+
+        });
 
         for (int i = 0; i < palette.size(); i++) {
 

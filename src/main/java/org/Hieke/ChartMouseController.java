@@ -11,7 +11,7 @@ public class ChartMouseController {
     private final java.util.function.BiConsumer<Integer, Integer> paint;
     private final java.util.function.BiConsumer<Double, Double> updateCursor;
     private final java.util.function.BiConsumer<Double, Double> showMenu;
-
+    private final Runnable closePopup;
 
     private final Canvas canvas;
     private final ChartEditor editor;
@@ -24,6 +24,7 @@ public class ChartMouseController {
     private double lastMouseY;
 
     private boolean panning = false;
+    private boolean consumedClick = false;
 
 
     public ChartMouseController(
@@ -35,7 +36,8 @@ public class ChartMouseController {
             Runnable refresh,
             BiConsumer<Integer, Integer> paint,
             BiConsumer<Double, Double> updateCursor,
-            BiConsumer<Double, Double> showMenu
+            BiConsumer<Double, Double> showMenu,
+            Runnable closePopup
     ) {
 
         this.canvas = canvas;
@@ -48,6 +50,7 @@ public class ChartMouseController {
         this.paint = paint;
         this.updateCursor = updateCursor;
         this.showMenu = showMenu;
+        this.closePopup = closePopup;
 
     }
 
@@ -63,10 +66,29 @@ public class ChartMouseController {
 
         canvas.setOnMousePressed(event -> {
 
+            if (editorState.isPopupActive()) {
+
+
+                closePopup.run();
+
+                consumedClick = true;
+
+                return;
+
+            }
+
+
+            if (editorState.getMode() != EditorMode.NORMAL) {
+
+                return;
+
+            }
+
+
             editorState.getSelection()
                     .clear();
 
-        refresh.run();
+            refresh.run();
 
             if (event.isMiddleButtonDown()) {
 
@@ -116,6 +138,12 @@ public class ChartMouseController {
         });
 
         canvas.setOnMouseDragged(event -> {
+
+            if (editorState.getMode() != EditorMode.NORMAL) {
+
+                return;
+
+            }
 
             updateCursor.accept(
                     event.getX(),
@@ -198,6 +226,14 @@ public class ChartMouseController {
         });
 
         canvas.setOnMouseReleased(event -> {
+
+            if (consumedClick) {
+
+                consumedClick = false;
+
+                return;
+
+            }
 
 
             if (panning) {
