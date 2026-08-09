@@ -95,7 +95,6 @@ public class ChartCanvas extends Canvas {
                         transform,
                         this::drawChart,
                         (row, column) -> {
-
                             editor.paint(
                                     row,
                                     column,
@@ -107,7 +106,23 @@ public class ChartCanvas extends Canvas {
                         },
                         this::updateCursorPosition,
                         this::showSelectionMenu,
-                        this::closePopups
+                        this::closePopups,
+                        dragging -> {
+
+                            if (activeSelectionMenu != null) {
+
+                                FloatingSelectionMenu menu =
+                                        activeSelectionMenu.getFloatingSelectionMenu();
+
+                                if (menu != null) {
+
+                                    menu.setDragging(dragging);
+
+                                }
+
+                            }
+
+                        }
                 );
 
         this.selectionMenuController =

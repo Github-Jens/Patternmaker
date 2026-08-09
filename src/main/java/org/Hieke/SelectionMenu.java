@@ -224,6 +224,19 @@ public class SelectionMenu extends ContextMenu {
 
         });
 
+        MenuItem move =
+                new MenuItem(
+                        "Move..."
+                );
+
+        move.setOnAction(event -> {
+
+            controller.startMoveMode();
+
+            hide();
+
+        });
+
         MenuItem rotate =
                 new MenuItem(
                         "Rotate..."
@@ -338,6 +351,7 @@ public class SelectionMenu extends ContextMenu {
                         new SeparatorMenuItem(),
                         mirrorHorizontal,
                         mirrorVertical,
+                        move,
                         rotate,
                         new SeparatorMenuItem(),
                         insert,
@@ -356,6 +370,12 @@ public class SelectionMenu extends ContextMenu {
 
         this.menuX = x;
         this.menuY = y;
+
+    }
+
+    public FloatingSelectionMenu getFloatingSelectionMenu() {
+
+        return floatingSelectionMenu;
 
     }
 

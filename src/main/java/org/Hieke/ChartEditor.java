@@ -732,6 +732,56 @@ public class ChartEditor {
 
     }
 
+    public void startMove(
+            ChartSelection selection,
+            EditorState state
+    ) {
+
+        if (!selection.hasSelection()) {
+            return;
+        }
+
+
+        int startRow =
+                getSelectionStartRow(selection);
+
+
+        int startColumn =
+                getSelectionStartColumn(selection);
+
+
+        SelectionSnapshot snapshot =
+                transformer.createSnapshot(
+                        chart,
+                        selection
+                );
+
+
+        transformer.clearArea(
+                chart,
+                startRow,
+                startColumn,
+                snapshot.getRows(),
+                snapshot.getColumns()
+        );
+
+
+        state.setFloatingSelection(
+                new FloatingSelection(
+                        snapshot,
+                        snapshot,
+                        startRow,
+                        startColumn
+                )
+        );
+
+
+        state.setMode(
+                EditorMode.FLOATING_SELECTION
+        );
+
+    }
+
     public void rotateFloating90(
             EditorState state
     ) {
@@ -774,6 +824,8 @@ public class ChartEditor {
 
     }
 
+    // for roation placement
+
     public void placeFloatingSelection(
             EditorState state
     ) {
@@ -807,6 +859,8 @@ public class ChartEditor {
                 new FloatingSelectionPlacementChange(
                         transformer,
                         chart,
+                        floating.getOriginalRow(),
+                        floating.getOriginalColumn(),
                         startRow,
                         startColumn,
                         before,
@@ -830,6 +884,74 @@ public class ChartEditor {
         );
 
         modified = true;
+
+    }
+
+    //place the floating selection when in move mode
+
+    public void commitFloatingSelectionMove(
+            EditorState state
+    ) {
+
+        FloatingSelection floating =
+                state.getFloatingSelection();
+
+        if (floating == null) {
+            return;
+        }
+
+        int row =
+                floating.getRow();
+
+        int column =
+                floating.getColumn();
+
+        SelectionSnapshot before =
+                floating.getOriginalSnapshot();
+
+        SelectionSnapshot after =
+                floating.getSnapshot();
+
+        beginStroke();
+
+        FloatingSelectionPlacementChange change =
+                new FloatingSelectionPlacementChange(
+                        transformer,
+                        chart,
+                        floating.getOriginalRow(),
+                        floating.getOriginalColumn(),
+                        row,
+                        column,
+                        before,
+                        after
+                );
+
+        change.redo();
+
+        currentStroke.addChange(change);
+
+        endStroke();
+
+        modified = true;
+    }
+
+    public void moveFloatingSelection(
+            EditorState state,
+            int row,
+            int column
+    ) {
+
+        FloatingSelection floating =
+                state.getFloatingSelection();
+
+        if (floating == null) {
+            return;
+        }
+
+        floating.move(
+                row,
+                column
+        );
 
     }
 

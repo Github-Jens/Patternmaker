@@ -322,6 +322,16 @@ public class SelectionMenuController {
         refresh.run();
 
     }
+    public void startMoveMode() {
+
+        editor.startMove(
+                editorState.getSelection(),
+                editorState
+        );
+
+        refresh.run();
+
+    }
 
     public FloatingSelectionMenuController openRotationMode() {
 

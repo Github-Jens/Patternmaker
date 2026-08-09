@@ -5,6 +5,9 @@ public class FloatingSelection {
     private SelectionSnapshot snapshot;
     private final SelectionSnapshot originalSnapshot;
 
+    private final int originalRow;
+    private final int originalColumn;
+
     private int row;
     private int column;
 
@@ -18,6 +21,9 @@ public class FloatingSelection {
 
         this.snapshot = snapshot;
         this.originalSnapshot = originalSnapshot;
+
+        this.originalRow = row;
+        this.originalColumn = column;
 
         this.row = row;
         this.column = column;
@@ -94,6 +100,19 @@ public class FloatingSelection {
                 transformer.rotateCounterClockwise90(
                         snapshot
                 );
+
+    }
+
+    public int getOriginalRow() {
+
+        return originalRow;
+
+    }
+
+
+    public int getOriginalColumn() {
+
+        return originalColumn;
 
     }
 

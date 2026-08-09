@@ -99,4 +99,14 @@ public class FloatingSelectionMenu extends Popup {
 
     }
 
+    public void setDragging(boolean dragging) {
+
+        getContent().forEach(node ->
+                node.setOpacity(
+                        dragging ? 0.5 : 1.0
+                )
+        );
+
+    }
+
 }

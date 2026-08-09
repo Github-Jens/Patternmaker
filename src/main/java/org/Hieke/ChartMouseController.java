@@ -3,6 +3,7 @@ package org.Hieke;
 import javafx.scene.canvas.Canvas;
 
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 
 public class ChartMouseController {
@@ -11,6 +12,7 @@ public class ChartMouseController {
     private final java.util.function.BiConsumer<Integer, Integer> paint;
     private final java.util.function.BiConsumer<Double, Double> updateCursor;
     private final java.util.function.BiConsumer<Double, Double> showMenu;
+    private final java.util.function.Consumer<Boolean> setMenuDragging;
     private final Runnable closePopup;
 
     private final Canvas canvas;
@@ -25,6 +27,10 @@ public class ChartMouseController {
 
     private boolean panning = false;
     private boolean consumedClick = false;
+    private boolean movingSelection = false;
+
+    private int selectionGrabOffsetRow;
+    private int selectionGrabOffsetColumn;
 
 
     public ChartMouseController(
@@ -37,7 +43,8 @@ public class ChartMouseController {
             BiConsumer<Integer, Integer> paint,
             BiConsumer<Double, Double> updateCursor,
             BiConsumer<Double, Double> showMenu,
-            Runnable closePopup
+            Runnable closePopup,
+            Consumer<Boolean> setMenuDragging
     ) {
 
         this.canvas = canvas;
@@ -47,6 +54,7 @@ public class ChartMouseController {
         this.transform = transform;
 
         this.refresh = refresh;
+        this.setMenuDragging = setMenuDragging;
         this.paint = paint;
         this.updateCursor = updateCursor;
         this.showMenu = showMenu;
@@ -77,8 +85,102 @@ public class ChartMouseController {
 
             }
 
+            if (editorState.getMode() == EditorMode.FLOATING_SELECTION) {
 
-            if (editorState.getMode() != EditorMode.NORMAL) {
+                FloatingSelection floating =
+                        editorState.getFloatingSelection();
+
+                if (floating != null) {
+
+                    int column =
+                            transform.screenToColumn(
+                                    event.getX()
+                            );
+
+                    int row =
+                            transform.screenToRow(
+                                    event.getY()
+                            );
+
+
+                    if (isMouseInsideFloatingSelection(
+                            row,
+                            column
+                    )) {
+
+                        movingSelection = true;
+                        setMenuDragging.accept(true);
+
+                        selectionGrabOffsetRow =
+                                row - floating.getRow();
+
+                        selectionGrabOffsetColumn =
+                                column - floating.getColumn();
+
+                        return;
+
+                    }
+
+
+                    editor.commitFloatingSelectionMove(
+                            editorState
+                    );
+
+                    editorState.setFloatingSelection(null);
+
+                    editorState.getSelection()
+                            .clear();
+
+                    editorState.setMode(
+                            EditorMode.NORMAL
+                    );
+
+                    refresh.run();
+
+                }
+
+                return;
+            }
+
+
+
+            //this allows moving while in rotating mode
+            if (editorState.getMode() == EditorMode.ROTATION) {
+
+                FloatingSelection floating =
+                        editorState.getFloatingSelection();
+
+                if (floating != null) {
+
+                    int column =
+                            transform.screenToColumn(
+                                    event.getX()
+                            );
+
+                    int row =
+                            transform.screenToRow(
+                                    event.getY()
+                            );
+
+                    if (isMouseInsideFloatingSelection(
+                            row,
+                            column
+                    )) {
+
+                        movingSelection = true;
+                        setMenuDragging.accept(true);
+
+                        selectionGrabOffsetRow =
+                                row - floating.getRow();
+
+                        selectionGrabOffsetColumn =
+                                column - floating.getColumn();
+
+                        return;
+
+                    }
+
+                }
 
                 return;
 
@@ -138,6 +240,43 @@ public class ChartMouseController {
         });
 
         canvas.setOnMouseDragged(event -> {
+
+            if ((editorState.getMode() == EditorMode.FLOATING_SELECTION
+                    || editorState.getMode() == EditorMode.ROTATION)
+                    && movingSelection) {
+
+
+                FloatingSelection floating =
+                        editorState.getFloatingSelection();
+
+
+                if (floating != null) {
+
+                    int column =
+                            transform.screenToColumn(
+                                    event.getX()
+                            );
+
+                    int row =
+                            transform.screenToRow(
+                                    event.getY()
+                            );
+
+
+                    editor.moveFloatingSelection(
+                            editorState,
+                            row - selectionGrabOffsetRow,
+                            column - selectionGrabOffsetColumn
+                    );
+
+
+                    refresh.run();
+
+                }
+
+                return;
+
+            }
 
             if (editorState.getMode() != EditorMode.NORMAL) {
 
@@ -245,6 +384,18 @@ public class ChartMouseController {
             }
 
 
+            if (editorState.getMode() == EditorMode.FLOATING_SELECTION
+                    || editorState.getMode() == EditorMode.ROTATION) {
+
+                movingSelection = false;
+
+                setMenuDragging.accept(false);
+
+                return;
+
+            }
+
+
             if (selectionController.isSelecting()) {
 
                 selectionController.finishSelection();
@@ -264,6 +415,28 @@ public class ChartMouseController {
             editor.finishPainting();
 
         });
+
+    }
+
+    private boolean isMouseInsideFloatingSelection(
+            int row,
+            int column
+    ) {
+
+        FloatingSelection floating =
+                editorState.getFloatingSelection();
+
+        if (floating == null) {
+
+            return false;
+
+        }
+
+
+        return row >= floating.getRow()
+                && row < floating.getRow() + floating.getRows()
+                && column >= floating.getColumn()
+                && column < floating.getColumn() + floating.getColumns();
 
     }
 

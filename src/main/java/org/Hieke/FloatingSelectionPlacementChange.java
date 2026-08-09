@@ -6,8 +6,11 @@ public class FloatingSelectionPlacementChange implements UndoableChange {
 
     private final KnittingChart chart;
 
-    private final int startRow;
-    private final int startColumn;
+    private final int originalRow;
+    private final int originalColumn;
+
+    private final int finalRow;
+    private final int finalColumn;
 
     private final SelectionSnapshot before;
     private final SelectionSnapshot after;
@@ -16,8 +19,10 @@ public class FloatingSelectionPlacementChange implements UndoableChange {
     public FloatingSelectionPlacementChange(
             SelectionTransformer transformer,
             KnittingChart chart,
-            int startRow,
-            int startColumn,
+            int originalRow,
+            int originalColumn,
+            int finalRow,
+            int finalColumn,
             SelectionSnapshot before,
             SelectionSnapshot after
     ) {
@@ -25,8 +30,11 @@ public class FloatingSelectionPlacementChange implements UndoableChange {
         this.transformer = transformer;
         this.chart = chart;
 
-        this.startRow = startRow;
-        this.startColumn = startColumn;
+        this.originalRow = originalRow;
+        this.originalColumn = originalColumn;
+
+        this.finalRow = finalRow;
+        this.finalColumn = finalColumn;
 
         this.before = before;
         this.after = after;
@@ -37,12 +45,18 @@ public class FloatingSelectionPlacementChange implements UndoableChange {
     @Override
     public void undo() {
 
-        transformer.replaceSelection(
+        transformer.clearArea(
                 chart,
-                startRow,
-                startColumn,
+                finalRow,
+                finalColumn,
                 after.getRows(),
-                after.getColumns(),
+                after.getColumns()
+        );
+
+        transformer.applySnapshot(
+                chart,
+                originalRow,
+                originalColumn,
                 before
         );
 
@@ -52,12 +66,18 @@ public class FloatingSelectionPlacementChange implements UndoableChange {
     @Override
     public void redo() {
 
-        transformer.replaceSelection(
+        transformer.clearArea(
                 chart,
-                startRow,
-                startColumn,
+                originalRow,
+                originalColumn,
                 before.getRows(),
-                before.getColumns(),
+                before.getColumns()
+        );
+
+        transformer.applySnapshot(
+                chart,
+                finalRow,
+                finalColumn,
                 after
         );
 
