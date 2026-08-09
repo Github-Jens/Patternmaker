@@ -208,7 +208,9 @@ public class ChartCanvas extends Canvas {
         selectionRenderer.render(
                 getGraphicsContext2D(),
                 editorState.getSelection(),
-                editorState.getFloatingSelection()
+                editorState.getFloatingSelection(),
+                editor.getChart().getRows(),
+                editor.getChart().getColumns()
         );
 
         gc.restore();

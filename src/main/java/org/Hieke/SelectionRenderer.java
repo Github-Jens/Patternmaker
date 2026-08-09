@@ -20,8 +20,10 @@ public class SelectionRenderer {
     public void render(
             GraphicsContext gc,
             ChartSelection selection,
-            FloatingSelection floatingSelection
-    ) {
+            FloatingSelection floatingSelection,
+            int chartRows,
+            int chartColumns
+    )  {
 
         if (!selection.hasSelection() &&
                 floatingSelection == null) {
@@ -101,10 +103,39 @@ public class SelectionRenderer {
 
         if (floatingSelection != null) {
 
+            double chartX =
+                    transform.chartToScreenX(0);
+
+            double chartY =
+                    transform.chartToScreenY(0);
+
+            double chartWidth =
+                    chartColumns * transform.getScaledCellSize();
+
+            double chartHeight =
+                    chartRows * transform.getScaledCellSize();
+
+
+            gc.save();
+
+            gc.beginPath();
+            gc.rect(
+                    chartX,
+                    chartY,
+                    chartWidth,
+                    chartHeight
+            );
+            gc.closePath();
+            gc.clip();
+
+
             renderFloatingSelection(
                     gc,
                     floatingSelection
             );
+
+
+            gc.restore();
 
         }
 
