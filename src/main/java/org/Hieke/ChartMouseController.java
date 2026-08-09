@@ -230,10 +230,17 @@ public class ChartMouseController {
                                 event.getY()
                         );
 
-                paint.accept(
-                        row,
-                        column
-                );
+                if (row >= 0 &&
+                        row < editor.getChart().getRows() &&
+                        column >= 0 &&
+                        column < editor.getChart().getColumns()) {
+
+                    paint.accept(
+                            row,
+                            column
+                    );
+
+                }
 
             }
 
@@ -346,10 +353,17 @@ public class ChartMouseController {
                                 event.getY()
                         );
 
-                paint.accept(
-                        row,
-                        column
-                );
+                if (row >= 0 &&
+                        row < editor.getChart().getRows() &&
+                        column >= 0 &&
+                        column < editor.getChart().getColumns()) {
+
+                    paint.accept(
+                            row,
+                            column
+                    );
+
+                }
 
             }
 

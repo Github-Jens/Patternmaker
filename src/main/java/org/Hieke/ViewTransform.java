@@ -64,7 +64,7 @@ public class ViewTransform {
             double mouseX
     ) {
 
-        return (int)(
+        return (int) Math.floor(
                 (mouseX - offsetX - getScaledRulerSize())
                         / getScaledCellSize()
         );
@@ -76,7 +76,7 @@ public class ViewTransform {
             double mouseY
     ) {
 
-        return (int)(
+        return (int) Math.floor(
                 (mouseY - offsetY - getScaledRulerSize())
                         / getScaledCellSize()
         );
