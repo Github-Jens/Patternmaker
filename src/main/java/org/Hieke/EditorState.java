@@ -95,6 +95,7 @@ public class EditorState {
 
     //checks if i have a popup window open to delay some operations
     private boolean popupActive = false;
+    private boolean popupBlocksCanvas = false;
 
 
     /**
@@ -331,6 +332,19 @@ public class EditorState {
     ) {
 
         popupActive = active;
+
+    }
+    public boolean isPopupBlocksCanvas() {
+
+        return popupBlocksCanvas;
+
+    }
+
+    public void setPopupBlocksCanvas(
+            boolean blocks
+    ) {
+
+        popupBlocksCanvas = blocks;
 
     }
 

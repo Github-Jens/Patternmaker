@@ -15,6 +15,9 @@ public class SelectionMenu extends ContextMenu {
     private FloatingSelectionMenu floatingSelectionMenu;
     private FloatingSelectionMenuController floatingSelectionMenuController;
 
+    private DeleteSelectionController deleteSelectionController;
+    private DeleteSelectionPopup deleteSelectionPopup;
+
 
     private SymbolPickerPopup symbolPicker;
     private ColourPickerPopup colourPicker;
@@ -37,6 +40,7 @@ public class SelectionMenu extends ContextMenu {
         this.symbolPalette = symbolPalette;
         this.palette = palette;
         this.chartCanvas = chartCanvas;
+
 
         setOnHidden(event -> {
 
@@ -325,9 +329,42 @@ public class SelectionMenu extends ContextMenu {
 
         });
 
+        MenuItem deleteOption =
+                new MenuItem(
+                        "Delete..."
+                );
+
+        deleteOption.setOnAction(event -> {
+
+                if (deleteSelectionPopup == null) {
+
+                    deleteSelectionPopup =
+                            new DeleteSelectionPopup(
+                                    controller.getDeleteSelectionController(),
+                                    controller::closePopup
+                            );
+
+                }
+
+
+
+            childPopupActive = true;
+
+            controller.openPopup();
+
+            controller.setPopupBlocksCanvas(true);
+
+            deleteSelectionPopup.show(
+                    chartCanvas,
+                    menuX + 50,
+                    menuY
+            );
+
+        });
+
         MenuItem clear =
                 new MenuItem(
-                        "Delete"
+                        "Delete All"
                 );
 
 
@@ -347,6 +384,7 @@ public class SelectionMenu extends ContextMenu {
                         copy,
                         paste,
                         cut,
+                        deleteOption,
                         clear,
                         new SeparatorMenuItem(),
                         mirrorHorizontal,

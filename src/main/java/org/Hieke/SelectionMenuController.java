@@ -343,6 +343,18 @@ public class SelectionMenuController {
 
     }
 
+    public DeleteSelectionController getDeleteSelectionController() {
+
+        return new DeleteSelectionController(
+                editor,
+                editorState,
+                refresh,
+                resizeCanvas
+        );
+
+    }
+
+
     public void place() {
 
         editor.placeFloatingSelection(
@@ -393,6 +405,15 @@ public class SelectionMenuController {
         refresh.run();
 
         editorState.setPopupActive(false);
+        editorState.setPopupBlocksCanvas(false);
+
+    }
+
+    public void setPopupBlocksCanvas(
+            boolean blocks
+    ) {
+
+        editorState.setPopupBlocksCanvas(blocks);
 
     }
 

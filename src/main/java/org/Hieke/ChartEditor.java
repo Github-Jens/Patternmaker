@@ -66,10 +66,16 @@ public class ChartEditor {
 
 
         // Stitch handling
+
+        //the eraser kills everything
         if (activeTool == Tool.ERASE) {
 
             newStitch = null;
             newBackground = null;
+            newTopBorder = null;
+            newRightBorder = null;
+            newBottomBorder = null;
+            newLeftBorder = null;
 
         }
         else if (selectedStitch != null) {
@@ -419,6 +425,147 @@ public class ChartEditor {
 
 
         endStroke();
+
+    }
+
+    public void deleteSelectionParts(
+            ChartSelection selection,
+            boolean colour,
+            boolean symbol,
+            boolean frame
+    ) {
+
+        if (!selection.hasSelection()) {
+            return;
+        }
+
+        int startColumn =
+                Math.min(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+        int endColumn =
+                Math.max(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+        int startRow =
+                Math.min(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+        int endRow =
+                Math.max(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+
+        beginStroke();
+
+
+        for (int row = startRow; row <= endRow; row++) {
+
+            for (int column = startColumn;
+                 column <= endColumn;
+                 column++) {
+
+                Stitch stitch =
+                        chart.getStitch(
+                                row,
+                                column
+                        );
+
+
+                StitchDefinition oldStitch =
+                        stitch.getDefinition();
+
+                Color oldBackground =
+                        stitch.getBackgroundColor();
+
+                Color oldTopBorder =
+                        stitch.getTopBorderColor();
+
+                Color oldRightBorder =
+                        stitch.getRightBorderColor();
+
+                Color oldBottomBorder =
+                        stitch.getBottomBorderColor();
+
+                Color oldLeftBorder =
+                        stitch.getLeftBorderColor();
+
+
+                StitchDefinition newStitch =
+                        symbol
+                                ? null
+                                : oldStitch;
+
+                Color newBackground =
+                        colour
+                                ? null
+                                : oldBackground;
+
+                Color newTopBorder =
+                        frame
+                                ? null
+                                : oldTopBorder;
+
+                Color newRightBorder =
+                        frame
+                                ? null
+                                : oldRightBorder;
+
+                Color newBottomBorder =
+                        frame
+                                ? null
+                                : oldBottomBorder;
+
+                Color newLeftBorder =
+                        frame
+                                ? null
+                                : oldLeftBorder;
+
+
+                StitchChange change =
+                        new StitchChange(
+                                stitch,
+
+                                oldStitch,
+                                newStitch,
+
+                                oldBackground,
+                                newBackground,
+
+                                oldTopBorder,
+                                newTopBorder,
+
+                                oldRightBorder,
+                                newRightBorder,
+
+                                oldBottomBorder,
+                                newBottomBorder,
+
+                                oldLeftBorder,
+                                newLeftBorder
+                        );
+
+
+                change.redo();
+
+                currentStroke.addChange(change);
+
+            }
+
+        }
+
+
+        endStroke();
+
+        modified = true;
 
     }
 

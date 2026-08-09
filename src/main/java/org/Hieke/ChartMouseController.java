@@ -75,7 +75,12 @@ public class ChartMouseController {
         canvas.setOnMousePressed(event -> {
 
             if (editorState.isPopupActive()) {
+                    //this 2nd check is for the deletemenu to block clicks on the canvas
+                if (editorState.isPopupBlocksCanvas()) {
 
+                    return;
+
+                }
 
                 closePopup.run();
 
