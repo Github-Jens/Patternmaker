@@ -84,7 +84,13 @@ public class Main extends Application {
 
         EditorToolbar toolbar =
                 new EditorToolbar(
-                        editorState
+                        editorState,
+                        this::createNewChart,
+                        this::undo,
+                        this::redo,
+                        this::resetView,
+                        this::addColumn,
+                        this::addRow
                 );
 
 
@@ -533,6 +539,12 @@ public class Main extends Application {
     private void setChart(KnittingChart chart) {
 
         editorState.getSelection().clear();
+        editorState.activeToolProperty().set(Tool.DRAW);
+
+        editorState.selectedColorProperty().set(null);
+        editorState.selectedColorIndexProperty().set(-1);
+
+        editorState.selectedStitchProperty().set(null);
 
 
         scrollPane = new ScrollPane();
@@ -565,6 +577,26 @@ public class Main extends Application {
 
         root.setCenter(scrollPane);
 
+    }
+
+    private void undo() {
+        canvas.undo();
+    }
+
+    private void redo() {
+        canvas.redo();
+    }
+
+    private void resetView() {
+        canvas.resetView();
+    }
+
+    private void addColumn() {
+        modificationController.addColumn();
+    }
+
+    private void addRow() {
+        modificationController.addRow();
     }
 
 

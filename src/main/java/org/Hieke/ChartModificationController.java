@@ -88,4 +88,26 @@ public class ChartModificationController {
 
     }
 
+    public void addRow() {
+
+        editor.insertRows(
+                editor.getChart().getRows(),
+                1
+        );
+
+        refresh.run();
+
+    }
+
+    public void addColumn() {
+
+        editor.insertColumns(
+                editor.getChart().getColumns(),
+                1
+        );
+
+        refresh.run();
+
+    }
+
 }

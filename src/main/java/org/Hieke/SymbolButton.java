@@ -122,7 +122,7 @@ public class SymbolButton extends Button {
             );
 
             style.append(
-                    "-fx-border-width: 3;"
+                    "-fx-border-width: 2;"
             );
 
         }
