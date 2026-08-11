@@ -27,6 +27,7 @@ public class Main extends Application {
     private StitchLibrary stitchLibrary;
 
     private ChartModificationController modificationController;
+    private ReplaceController replaceController;
 
     private static final int MIN_CHART_SIZE = 1;
     private static final int MAX_CHART_SIZE = 300;
@@ -78,7 +79,8 @@ public class Main extends Application {
                         () -> canvas.resetView(),
                         this::exportPDF,
                         this::exportSVG,
-                        this::modifyChart
+                        this::modifyChart,
+                        this::replaceChart
                 ).createMenuBar();
 
 
@@ -563,6 +565,17 @@ public class Main extends Application {
                         canvas::refresh
                 );
 
+        replaceController =
+                new ReplaceController(
+                        canvas.getEditor(),
+                        editorState,
+                        palette,
+                        editorState.getSymbolPalette(),
+                        canvas::refresh,
+                        true
+
+                );
+
 
         scrollPane.setContent(canvas);
 
@@ -576,6 +589,24 @@ public class Main extends Application {
 
 
         root.setCenter(scrollPane);
+
+    }
+
+    private void replaceChart() {
+
+        ReplacePopup popup =
+                new ReplacePopup(
+                        replaceController,
+                        editorState.getSymbolPalette(),
+                        () -> {
+                        }
+                );
+
+        popup.show(
+                stage,
+                stage.getX() + 100,
+                stage.getY() + 100
+        );
 
     }
 

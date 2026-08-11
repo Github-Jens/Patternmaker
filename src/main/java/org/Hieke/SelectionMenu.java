@@ -15,8 +15,10 @@ public class SelectionMenu extends ContextMenu {
     private FloatingSelectionMenu floatingSelectionMenu;
     private FloatingSelectionMenuController floatingSelectionMenuController;
 
-    private DeleteSelectionController deleteSelectionController;
     private DeleteSelectionPopup deleteSelectionPopup;
+
+    private ReplacePopup replacePopup;
+
 
 
     private SymbolPickerPopup symbolPicker;
@@ -155,6 +157,39 @@ public class SelectionMenu extends ContextMenu {
 
             controller.openPopup();
             frameColourPicker.show(
+                    chartCanvas,
+                    menuX + 50,
+                    menuY
+            );
+
+        });
+
+        MenuItem replace =
+                new MenuItem(
+                        "Replace..."
+                );
+
+        replace.setOnAction(event -> {
+
+            if (replacePopup == null) {
+
+                replacePopup =
+                        new ReplacePopup(
+                                controller.getReplaceController(),
+                                symbolPalette,
+                                controller::closePopup
+                        );
+
+            }
+
+
+            childPopupActive = true;
+
+            controller.openPopup();
+
+            controller.setPopupBlocksCanvas(true);
+
+            replacePopup.show(
                     chartCanvas,
                     menuX + 50,
                     menuY
@@ -380,6 +415,7 @@ public class SelectionMenu extends ContextMenu {
                         fillSymbol,
                         fillColour,
                         frameColour,
+                        replace,
                         new SeparatorMenuItem(),
                         copy,
                         paste,

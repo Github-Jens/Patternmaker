@@ -2,6 +2,8 @@ package org.Hieke;
 
 import java.util.Optional;
 
+//this controlls the Chart operations in the menu bar up top
+
 public class ChartModificationController {
 
     private final ChartEditor editor;

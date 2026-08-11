@@ -354,6 +354,19 @@ public class SelectionMenuController {
 
     }
 
+    public ReplaceController getReplaceController() {
+
+        return new ReplaceController(
+                editor,
+                editorState,
+                palette,
+                symbolPalette,
+                refresh,
+                false
+        );
+
+    }
+
 
     public void place() {
 

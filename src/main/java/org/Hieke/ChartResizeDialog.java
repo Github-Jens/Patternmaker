@@ -61,7 +61,7 @@ public class ChartResizeDialog {
 
 
         dialog.setTitle(
-                "Modify Chart"
+                "Resize Chart"
         );
 
 

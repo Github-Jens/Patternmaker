@@ -19,6 +19,7 @@ public class MenuBarBuilder {
     private final Runnable exportSVGAction;
 
     private final Runnable modifyChartAction;
+    private final Runnable replaceChartAction;
 
 
     public MenuBarBuilder(
@@ -30,7 +31,8 @@ public class MenuBarBuilder {
             Runnable resetViewAction,
             Runnable exportPDFAction,
             Runnable exportSVGAction,
-            Runnable modifyChartAction
+            Runnable modifyChartAction,
+            Runnable replaceChartAction
     ) {
 
         this.newChartAction = newChartAction;
@@ -46,6 +48,7 @@ public class MenuBarBuilder {
         this.exportSVGAction = exportSVGAction;
 
         this.modifyChartAction = modifyChartAction;
+        this.replaceChartAction = replaceChartAction;
     }
 
 
@@ -177,26 +180,29 @@ public class MenuBarBuilder {
 
         Menu chartMenu = new Menu("Chart");
 
-
-        MenuItem modifyChart =
+        MenuItem resizeChart =
                 new MenuItem(
-                        "Modify Chart..."
+                        "Resize Chart..."
                 );
 
+        MenuItem replaceChart =
+                new MenuItem("Replace...");
 
-        modifyChart.setOnAction(event ->
+        resizeChart.setOnAction(event ->
                 modifyChartAction.run()
         );
+        replaceChart.setOnAction(event ->
+                replaceChartAction.run()
+        );
 
-
-        chartMenu.getItems()
-                .add(
-                        modifyChart
-                );
-
+        chartMenu.getItems().add(
+                resizeChart
+        );
+        chartMenu.getItems().add(
+                replaceChart
+        );
 
         return chartMenu;
-
     }
 
     public MenuBar createMenuBar() {

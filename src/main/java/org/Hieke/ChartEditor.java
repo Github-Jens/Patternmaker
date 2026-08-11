@@ -1475,4 +1475,442 @@ public class ChartEditor {
 
     }
 
+    public void replaceSymbol(
+            ChartSelection selection,
+            StitchDefinition source,
+            StitchDefinition target
+    ) {
+
+        if (!selection.hasSelection()) {
+            return;
+        }
+
+
+        int startColumn =
+                Math.min(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+        int endColumn =
+                Math.max(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+        int startRow =
+                Math.min(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+        int endRow =
+                Math.max(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+
+        beginStroke();
+
+
+        for (int row = startRow; row <= endRow; row++) {
+
+            for (int column = startColumn;
+                 column <= endColumn;
+                 column++) {
+
+
+                Stitch stitch =
+                        chart.getStitch(
+                                row,
+                                column
+                        );
+
+
+                boolean matches =
+                        source == null
+                                ? stitch.getDefinition() == null
+                                : stitch.getDefinition() == source;
+
+
+                if (!matches) {
+                    continue;
+                }
+
+
+                StitchDefinition oldStitch =
+                        stitch.getDefinition();
+
+
+                StitchChange change =
+                        new StitchChange(
+                                stitch,
+
+                                oldStitch,
+                                target,
+
+                                stitch.getBackgroundColor(),
+                                stitch.getBackgroundColor(),
+
+                                stitch.getTopBorderColor(),
+                                stitch.getTopBorderColor(),
+
+                                stitch.getRightBorderColor(),
+                                stitch.getRightBorderColor(),
+
+                                stitch.getBottomBorderColor(),
+                                stitch.getBottomBorderColor(),
+
+                                stitch.getLeftBorderColor(),
+                                stitch.getLeftBorderColor()
+                        );
+
+
+                change.redo();
+
+                currentStroke.addChange(change);
+
+            }
+
+        }
+
+
+        endStroke();
+
+        modified = true;
+
+    }
+
+    public void replaceSymbolWithColour(
+            ChartSelection selection,
+            StitchDefinition source,
+            Color targetColour
+    ) {
+
+        if (!selection.hasSelection()) {
+
+            return;
+
+        }
+
+
+        int startColumn =
+                Math.min(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+        int endColumn =
+                Math.max(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+        int startRow =
+                Math.min(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+        int endRow =
+                Math.max(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+
+        beginStroke();
+
+
+        for (int row = startRow; row <= endRow; row++) {
+
+            for (int column = startColumn;
+                 column <= endColumn;
+                 column++) {
+
+
+                Stitch stitch =
+                        chart.getStitch(
+                                row,
+                                column
+                        );
+
+
+                boolean matches =
+                        source == null
+                                ? stitch.getDefinition() == null
+                                : stitch.getDefinition() == source;
+
+                if (!matches) {
+                    continue;
+                }
+
+
+                StitchDefinition oldStitch =
+                        stitch.getDefinition();
+
+                Color oldColour =
+                        stitch.getBackgroundColor();
+
+
+                StitchChange change =
+                        new StitchChange(
+                                stitch,
+
+                                oldStitch,
+                                null,
+
+                                oldColour,
+                                targetColour,
+
+                                stitch.getTopBorderColor(),
+                                stitch.getTopBorderColor(),
+
+                                stitch.getRightBorderColor(),
+                                stitch.getRightBorderColor(),
+
+                                stitch.getBottomBorderColor(),
+                                stitch.getBottomBorderColor(),
+
+                                stitch.getLeftBorderColor(),
+                                stitch.getLeftBorderColor()
+                        );
+
+
+                change.redo();
+
+                currentStroke.addChange(change);
+
+            }
+
+        }
+
+
+        endStroke();
+
+        modified = true;
+
+    }
+    public void replaceColourWithSymbol(
+            ChartSelection selection,
+            Color sourceColour,
+            StitchDefinition target
+    ) {
+
+        if (!selection.hasSelection()
+                || sourceColour == null) {
+
+            return;
+
+        }
+
+
+        int startColumn =
+                Math.min(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+        int endColumn =
+                Math.max(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+        int startRow =
+                Math.min(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+        int endRow =
+                Math.max(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+
+        beginStroke();
+
+
+        for (int row = startRow; row <= endRow; row++) {
+
+            for (int column = startColumn;
+                 column <= endColumn;
+                 column++) {
+
+
+                Stitch stitch =
+                        chart.getStitch(
+                                row,
+                                column
+                        );
+
+
+                Color oldColour =
+                        stitch.getBackgroundColor();
+
+
+                if (oldColour == null
+                        || !oldColour.equals(sourceColour)) {
+
+                    continue;
+
+                }
+
+
+                StitchDefinition oldStitch =
+                        stitch.getDefinition();
+
+
+                StitchChange change =
+                        new StitchChange(
+                                stitch,
+
+                                oldStitch,
+                                target,
+
+                                oldColour,
+                                null,
+
+                                stitch.getTopBorderColor(),
+                                stitch.getTopBorderColor(),
+
+                                stitch.getRightBorderColor(),
+                                stitch.getRightBorderColor(),
+
+                                stitch.getBottomBorderColor(),
+                                stitch.getBottomBorderColor(),
+
+                                stitch.getLeftBorderColor(),
+                                stitch.getLeftBorderColor()
+                        );
+
+
+                change.redo();
+
+                currentStroke.addChange(change);
+
+            }
+
+        }
+
+
+        endStroke();
+
+        modified = true;
+
+    }
+    public void replaceColour(
+            ChartSelection selection,
+            Color sourceColour,
+            Color targetColour
+    ) {
+
+        if (!selection.hasSelection()
+                || sourceColour == null) {
+
+            return;
+
+        }
+
+
+        int startColumn =
+                Math.min(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+        int endColumn =
+                Math.max(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+        int startRow =
+                Math.min(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+        int endRow =
+                Math.max(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+
+        beginStroke();
+
+
+        for (int row = startRow; row <= endRow; row++) {
+
+            for (int column = startColumn;
+                 column <= endColumn;
+                 column++) {
+
+
+                Stitch stitch =
+                        chart.getStitch(
+                                row,
+                                column
+                        );
+
+
+                Color oldColour =
+                        stitch.getBackgroundColor();
+
+
+                if (oldColour == null
+                        || !oldColour.equals(sourceColour)) {
+
+                    continue;
+
+                }
+
+
+                StitchDefinition oldStitch =
+                        stitch.getDefinition();
+
+
+                StitchChange change =
+                        new StitchChange(
+                                stitch,
+
+                                oldStitch,
+                                oldStitch,
+
+                                oldColour,
+                                targetColour,
+
+                                stitch.getTopBorderColor(),
+                                stitch.getTopBorderColor(),
+
+                                stitch.getRightBorderColor(),
+                                stitch.getRightBorderColor(),
+
+                                stitch.getBottomBorderColor(),
+                                stitch.getBottomBorderColor(),
+
+                                stitch.getLeftBorderColor(),
+                                stitch.getLeftBorderColor()
+                        );
+
+
+                change.redo();
+
+                currentStroke.addChange(change);
+
+            }
+
+        }
+
+
+        endStroke();
+
+        modified = true;
+
+    }
+
 }
