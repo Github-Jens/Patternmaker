@@ -404,7 +404,7 @@ public class ChartCanvas extends Canvas {
 
         activeSelectionMenu.show(
                 this,
-                screenX,
+                screenX + 15,
                 screenY
         );
 

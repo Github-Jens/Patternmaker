@@ -28,6 +28,11 @@ public class ChartMouseController {
     private boolean panning = false;
     private boolean consumedClick = false;
     private boolean movingSelection = false;
+    private boolean selectingRows = false;
+    private boolean selectingColumns = false;
+
+    private boolean selectingRight = false;
+    private boolean selectingBottom = false;
 
     private int selectionGrabOffsetRow;
     private int selectionGrabOffsetColumn;
@@ -210,6 +215,71 @@ public class ChartMouseController {
 
             if (editorState.activeToolProperty().get() == Tool.SELECT) {
 
+                double rulerSize =
+                        transform.getScaledRulerSize();
+
+                double x =
+                        event.getX() - transform.getOffsetX();
+
+                double y =
+                        event.getY() - transform.getOffsetY();
+
+                double chartWidth =
+                        editor.getChart().getColumns()
+                                * transform.getScaledCellSize();
+
+                double chartHeight =
+                        editor.getChart().getRows()
+                                * transform.getScaledCellSize();
+
+
+                // Top or bottom ruler
+                if (x >= rulerSize &&
+                        x < rulerSize + chartWidth &&
+                        (y < rulerSize ||
+                                y >= rulerSize + chartHeight)) {
+
+                    selectingColumns = true;
+
+                    selectingBottom =
+                            y >= rulerSize + chartHeight;
+
+                    selectionController.startColumnSelection(
+                            event.getX(),
+                            transform,
+                            selectingBottom
+                    );
+
+                    return;
+                }
+
+
+                // Left or right ruler
+                if (y >= rulerSize &&
+                        y < rulerSize + chartHeight &&
+                        (x < rulerSize ||
+                                x >= rulerSize + chartWidth)) {
+
+                    selectingRows = true;
+
+                    selectingRight =
+                            x >= rulerSize + chartWidth;
+
+                    selectionController.startRowSelection(
+                            event.getY(),
+                            transform,
+                            selectingRight
+                    );
+
+                    return;
+                }
+
+                // Normal cell selection
+                selectingRows = false;
+                selectingColumns = false;
+                selectingRight = false;
+                selectingBottom = false;
+
                 selectionController.startSelection(
                         event.getX(),
                         event.getY(),
@@ -330,13 +400,39 @@ public class ChartMouseController {
             if (editorState.activeToolProperty().get() == Tool.SELECT
                     && selectionController.isSelecting()) {
 
+                if (selectingColumns) {
+
+                    selectionController.updateColumnSelection(
+                            event.getX(),
+                            transform,
+                            selectingBottom
+                    );
+
+                    refresh.run();
+
+                    return;
+                }
+
+
+                if (selectingRows) {
+
+                    selectionController.updateRowSelection(
+                            event.getY(),
+                            transform,
+                            selectingRight
+                    );
+
+                    refresh.run();
+
+                    return;
+                }
+
 
                 selectionController.updateSelection(
                         event.getX(),
                         event.getY(),
                         transform
                 );
-
 
                 refresh.run();
 
@@ -419,6 +515,11 @@ public class ChartMouseController {
 
                 selectionController.finishSelection();
 
+                selectingRows = false;
+                selectingColumns = false;
+                selectingRight = false;
+                selectingBottom = false;
+
                 refresh.run();
 
                 showMenu.accept(
@@ -427,7 +528,6 @@ public class ChartMouseController {
                 );
 
                 return;
-
             }
 
 

@@ -109,16 +109,89 @@ public class SelectionMenuController {
 
     public void paste() {
 
-        if (cursorRow < 0 ||
-                cursorColumn < 0) {
+        ChartSelection selection =
+                editorState.getSelection();
+
+
+        if (!selection.hasSelection()) {
+
+            if (cursorRow < 0 ||
+                    cursorColumn < 0) {
+
+                return;
+
+            }
+
+            editor.paste(
+                    cursorRow,
+                    cursorColumn
+            );
+
+            finishAction();
 
             return;
+        }
+
+
+        int startRow =
+                Math.min(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+        int startColumn =
+                Math.min(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+        int endRow =
+                Math.max(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+        int endColumn =
+                Math.max(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+
+        int targetRow;
+        int targetColumn;
+
+
+        // Whole-row selection
+        if (startColumn == 0 &&
+                endColumn == editor.getChart().getColumns() - 1) {
+
+            targetRow = startRow;
+            targetColumn = 0;
 
         }
 
+        // Whole-column selection
+        else if (startRow == 0 &&
+                endRow == editor.getChart().getRows() - 1) {
+
+            targetRow = 0;
+            targetColumn = startColumn;
+
+        }
+
+        // Normal rectangular/cell selection
+        else {
+
+            targetRow = cursorRow;
+            targetColumn = cursorColumn;
+
+        }
+
+
         editor.paste(
-                cursorRow,
-                cursorColumn
+                targetRow,
+                targetColumn
         );
 
         finishAction();
