@@ -7,6 +7,7 @@ public class EditorToolbar extends ToolBar {
     public EditorToolbar(
             EditorState editorState,
             Runnable newFile,
+            Runnable save,
             Runnable undo,
             Runnable redo,
             Runnable resetView,
@@ -27,6 +28,8 @@ public class EditorToolbar extends ToolBar {
 
         Button newFileButton =
                 new Button("New");
+        Button saveButton =
+                new Button("Save");
 
         Button undoButton =
                 new Button("Undo");
@@ -43,10 +46,6 @@ public class EditorToolbar extends ToolBar {
         Button addRowButton =
                 new Button("Add Row");
 
-
-        drawButton.setToggleGroup(group);
-        selectButton.setToggleGroup(group);
-        eraserButton.setToggleGroup(group);
 
         drawButton.setToggleGroup(group);
         selectButton.setToggleGroup(group);
@@ -74,6 +73,7 @@ public class EditorToolbar extends ToolBar {
         selectButton.setFocusTraversable(false);
         eraserButton.setFocusTraversable(false);
         newFileButton.setFocusTraversable(false);
+        saveButton.setFocusTraversable(false);
         undoButton.setFocusTraversable(false);
         redoButton.setFocusTraversable(false);
         resetViewButton.setFocusTraversable(false);
@@ -102,6 +102,9 @@ public class EditorToolbar extends ToolBar {
         newFileButton.setOnAction(event ->
                 newFile.run()
         );
+        saveButton.setOnAction(event ->
+                save.run()
+        );
 
         undoButton.setOnAction(event ->
                 undo.run()
@@ -126,6 +129,7 @@ public class EditorToolbar extends ToolBar {
 
         getItems().addAll(
                 newFileButton,
+                saveButton,
 
                 new Separator(),
 

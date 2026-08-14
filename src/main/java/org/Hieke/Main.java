@@ -93,6 +93,7 @@ public class Main extends Application {
                 new MenuBarBuilder(
                         this::createNewChart,
                         this::saveChart,
+                        this::saveChartAs,
                         this::loadChart,
                         () -> canvas.undo(),
                         () -> canvas.redo(),
@@ -110,6 +111,7 @@ public class Main extends Application {
                 new EditorToolbar(
                         editorState,
                         this::createNewChart,
+                        this::saveChart,
                         this::undo,
                         this::redo,
                         this::resetView,
@@ -686,6 +688,16 @@ public class Main extends Application {
         setChart(
                 document.getChart()
         );
+
+    }
+
+    private void saveChartAs() {
+
+        if (documentManager.saveAs()) {
+
+            canvas.markSaved();
+
+        }
 
     }
 

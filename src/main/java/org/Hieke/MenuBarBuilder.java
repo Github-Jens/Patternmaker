@@ -13,6 +13,7 @@ public class MenuBarBuilder {
 
     private final Runnable newChartAction;
     private final Runnable saveAction;
+    private final Runnable saveAsAction;
     private final Runnable loadAction;
 
     private final Runnable undoAction;
@@ -33,6 +34,7 @@ public class MenuBarBuilder {
     public MenuBarBuilder(
             Runnable newChartAction,
             Runnable saveAction,
+            Runnable saveAsAction,
             Runnable loadAction,
             Runnable undoAction,
             Runnable redoAction,
@@ -48,6 +50,8 @@ public class MenuBarBuilder {
 
         this.newChartAction = newChartAction;
         this.saveAction = saveAction;
+        this.saveAsAction =
+                saveAsAction;
         this.loadAction = loadAction;
 
         this.undoAction = undoAction;
@@ -161,11 +165,14 @@ public class MenuBarBuilder {
         MenuItem savePattern =
                 new MenuItem("Save Pattern");
 
+        MenuItem savePatternAs =
+                new MenuItem("Save Pattern As...");
+
         MenuItem loadPattern =
                 new MenuItem("Load Pattern");
 
         Menu recentMenu =
-                new Menu("Open Recent");
+                new Menu("Open Recent Pattern");
 
         MenuItem loading =
                 new MenuItem("No recent files");
@@ -183,6 +190,10 @@ public class MenuBarBuilder {
 
         savePattern.setOnAction(event ->
                 saveAction.run()
+        );
+
+        savePatternAs.setOnAction(event ->
+                saveAsAction.run()
         );
 
         loadPattern.setOnAction(event ->
@@ -238,6 +249,7 @@ public class MenuBarBuilder {
         fileMenu.getItems().addAll(
                 newChart,
                 savePattern,
+                savePatternAs,
                 loadPattern,
                 recentMenu
         );

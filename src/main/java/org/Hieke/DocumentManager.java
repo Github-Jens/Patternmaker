@@ -164,6 +164,78 @@ public class DocumentManager {
         }
     }
 
+    public boolean saveAs() {
+
+        if (document == null) {
+            return false;
+        }
+
+        FileChooser fileChooser =
+                new FileChooser();
+
+        fileChooser.setTitle(
+                "Save Knitting Pattern As"
+        );
+
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter(
+                        "Knitting Pattern (*.knit)",
+                        "*.knit"
+                )
+        );
+
+        File currentFile =
+                document.getFile();
+
+        if (currentFile != null) {
+
+            fileChooser.setInitialDirectory(
+                    currentFile.getParentFile()
+            );
+
+            fileChooser.setInitialFileName(
+                    currentFile.getName()
+            );
+
+        }
+
+        File file =
+                fileChooser.showSaveDialog(stage);
+
+        if (file == null) {
+            return false;
+        }
+
+        try {
+
+            save(file);
+
+            return true;
+
+        }
+        catch (IOException e) {
+
+            Alert alert =
+                    new Alert(
+                            Alert.AlertType.ERROR
+                    );
+
+            alert.setTitle("Save Error");
+            alert.setHeaderText(
+                    "Could not save pattern"
+            );
+            alert.setContentText(
+                    e.getMessage()
+            );
+
+            alert.showAndWait();
+
+            return false;
+
+        }
+
+    }
+
     public boolean load() {
 
         FileChooser fileChooser =
