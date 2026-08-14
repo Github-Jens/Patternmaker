@@ -12,7 +12,9 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Main extends Application {
 
@@ -25,9 +27,11 @@ public class Main extends Application {
     private ScrollPane scrollPane;
     private EditorState editorState;
     private StitchLibrary stitchLibrary;
+    private DocumentManager documentManager;
 
     private ChartModificationController modificationController;
     private ReplaceController replaceController;
+    private AutosaveManager autosaveManager;
 
     private static final int MIN_CHART_SIZE = 1;
     private static final int MAX_CHART_SIZE = 300;
@@ -53,6 +57,14 @@ public class Main extends Application {
         stitchLibrary =
                 new StitchLibrary();
 
+        documentManager =
+                new DocumentManager(
+                        stage,
+                        stitchLibrary
+                );
+        autosaveManager =
+                new AutosaveManager();
+
 
         editorState =
                 new EditorState(
@@ -63,9 +75,17 @@ public class Main extends Application {
         palette =
                 new Palette();
 
-        // Create canvas
+        documentManager.createNewDocument(
+                chart,
+                palette,
+                editorState.getSymbolPalette()
+        );
+
+// Create canvas
 
         setChart(chart);
+
+        startAutosave();
 
         // TOP Menu Bar + Toolbar
 
@@ -80,7 +100,9 @@ public class Main extends Application {
                         this::exportPDF,
                         this::exportSVG,
                         this::modifyChart,
-                        this::replaceChart
+                        this::replaceChart,
+                        documentManager::getRecentFiles,
+                        this::openRecentChart
                 ).createMenuBar();
 
 
@@ -159,6 +181,7 @@ public class Main extends Application {
         });
 
         stage.show();
+        checkForAutosaves();
     }
 
     private void exportPDF() {
@@ -320,8 +343,15 @@ public class Main extends Application {
                                     columns
                             );
 
+                    documentManager.createNewDocument(
+                            newChartData,
+                            palette,
+                            editorState.getSymbolPalette()
+                    );
 
                     setChart(newChartData);
+
+                    startAutosave();
 
 
                 } catch (NumberFormatException e) {
@@ -354,122 +384,46 @@ public class Main extends Application {
             return;
         }
 
+        if (!documentManager.load()) {
+            return;
+        }
 
-        FileChooser fileChooser = new FileChooser();
+        PatternDocument loadedDocument =
+                documentManager.getDocument();
 
-        fileChooser.setTitle("Open Knitting Pattern");
-
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter(
-                        "Knitting Pattern (*.knit)",
-                        "*.knit"
-                )
+        palette.replaceColors(
+                loadedDocument.getPalette().getColors()
         );
 
-
-        File file =
-                fileChooser.showOpenDialog(stage);
-
-
-        if (file != null) {
-
-            try {
-
-                FileManager manager =
-                        new FileManager();
-
-
-                PatternData data =
-                        manager.load(
-                                file,
-                                stitchLibrary
-                        );
-
-
-                palette.replaceColors(
-                        data.getPalette().getColors()
+        editorState.getSymbolPalette()
+                .getSymbols()
+                .setAll(
+                        loadedDocument.getSymbolPalette()
+                                .getSymbols()
                 );
 
-
-                editorState.getSymbolPalette()
-                        .getSymbols()
-                        .setAll(
-                                data.getSymbolPalette()
-                                        .getSymbols()
-                        );
-
-
-                setChart(
-                        data.getChart()
-                );
-
-
-            } catch (IOException e) {
-
-                Alert alert =
-                        new Alert(Alert.AlertType.ERROR);
-
-                alert.setTitle("Load Error");
-                alert.setHeaderText("Could not load pattern");
-                alert.setContentText(e.getMessage());
-
-                alert.showAndWait();
-
-            }
-        }
+        setChart(
+                loadedDocument.getChart()
+        );
+        startAutosave();
     }
+
     private boolean saveChart() {
 
-        FileChooser fileChooser = new FileChooser();
+        boolean saved =
+                documentManager.save();
 
-        fileChooser.setTitle("Save Knitting Pattern");
+        if (saved) {
 
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter(
-                        "Knitting Pattern (*.knit)",
-                        "*.knit"
-                )
-        );
-
-
-        File file = fileChooser.showSaveDialog(this.stage);
-
-
-        if (file == null) {
-            return false;
-        }
-
-
-        try {
-
-            FileManager manager = new FileManager();
-
-            manager.save(
-                    canvas.getChart(),
-                    palette,
-                    editorState.getSymbolPalette(),
-                    file
+            autosaveManager.deleteAutosave(
+                    documentManager.getDocument()
             );
 
             canvas.markSaved();
 
-            return true;
-
         }
-        catch (IOException e) {
 
-            Alert alert = new Alert(
-                    Alert.AlertType.ERROR
-            );
-
-            alert.setTitle("Save Error");
-            alert.setHeaderText("Could not save pattern");
-            alert.setContentText(e.getMessage());
-
-            alert.showAndWait();
-
-            return false;
-        }
+        return saved;
     }
 
     private void modifyChart() {
@@ -606,6 +560,131 @@ public class Main extends Application {
                 stage,
                 stage.getX() + 100,
                 stage.getY() + 100
+        );
+
+    }
+
+    private void startAutosave() {
+
+        autosaveManager.start(
+                documentManager.getDocument(),
+                canvas::isModified
+        );
+
+    }
+    private void checkForAutosaves() {
+
+        List<AutosaveData> autosaves =
+                autosaveManager.findAutosaves();
+
+        if (autosaves.isEmpty()) {
+            return;
+        }
+
+        Optional<AutosaveData> recovered =
+                RecoveryDialog.show(autosaves);
+
+        if (recovered.isPresent()) {
+
+            recoverAutosave(
+                    recovered.get()
+            );
+
+        }
+        else {
+
+            for (AutosaveData data : autosaves) {
+
+                autosaveManager.deleteAutosave(
+                        data
+                );
+
+            }
+
+        }
+
+    }
+
+    private void recoverAutosave(
+            AutosaveData data
+    ) {
+
+        try {
+
+            FileManager manager =
+                    new FileManager();
+
+            PatternDocument recovered =
+                    manager.loadAutosave(
+                            data.getAutosaveFile(),
+                            stitchLibrary
+                    );
+
+            documentManager.setDocument(recovered);
+
+            palette.replaceColors(
+                    recovered.getPalette().getColors()
+            );
+
+            editorState.getSymbolPalette()
+                    .getSymbols()
+                    .setAll(
+                            recovered.getSymbolPalette()
+                                    .getSymbols()
+                    );
+
+            setChart(
+                    recovered.getChart()
+            );
+
+            startAutosave();
+
+        }
+        catch (IOException e) {
+
+            Alert alert =
+                    new Alert(Alert.AlertType.ERROR);
+
+            alert.setTitle("Recovery Failed");
+            alert.setHeaderText(
+                    "Could not recover autosave"
+            );
+            alert.setContentText(
+                    e.getMessage()
+            );
+
+            alert.showAndWait();
+
+        }
+
+    }
+
+    private void openRecentChart(File file) {
+
+        if (!confirmDiscardChanges()) {
+            return;
+        }
+
+        if (!documentManager.load(file)) {
+            return;
+        }
+
+        PatternDocument document =
+                documentManager.getDocument();
+
+        palette.replaceColors(
+                document.getPalette().getColors()
+        );
+
+        editorState.getSymbolPalette()
+                .getSymbols()
+                .setAll(
+                        document.getSymbolPalette()
+                                .getSymbols()
+                );
+
+        setChart(
+                document.getChart()
         );
 
     }

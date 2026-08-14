@@ -4,6 +4,11 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 
+import java.io.File;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 public class MenuBarBuilder {
 
     private final Runnable newChartAction;
@@ -21,6 +26,9 @@ public class MenuBarBuilder {
     private final Runnable modifyChartAction;
     private final Runnable replaceChartAction;
 
+    private final Supplier<List<File>> recentFilesSupplier;
+    private final Consumer<File> openRecentAction;
+
 
     public MenuBarBuilder(
             Runnable newChartAction,
@@ -32,7 +40,10 @@ public class MenuBarBuilder {
             Runnable exportPDFAction,
             Runnable exportSVGAction,
             Runnable modifyChartAction,
-            Runnable replaceChartAction
+            Runnable replaceChartAction,
+            Supplier<List<File>> recentFilesSupplier,
+            Consumer<File> openRecentAction
+
     ) {
 
         this.newChartAction = newChartAction;
@@ -49,6 +60,10 @@ public class MenuBarBuilder {
 
         this.modifyChartAction = modifyChartAction;
         this.replaceChartAction = replaceChartAction;
+
+        this.recentFilesSupplier = recentFilesSupplier;
+        this.openRecentAction =
+                openRecentAction;
     }
 
 
@@ -140,7 +155,6 @@ public class MenuBarBuilder {
 
         Menu fileMenu = new Menu("File");
 
-
         MenuItem newChart =
                 new MenuItem("New Chart");
 
@@ -150,30 +164,86 @@ public class MenuBarBuilder {
         MenuItem loadPattern =
                 new MenuItem("Load Pattern");
 
+        Menu recentMenu =
+                new Menu("Open Recent");
+
+        MenuItem loading =
+                new MenuItem("No recent files");
+
+        loading.setDisable(true);
+
+        recentMenu.getItems().add(
+                loading
+        );
+
 
         newChart.setOnAction(event ->
                 newChartAction.run()
         );
 
-
         savePattern.setOnAction(event ->
                 saveAction.run()
         );
-
 
         loadPattern.setOnAction(event ->
                 loadAction.run()
         );
 
 
+        recentMenu.setOnShowing(event -> {
+
+            recentMenu.getItems().clear();
+
+            List<File> recentFiles =
+                    recentFilesSupplier.get();
+
+            if (recentFiles.isEmpty()) {
+
+                MenuItem empty =
+                        new MenuItem(
+                                "No recent files"
+                        );
+
+                empty.setDisable(true);
+
+                recentMenu.getItems().add(
+                        empty
+                );
+
+            }
+            else {
+
+                for (File file : recentFiles) {
+
+                    MenuItem item =
+                            new MenuItem(
+                                    file.getName()
+                            );
+
+                    item.setOnAction(actionEvent ->
+                            openRecentAction.accept(file)
+                    );
+
+                    recentMenu.getItems().add(
+                            item
+                    );
+
+                }
+
+            }
+
+        });
+
+
         fileMenu.getItems().addAll(
                 newChart,
                 savePattern,
-                loadPattern
+                loadPattern,
+                recentMenu
         );
 
-
         return fileMenu;
+
     }
 
     private Menu createChartMenu() {
