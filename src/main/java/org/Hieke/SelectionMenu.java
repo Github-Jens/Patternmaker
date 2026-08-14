@@ -263,10 +263,17 @@ public class SelectionMenu extends ContextMenu {
 
         });
 
+        MenuItem reflect =
+                new MenuItem("Reflect...");
+
         MenuItem move =
                 new MenuItem(
                         "Move..."
                 );
+
+        reflect.setOnAction(event ->
+                controller.reflectSelection()
+        );
 
         move.setOnAction(event -> {
 
@@ -425,6 +432,7 @@ public class SelectionMenu extends ContextMenu {
                         new SeparatorMenuItem(),
                         mirrorHorizontal,
                         mirrorVertical,
+                        reflect,
                         move,
                         rotate,
                         new SeparatorMenuItem(),

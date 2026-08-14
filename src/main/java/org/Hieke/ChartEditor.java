@@ -830,6 +830,385 @@ public class ChartEditor {
 
     }
 
+    public void mirrorOutward(
+            ChartSelection selection,
+            ReflectDirection direction
+    ) {
+
+        if (!selection.hasSelection()) {
+            return;
+        }
+
+        int startRow =
+                getSelectionStartRow(selection);
+
+        int startColumn =
+                getSelectionStartColumn(selection);
+
+        int endRow =
+                Math.max(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+        int endColumn =
+                Math.max(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+        int rows =
+                endRow - startRow + 1;
+
+        int columns =
+                endColumn - startColumn + 1;
+
+
+        SelectionSnapshot original =
+                transformer.createSnapshot(
+                        chart,
+                        selection
+                );
+
+
+        SelectionSnapshot mirrored =
+                switch (direction) {
+
+                    case LEFT, RIGHT ->
+                            transformer.mirrorHorizontal(
+                                    original
+                            );
+
+                    case UP, DOWN ->
+                            transformer.mirrorVertical(
+                                    original
+                            );
+
+                };
+
+
+        int targetRow;
+        int targetColumn;
+
+
+        switch (direction) {
+
+            case LEFT -> {
+                targetRow = startRow;
+                targetColumn = startColumn - columns;
+            }
+
+            case RIGHT -> {
+                targetRow = startRow;
+                targetColumn = endColumn + 1;
+            }
+
+            case UP -> {
+                targetRow = startRow - rows;
+                targetColumn = startColumn;
+            }
+
+            case DOWN -> {
+                targetRow = endRow + 1;
+                targetColumn = startColumn;
+            }
+
+            default ->
+                    throw new IllegalStateException(
+                            "Unexpected mirror direction"
+                    );
+
+        }
+
+
+        beginStroke();
+
+
+        for (int row = 0; row < mirrored.getRows(); row++) {
+
+            for (int column = 0;
+                 column < mirrored.getColumns();
+                 column++) {
+
+
+                int chartRow =
+                        targetRow + row;
+
+                int chartColumn =
+                        targetColumn + column;
+
+
+                // Outside the chart = simply don't copy it.
+                if (chartRow < 0 ||
+                        chartColumn < 0 ||
+                        chartRow >= chart.getRows() ||
+                        chartColumn >= chart.getColumns()) {
+
+                    continue;
+
+                }
+
+
+                Stitch source =
+                        mirrored.get(
+                                row,
+                                column
+                        );
+
+
+                Stitch destination =
+                        chart.getStitch(
+                                chartRow,
+                                chartColumn
+                        );
+
+
+                StitchChange change =
+                        new StitchChange(
+
+                                destination,
+
+                                destination.getDefinition(),
+                                source.getDefinition(),
+
+                                destination.getBackgroundColor(),
+                                source.getBackgroundColor(),
+
+                                destination.getTopBorderColor(),
+                                source.getTopBorderColor(),
+
+                                destination.getRightBorderColor(),
+                                source.getRightBorderColor(),
+
+                                destination.getBottomBorderColor(),
+                                source.getBottomBorderColor(),
+
+                                destination.getLeftBorderColor(),
+                                source.getLeftBorderColor()
+                        );
+
+
+                change.redo();
+
+                currentStroke.addChange(change);
+
+            }
+
+        }
+
+
+        endStroke();
+
+        modified = true;
+
+    }
+
+    public void reflectSelection(
+            ChartSelection selection,
+            ReflectDirection direction
+    ) {
+
+        if (!selection.hasSelection()) {
+            return;
+        }
+
+
+        int startRow =
+                getSelectionStartRow(selection);
+
+        int endRow =
+                Math.max(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+        int startColumn =
+                getSelectionStartColumn(selection);
+
+        int endColumn =
+                Math.max(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+
+        SelectionSnapshot original =
+                transformer.createSnapshot(
+                        chart,
+                        selection
+                );
+
+
+        SelectionSnapshot reflected;
+
+
+        if (direction == ReflectDirection.LEFT ||
+                direction == ReflectDirection.RIGHT) {
+
+            reflected =
+                    transformer.mirrorHorizontal(
+                            original
+                    );
+
+        }
+        else {
+
+            reflected =
+                    transformer.mirrorVertical(
+                            original
+                    );
+
+        }
+
+
+        int targetRow;
+        int targetColumn;
+
+
+        switch (direction) {
+
+            case LEFT:
+
+                targetRow =
+                        startRow;
+
+                targetColumn =
+                        startColumn
+                                - reflected.getColumns();
+
+                break;
+
+
+            case RIGHT:
+
+                targetRow =
+                        startRow;
+
+                targetColumn =
+                        endColumn + 1;
+
+                break;
+
+
+            case UP:
+
+                targetRow =
+                        startRow
+                                - reflected.getRows();
+
+                targetColumn =
+                        startColumn;
+
+                break;
+
+
+            case DOWN:
+
+                targetRow =
+                        endRow + 1;
+
+                targetColumn =
+                        startColumn;
+
+                break;
+
+
+            default:
+
+                throw new IllegalStateException(
+                        "Unknown reflection direction"
+                );
+
+        }
+
+
+        beginStroke();
+
+
+        for (int row = 0;
+             row < reflected.getRows();
+             row++) {
+
+            for (int column = 0;
+                 column < reflected.getColumns();
+                 column++) {
+
+
+                int chartRow =
+                        targetRow + row;
+
+                int chartColumn =
+                        targetColumn + column;
+
+
+                // Clip anything outside the chart.
+
+                if (chartRow < 0 ||
+                        chartColumn < 0 ||
+                        chartRow >= chart.getRows() ||
+                        chartColumn >= chart.getColumns()) {
+
+                    continue;
+
+                }
+
+
+                Stitch source =
+                        reflected.get(
+                                row,
+                                column
+                        );
+
+
+                Stitch destination =
+                        chart.getStitch(
+                                chartRow,
+                                chartColumn
+                        );
+
+
+                StitchChange change =
+                        new StitchChange(
+
+                                destination,
+
+                                destination.getDefinition(),
+                                source.getDefinition(),
+
+                                destination.getBackgroundColor(),
+                                source.getBackgroundColor(),
+
+                                destination.getTopBorderColor(),
+                                source.getTopBorderColor(),
+
+                                destination.getRightBorderColor(),
+                                source.getRightBorderColor(),
+
+                                destination.getBottomBorderColor(),
+                                source.getBottomBorderColor(),
+
+                                destination.getLeftBorderColor(),
+                                source.getLeftBorderColor()
+                        );
+
+
+                change.redo();
+
+                currentStroke.addChange(
+                        change
+                );
+
+            }
+
+        }
+
+
+        endStroke();
+
+        modified = true;
+
+    }
+
     public void startRotation(
             ChartSelection selection,
             EditorState state

@@ -385,6 +385,32 @@ public class SelectionMenuController {
 
     }
 
+    public void reflectSelection() {
+
+        ChartSelection selection =
+                editorState.getSelection();
+
+        if (!selection.hasSelection()) {
+            return;
+        }
+
+        ReflectDialog dialog =
+                new ReflectDialog();
+
+        dialog.showAndWait().ifPresent(
+                direction ->
+                        editor.reflectSelection(
+                                selection,
+                                direction
+                        )
+        );
+
+        editorState.getSelection().clear();
+
+        refresh.run();
+
+    }
+
     public void startRotationMode() {
 
         editor.startRotation(

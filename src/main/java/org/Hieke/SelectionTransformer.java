@@ -173,85 +173,47 @@ public class SelectionTransformer {
     public SelectionSnapshot mirrorHorizontal(
             SelectionSnapshot source
     ) {
-
         Stitch[][] result =
-                new Stitch[
-                        source.getRows()
-                        ][
-                        source.getColumns()
-                        ];
+                new Stitch[source.getRows()][source.getColumns()];
 
-
-        for (int row = 0;
-             row < source.getRows();
-             row++) {
-
+        for (int row = 0; row < source.getRows(); row++) {
 
             for (int column = 0;
                  column < source.getColumns();
                  column++) {
 
-
                 result[row][column] =
                         source.get(
-                                        row,
-                                        source.getColumns()
-                                                - column
-                                                - 1
-                                )
-                                .copy();
-
+                                row,
+                                source.getColumns() - column - 1
+                        ).copy();
             }
-
         }
 
-
-        return new SelectionSnapshot(
-                result
-        );
-
+        return new SelectionSnapshot(result);
     }
 
     public SelectionSnapshot mirrorVertical(
             SelectionSnapshot source
     ) {
-
         Stitch[][] result =
-                new Stitch[
-                        source.getRows()
-                        ][
-                        source.getColumns()
-                        ];
+                new Stitch[source.getRows()][source.getColumns()];
 
-
-        for (int row = 0;
-             row < source.getRows();
-             row++) {
-
+        for (int row = 0; row < source.getRows(); row++) {
 
             for (int column = 0;
                  column < source.getColumns();
                  column++) {
 
-
                 result[row][column] =
                         source.get(
-                                        source.getRows()
-                                                - row
-                                                - 1,
-                                        column
-                                )
-                                .copy();
-
+                                source.getRows() - row - 1,
+                                column
+                        ).copy();
             }
-
         }
 
-
-        return new SelectionSnapshot(
-                result
-        );
-
+        return new SelectionSnapshot(result);
     }
 
     public SelectionSnapshot rotate90(
