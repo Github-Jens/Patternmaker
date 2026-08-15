@@ -149,24 +149,18 @@ public class Main extends Application {
         //Create the scene
         Scene scene = new Scene(root, 800, 600);
 
-        scene.setOnKeyPressed(event -> {
+        new KeyboardShortcuts(
+                scene,
+                this::createNewChart,
+                this::saveChart,
+                this::saveChartAs,
+                this::loadChart,
+                this::undo,
+                this::redo,
+                canvas::cancelCurrentOperation
+        );
 
-            switch (event.getCode()) {
 
-                case Z:
-                    if (event.isControlDown()) {
-                        canvas.undo();
-                    }
-                    break;
-
-                case Y:
-                    if (event.isControlDown()) {
-                        canvas.redo();
-                    }
-                    break;
-            }
-
-        });
 
         stage.setTitle("Penny and Stitch Chartmaker");
         stage.setMaximized(true);

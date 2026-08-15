@@ -191,7 +191,7 @@ public class AutosaveManager {
         autosaveTimer =
                 new Timeline(
                         new KeyFrame(
-                                Duration.seconds(10),
+                                Duration.seconds(60),
                                 event -> {
 
                                     if (!this.modified.getAsBoolean()) {

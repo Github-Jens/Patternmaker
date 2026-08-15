@@ -6,6 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import javafx.util.StringConverter;
@@ -237,6 +238,21 @@ public class ReplacePopup extends Popup {
 
         getContent().add(layout);
 
+        layout.addEventFilter(
+                javafx.scene.input.KeyEvent.KEY_PRESSED,
+                event -> {
+
+                    if (event.getCode() == KeyCode.ESCAPE) {
+
+                        hide();
+                        closePopup.run();
+
+                        event.consume();
+
+                    }
+
+                }
+        );
 
         updateSelectors();
 

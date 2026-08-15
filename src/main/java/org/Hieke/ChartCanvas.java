@@ -332,6 +332,34 @@ public class ChartCanvas extends Canvas {
 
     }
 
+    public void cancelCurrentOperation() {
+
+        boolean hadFloatingSelection =
+                editorState.getFloatingSelection() != null;
+
+
+        if (hadFloatingSelection) {
+
+            editor.cancelFloatingSelection(
+                    editorState
+            );
+
+        }
+
+
+        if (activeSelectionMenu != null) {
+
+            closePopups();
+
+            editorState.setPopupActive(false);
+
+        }
+
+
+        drawChart();
+
+    }
+
     private RenderSettings getRenderSettings(
             int firstRow,
             int lastRow,
