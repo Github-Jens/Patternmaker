@@ -411,6 +411,34 @@ public class SelectionMenuController {
 
     }
 
+    public void extendSelection() {
+
+        ChartSelection selection =
+                editorState.getSelection();
+
+        if (!selection.hasSelection()) {
+            return;
+        }
+
+
+        ExtendDialog dialog =
+                new ExtendDialog();
+
+        dialog.showAndWait().ifPresent(
+                direction ->
+                        editor.extendSelection(
+                                selection,
+                                direction
+                        )
+        );
+
+
+        editorState.getSelection().clear();
+
+        refresh.run();
+
+    }
+
     public void startRotationMode() {
 
         editor.startRotation(

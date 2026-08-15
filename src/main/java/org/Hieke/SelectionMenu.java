@@ -240,7 +240,7 @@ public class SelectionMenu extends ContextMenu {
 
         MenuItem mirrorHorizontal =
                 new MenuItem(
-                        "Mirror Horizontal"
+                        "Flip Horizontal"
                 );
 
         mirrorHorizontal.setOnAction(event -> {
@@ -252,7 +252,7 @@ public class SelectionMenu extends ContextMenu {
 
         MenuItem mirrorVertical =
                 new MenuItem(
-                        "Mirror Vertical"
+                        "Flip Vertical"
                 );
 
 
@@ -264,16 +264,25 @@ public class SelectionMenu extends ContextMenu {
         });
 
         MenuItem reflect =
-                new MenuItem("Reflect...");
+                new MenuItem("Mirror...");
+
+        reflect.setOnAction(event ->
+                controller.reflectSelection()
+        );
+
+        MenuItem extend =
+                new MenuItem("Extend...");
+
+        extend.setOnAction(event ->
+                controller.extendSelection()
+        );
 
         MenuItem move =
                 new MenuItem(
                         "Move..."
                 );
 
-        reflect.setOnAction(event ->
-                controller.reflectSelection()
-        );
+
 
         move.setOnAction(event -> {
 
@@ -433,6 +442,7 @@ public class SelectionMenu extends ContextMenu {
                         mirrorHorizontal,
                         mirrorVertical,
                         reflect,
+                        extend,
                         move,
                         rotate,
                         new SeparatorMenuItem(),

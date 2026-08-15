@@ -1209,6 +1209,190 @@ public class ChartEditor {
 
     }
 
+    public void extendSelection(
+            ChartSelection selection,
+            ReflectDirection direction
+    ) {
+
+        if (!selection.hasSelection()) {
+            return;
+        }
+
+
+        int startRow =
+                getSelectionStartRow(selection);
+
+        int endRow =
+                Math.max(
+                        selection.getStartRow(),
+                        selection.getEndRow()
+                );
+
+        int startColumn =
+                getSelectionStartColumn(selection);
+
+        int endColumn =
+                Math.max(
+                        selection.getStartColumn(),
+                        selection.getEndColumn()
+                );
+
+
+        SelectionSnapshot source =
+                transformer.createSnapshot(
+                        chart,
+                        selection
+                );
+
+
+        int targetRow;
+        int targetColumn;
+
+
+        switch (direction) {
+
+            case LEFT:
+
+                targetRow =
+                        startRow;
+
+                targetColumn =
+                        startColumn
+                                - source.getColumns();
+
+                break;
+
+
+            case RIGHT:
+
+                targetRow =
+                        startRow;
+
+                targetColumn =
+                        endColumn + 1;
+
+                break;
+
+
+            case UP:
+
+                targetRow =
+                        startRow
+                                - source.getRows();
+
+                targetColumn =
+                        startColumn;
+
+                break;
+
+
+            case DOWN:
+
+                targetRow =
+                        endRow + 1;
+
+                targetColumn =
+                        startColumn;
+
+                break;
+
+
+            default:
+
+                throw new IllegalStateException(
+                        "Unknown extension direction"
+                );
+
+        }
+
+
+        beginStroke();
+
+
+        for (int row = 0;
+             row < source.getRows();
+             row++) {
+
+            for (int column = 0;
+                 column < source.getColumns();
+                 column++) {
+
+
+                int chartRow =
+                        targetRow + row;
+
+                int chartColumn =
+                        targetColumn + column;
+
+
+                // Clip anything outside the chart.
+
+                if (chartRow < 0 ||
+                        chartColumn < 0 ||
+                        chartRow >= chart.getRows() ||
+                        chartColumn >= chart.getColumns()) {
+
+                    continue;
+
+                }
+
+
+                Stitch sourceStitch =
+                        source.get(
+                                row,
+                                column
+                        );
+
+
+                Stitch destination =
+                        chart.getStitch(
+                                chartRow,
+                                chartColumn
+                        );
+
+
+                StitchChange change =
+                        new StitchChange(
+
+                                destination,
+
+                                destination.getDefinition(),
+                                sourceStitch.getDefinition(),
+
+                                destination.getBackgroundColor(),
+                                sourceStitch.getBackgroundColor(),
+
+                                destination.getTopBorderColor(),
+                                sourceStitch.getTopBorderColor(),
+
+                                destination.getRightBorderColor(),
+                                sourceStitch.getRightBorderColor(),
+
+                                destination.getBottomBorderColor(),
+                                sourceStitch.getBottomBorderColor(),
+
+                                destination.getLeftBorderColor(),
+                                sourceStitch.getLeftBorderColor()
+                        );
+
+
+                change.redo();
+
+                currentStroke.addChange(
+                        change
+                );
+
+            }
+
+        }
+
+
+        endStroke();
+
+        modified = true;
+
+    }
+
     public void startRotation(
             ChartSelection selection,
             EditorState state
